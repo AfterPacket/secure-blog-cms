@@ -40,7 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $error = "Invalid security token. Please try again.";
             $security->logSecurityEvent(
                 "CSRF token validation failed on login",
-                $clientIP);
+                $clientIP,
+            );
         } else {
             // Get and sanitize credentials
             $username = $security->getPostData("username", "alphanumeric", "");
@@ -63,7 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         @unlink($installFile);
                         $security->logSecurityEvent(
                             "Install file deleted on first login",
-                            $username);
+                            $username,
+                        );
                     }
 
                     // Successful login - redirect to admin
@@ -340,7 +342,8 @@ $csrfToken = $security->generateCSRFToken("login_form");
 
         <form method="post" action="login.php" autocomplete="off">
             <input type="hidden" name="csrf_token" value="<?php echo $security->escapeHTML(
-                $csrfToken); ?>">
+                $csrfToken,
+            ); ?>">
 
             <div class="form-group">
                 <label for="username">Username</label>
@@ -422,6 +425,6 @@ $csrfToken = $security->generateCSRFToken("login_form");
             window.history.replaceState(null, null, window.location.href);
         }
     </script>
-<?php include APP_ROOT . '/templates/footer.php'; ?>
+<div><?php include APP_ROOT . "/templates/footer.php"; ?></div>
 </body>
 </html>
