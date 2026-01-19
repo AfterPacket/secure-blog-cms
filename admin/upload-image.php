@@ -65,6 +65,7 @@ if (
     empty($csrfToken) ||
     !$security->validateCSRFToken($csrfToken, "image_upload")
 ) {
+    $newToken = $security->generateCSRFToken("image_upload");
     error_log(
         "Image upload CSRF failure. Token received: " .
             ($csrfToken ? "yes" : "no"),
@@ -73,6 +74,7 @@ if (
     echo json_encode([
         "success" => false,
         "error" => "Invalid security token. Please refresh the page.",
+        "new_token" => $newToken,
     ]);
     $security->logSecurityEvent(
         "CSRF validation failed on image upload",

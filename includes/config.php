@@ -71,8 +71,8 @@ define("ENABLE_UPLOAD_MALWARE_SCAN", false);
 // Sanitization settings
 define(
     "ALLOWED_HTML_TAGS",
-    "<p><br><strong><em><u><h1><h2><h3><h4><ul><ol><li><a><img><blockquote><code><pre>",);
-
+    "<p><br><strong><em><u><h1><h2><h3><h4><ul><ol><li><a><img><blockquote><code><pre>",
+);
 define("MAX_POST_TITLE_LENGTH", 200);
 define("MAX_POST_CONTENT_LENGTH", 50000);
 define("MAX_POST_EXCERPT_LENGTH", 500);
