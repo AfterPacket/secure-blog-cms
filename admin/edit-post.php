@@ -58,7 +58,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $messageType = "error";
         $security->logSecurityEvent(
             "CSRF validation failed on post edit",
-            $_SESSION["user"]);
+            $_SESSION["user"],
+        );
     } else {
         // Get form data
         $formData = [
@@ -70,20 +71,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             "meta_description" => $security->getPostData(
                 "meta_description",
                 "string",
-                ""),
+                "",
+            ),
             "meta_keywords" => $security->getPostData(
                 "meta_keywords",
                 "string",
-                ""),
+                "",
+            ),
             "password_protected" => !empty($_POST["password_protected"]),
             "post_password" => $security->getPostData(
                 "post_password",
                 "string",
-                ""),
+                "",
+            ),
             "visibility" => $security->getPostData(
                 "visibility",
                 "string",
-                "public"),
+                "public",
+            ),
             "categories" =>
                 isset($_POST["categories"]) && is_array($_POST["categories"])
                     ? array_map("strip_tags", $_POST["categories"])
@@ -120,11 +125,13 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- CMS_BUILD_MARKER: v12 use images_upload_url (no custom handler) -->
+    <!-- CMS_BUILD_MARKER: v11 images_upload_handler async -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Edit Post - <?php echo $security->escapeHTML(SITE_NAME); ?></title>
-    
+
 
     <!-- TinyMCE WYSIWYG Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/8.1.2/tinymce.min.js" referrerpolicy="origin"></script>
@@ -424,7 +431,9 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
 
     <script>
         // CSRF token for image uploads (allows multiple uploads within token lifetime)
-        const imageCsrfToken = '<?php echo $security->generateCSRFToken("image_upload"); ?>';
+        const imageCsrfToken = '<?php echo $security->generateCSRFToken(
+            "image_upload",
+        ); ?>';
 
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof tinymce === 'undefined') {
@@ -432,7 +441,7 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
                 return;
             }
             tinymce.init({
-                
+
   license_key: 'gpl',
 selector: '#content',
                 height: 500,
@@ -454,28 +463,46 @@ selector: '#content',
                 valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target],blockquote,code,pre,img[src|alt|title|width|height]',
                 invalid_elements: 'script,iframe,object,embed,applet',
 
-                images_upload_handler: function (blobInfo, success, failure) {
+                // Image upload handler (TinyMCE 6+ compatible)
+                images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.open('POST', '<?php echo cms_path(
+                        "admin/upload-image.php",
+                    ); ?>');
+
+                    xhr.upload.onprogress = (e) => {
+                        progress(e.loaded / e.total * 100);
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status < 200 || xhr.status >= 300) {
+                            reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
+                            return;
+                        }
+
+                        const json = JSON.parse(xhr.responseText);
+
+                        if (!json || typeof json.location != 'string') {
+                            reject('Invalid JSON: ' + xhr.responseText);
+                            return;
+                        }
+
+                        resolve(json.location);
+                    };
+
+                    xhr.onerror = () => {
+                        reject('Image upload failed due to a XHR error. Code: ' + xhr.status);
+                    };
+
                     const formData = new FormData();
                     formData.append('file', blobInfo.blob(), blobInfo.filename());
                     formData.append('csrf_token', imageCsrfToken);
 
-                    fetch('upload-image.php', {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'same-origin'
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            success(result.location || result.url);
-                        } else {
-                            failure(result.error || 'Upload failed');
-                        }
-                    })
-                    .catch(error => {
-                        failure('Upload failed: ' + error.message);
-                    });
-                },
+                    xhr.send(formData);
+                }),
+
+
 
                 paste_data_images: true,
                 paste_as_text: false,
@@ -493,9 +520,14 @@ selector: '#content',
             <h1>✏️ Edit Post <span class="security-badge">SECURED</span></h1>
             <div class="admin-nav">
                 <a href="admin.php">← Back to Dashboard</a>
-                <a href="<?php echo cms_path('post.php'); ?>?slug=<?php echo $security->escapeURL(
-                    $post["slug"]); ?>" target="_blank">👁️ View Post</a>
-                <a href="<?php echo cms_path('index.php'); ?>" target="_blank">👁️ View Blog</a>
+                <a href="<?php echo cms_path(
+                    "post.php",
+                ); ?>?slug=<?php echo $security->escapeURL(
+    $post["slug"],
+); ?>" target="_blank">👁️ View Post</a>
+                <a href="<?php echo cms_path(
+                    "index.php",
+                ); ?>" target="_blank">👁️ View Blog</a>
                 <?php if (($_SESSION["role"] ?? "") === "admin"): ?>
                     <a href="comments.php">💬 Comments</a>
                 <?php endif; ?>
@@ -507,7 +539,8 @@ selector: '#content',
     <div class="container">
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $security->escapeHTML(
-                $messageType); ?>">
+                $messageType,
+            ); ?>">
                 <?php echo $security->escapeHTML($message); ?>
                 <?php if ($messageType === "success"): ?>
                     <br><small>Redirecting to dashboard...</small>
@@ -518,21 +551,27 @@ selector: '#content',
         <div class="card">
             <div class="post-info">
                 <strong>Post ID:</strong> <?php echo $security->escapeHTML(
-                    $post["id"]); ?> |
+                    $post["id"],
+                ); ?> |
                 <strong>Created:</strong> <?php echo date(
                     "Y-m-d H:i:s",
-                    $post["created_at"]); ?> |
+                    $post["created_at"],
+                ); ?> |
                 <strong>Last Updated:</strong> <?php echo date(
                     "Y-m-d H:i:s",
-                    $post["updated_at"]); ?> |
+                    $post["updated_at"],
+                ); ?> |
                 <strong>Views:</strong> <?php echo number_format(
-                    $post["views"]); ?>
+                    $post["views"],
+                ); ?>
             </div>
 
             <form method="post" action="edit-post.php?id=<?php echo $security->escapeURL(
-                $postId); ?>" id="postForm">
+                $postId,
+            ); ?>" id="postForm">
                 <input type="hidden" name="csrf_token" value="<?php echo $security->escapeHTML(
-                    $csrfToken); ?>">
+                    $csrfToken,
+                ); ?>">
 
                 <!-- Title -->
                 <div class="form-group">
@@ -544,7 +583,8 @@ selector: '#content',
                         required
                         maxlength="<?php echo MAX_POST_TITLE_LENGTH; ?>"
                         value="<?php echo $security->escapeHTML(
-                            $post["title"]); ?>"
+                            $post["title"],
+                        ); ?>"
                         placeholder="Enter post title..."
                     >
                     <div class="char-count" id="titleCount">0 / <?php echo MAX_POST_TITLE_LENGTH; ?></div>
@@ -559,7 +599,8 @@ selector: '#content',
                         name="slug"
                         pattern="[a-z0-9\-]+"
                         value="<?php echo $security->escapeHTML(
-                            $post["slug"]); ?>"
+                            $post["slug"],
+                        ); ?>"
                         placeholder="url-slug"
                     >
                     <div class="form-help">
@@ -577,9 +618,11 @@ selector: '#content',
                         maxlength="<?php echo MAX_POST_CONTENT_LENGTH; ?>"
                         placeholder="Write your post content here..."
                     ><?php echo $security->escapeHTML(
-                        $post["content"]); ?></textarea>
+                        $post["content"],
+                    ); ?></textarea>
                     <div class="char-count" id="contentCount">0 / <?php echo number_format(
-                        MAX_POST_CONTENT_LENGTH); ?></div>
+                        MAX_POST_CONTENT_LENGTH,
+                    ); ?></div>
                     <div class="allowed-tags">
                         <strong>Allowed HTML tags:</strong><br>
                         <?php echo $security->escapeHTML(ALLOWED_HTML_TAGS); ?>
@@ -596,7 +639,8 @@ selector: '#content',
                         maxlength="<?php echo MAX_POST_EXCERPT_LENGTH; ?>"
                         placeholder="Brief summary of the post..."
                     ><?php echo $security->escapeHTML(
-                        $post["excerpt"]); ?></textarea>
+                        $post["excerpt"],
+                    ); ?></textarea>
                     <div class="char-count" id="excerptCount">0 / <?php echo MAX_POST_EXCERPT_LENGTH; ?></div>
                 </div>
 
@@ -614,16 +658,21 @@ selector: '#content',
                                     ): ?>
                                         <div class="checkbox-item">
                                             <input type="checkbox" id="category_<?php echo $security->escapeHTML(
-                                                $category["slug"]); ?>" name="categories[]" value="<?php echo $security->escapeHTML(
-    $category["slug"]); ?>"
+                                                $category["slug"],
+                                            ); ?>" name="categories[]" value="<?php echo $security->escapeHTML(
+    $category["slug"],
+); ?>"
                                                 <?php echo in_array(
                                                     $category["slug"],
-                                                    $post["categories"] ?? [])
+                                                    $post["categories"] ?? [],
+                                                )
                                                     ? "checked"
                                                     : ""; ?>>
                                             <label for="category_<?php echo $security->escapeHTML(
-                                                $category["slug"]); ?>"><?php echo $security->escapeHTML(
-    $category["name"]); ?></label>
+                                                $category["slug"],
+                                            ); ?>"><?php echo $security->escapeHTML(
+    $category["name"],
+); ?></label>
                                         </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
@@ -634,7 +683,8 @@ selector: '#content',
                         <div class="form-group" style="margin-bottom: 0;">
                             <label for="tags" style="font-weight: bold;">Tags</label>
                             <input type="text" id="tags" name="tags" value="<?php echo $security->escapeHTML(
-                                $post["tags"] ?? ""); ?>" placeholder="tag1, tag2, tag3">
+                                $post["tags"] ?? "",
+                            ); ?>" placeholder="tag1, tag2, tag3">
                             <div class="form-help">Comma-separated tags. New tags will be created automatically.</div>
                         </div>
                     </div>
@@ -650,7 +700,8 @@ selector: '#content',
                             name="meta_description"
                             maxlength="160"
                             value="<?php echo $security->escapeHTML(
-                                $post["meta_description"] ?? ""); ?>"
+                                $post["meta_description"] ?? "",
+                            ); ?>"
                             placeholder="SEO description..."
                         >
                         <div class="form-help">Recommended: 150-160 characters</div>
@@ -664,7 +715,8 @@ selector: '#content',
                             name="meta_keywords"
                             maxlength="200"
                             value="<?php echo $security->escapeHTML(
-                                $post["meta_keywords"] ?? ""); ?>"
+                                $post["meta_keywords"] ?? "",
+                            ); ?>"
                             placeholder="keyword1, keyword2, keyword3..."
                         >
                         <div class="form-help">Comma-separated keywords</div>
@@ -842,6 +894,6 @@ selector: '#content',
             });
         });
     </script>
-<?php include APP_ROOT . '/templates/footer.php'; ?>
+<?php include APP_ROOT . "/templates/footer.php"; ?>
 </body>
 </html>

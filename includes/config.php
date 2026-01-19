@@ -10,7 +10,7 @@ if (!defined("SECURE_CMS_INIT")) {
 }
 
 // Security Configuration
-define("SECURE_CMS_VERSION", "1.0.9");
+define("SECURE_CMS_VERSION", "1.1.2");
 define("SESSION_NAME", "SECURE_CMS_SESSION");
 define("SESSION_LIFETIME", 3600); // 1 hour
 define("CSRF_TOKEN_LENGTH", 32);
@@ -44,7 +44,7 @@ define(
         "form-action 'self';");
 
 // Admin CSP: allows TinyMCE (cdn.tiny.cloud) + inline admin scripts.
-define("CSP_POLICY_ADMIN", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.tiny.cloud https://js.hcaptcha.com https://hcaptcha.com; script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.tiny.cloud https://js.hcaptcha.com https://hcaptcha.com; script-src-attr 'self' 'unsafe-inline'; upgrade-insecure-requests");
+define("CSP_POLICY_ADMIN", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-attr 'self' 'unsafe-inline'; upgrade-insecure-requests");
 // Sanitization settings
 define(
     "ALLOWED_HTML_TAGS",

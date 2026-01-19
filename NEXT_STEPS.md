@@ -49,9 +49,10 @@ tinymce.init({
     invalid_elements: 'script,iframe,object,embed',
     
     // Image upload (we'll implement this next)
-    images_upload_handler: function (blobInfo, success, failure) {
+    images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
         // We'll add this functionality in step 2
-        failure('Image upload not yet configured');
+        reject('Image upload not yet configured');
+    }),
     }
 });
 </script>
@@ -249,7 +250,7 @@ readfile($imagePath);
 #### Step 4: Update TinyMCE image upload handler
 
 ```javascript
-images_upload_handler: function (blobInfo, success, failure) {
+images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
     const formData = new FormData();
     formData.append('file', blobInfo.blob(), blobInfo.filename());
     formData.append('csrf_token', '<?php echo $csrfToken; ?>');
@@ -258,18 +259,21 @@ images_upload_handler: function (blobInfo, success, failure) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('HTTP Error: ' + response.status);
+        return response.json();
+    })
     .then(result => {
-        if (result.success) {
-            success(result.location);
+        if (result && result.location) {
+            resolve(result.location);
         } else {
-            failure(result.error || 'Upload failed');
+            reject('Invalid response from server');
         }
     })
-    .catch(error => {
-        failure('Upload failed: ' + error);
+    .catch(err => {
+        reject('Upload failed: ' + err.message);
     });
-}
+})
 ```
 
 #### Step 5: Add to data/uploads/.htaccess
