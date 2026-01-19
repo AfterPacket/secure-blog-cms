@@ -316,6 +316,32 @@ $csrfToken = $security->generateCSRFToken("login_form");
             transform: translateY(-50%);
             font-size: 18px;
         }
+
+        /* Make login centered, footer below it */
+        .page-wrap{
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* centers login block */
+            gap: 18px;
+        }
+
+        .footer-wrap{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Footer should not stretch or float */
+        .footer-wrap footer{
+            background: transparent;
+            border-top: none;          /* optional: cleaner on login page */
+            margin-top: 0;
+            padding-top: 0;
+        }
+
     </style>
 </head>
 <body>
@@ -407,6 +433,9 @@ $csrfToken = $security->generateCSRFToken("login_form");
                 All login attempts are logged and monitored for security.
             </p>
         </div>
+        <div class="footer-wrap">
+                    <?php include APP_ROOT . "/templates/footer.php"; ?>
+                </div>
     </div>
 
     <script>
@@ -425,6 +454,5 @@ $csrfToken = $security->generateCSRFToken("login_form");
             window.history.replaceState(null, null, window.location.href);
         }
     </script>
-<div><?php include APP_ROOT . "/templates/footer.php"; ?></div>
 </body>
 </html>
