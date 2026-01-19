@@ -114,7 +114,7 @@ $csrfToken = $security->generateCSRFToken("create_post_form");
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- CMS_BUILD_MARKER: v19 tinymce simplified security checks -->
+    <!-- CMS_BUILD_MARKER: v20 added novalidate to form -->
     <!-- CMS_BUILD_MARKER: v12 use images_upload_url (no custom handler) -->
     <!-- CMS_BUILD_MARKER: v11 images_upload_handler async -->
     <meta charset="UTF-8">
@@ -411,7 +411,7 @@ $csrfToken = $security->generateCSRFToken("create_post_form");
             "image_upload",
         ); ?>';
 
-        console.log('%c CMS Debug: create-post.php loaded (Build v19) ', 'background: #ff0000; color: #ffffff; font-weight: bold; font-size: 16px;');
+        console.log('%c CMS Debug: create-post.php loaded (Build v20) ', 'background: #ff0000; color: #ffffff; font-weight: bold; font-size: 16px;');
 
         // Initialize TinyMCE WYSIWYG Editor
         document.addEventListener('DOMContentLoaded', function() {
@@ -538,7 +538,7 @@ selector: '#content',
         <?php endif; ?>
 
         <div class="card">
-            <form method="post" action="create-post.php" id="postForm">
+            <form method="post" action="create-post.php" id="postForm" novalidate>
                 <input type="hidden" name="csrf_token" value="<?php echo $security->escapeHTML(
                     $csrfToken,
                 ); ?>">
@@ -584,7 +584,6 @@ selector: '#content',
                     <textarea
                         id="content"
                         name="content"
-                        required
                         maxlength="<?php echo MAX_POST_CONTENT_LENGTH; ?>"
                         placeholder="Write your post content here..."
                     ><?php echo $security->escapeHTML(
@@ -863,6 +862,11 @@ selector: '#content',
 
         // Form validation
         form.addEventListener('submit', function(e) {
+            // Trigger TinyMCE save to update the underlying textarea
+            if (typeof tinymce !== 'undefined' && tinymce.get('content')) {
+                tinymce.get('content').save();
+            }
+
             const title = document.getElementById('title').value.trim();
             const content = document.getElementById('content').value.trim();
 
