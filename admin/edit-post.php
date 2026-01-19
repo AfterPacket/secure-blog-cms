@@ -124,7 +124,11 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Edit Post - <?php echo $security->escapeHTML(SITE_NAME); ?></title>
-    <style>
+    
+
+    <!-- TinyMCE WYSIWYG Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/8.1.2/tinymce.min.js" referrerpolicy="origin"></script>
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -417,6 +421,71 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
             font-weight: normal;
         }
     </style>
+
+    <script>
+        // CSRF token for image uploads (allows multiple uploads within token lifetime)
+        const imageCsrfToken = '<?php echo $security->generateCSRFToken("image_upload"); ?>';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof tinymce === 'undefined') {
+                console.error('TinyMCE failed to load. Check CSP / CDN access.');
+                return;
+            }
+            tinymce.init({
+                
+  license_key: 'gpl',
+selector: '#content',
+                height: 500,
+                menubar: true,
+                branding: false,
+                promotion: false,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | bold italic underline strikethrough | ' +
+                         'alignleft aligncenter alignright alignjustify | ' +
+                         'bullist numlist outdent indent | link image | ' +
+                         'removeformat code fullscreen | help',
+
+                content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
+
+                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target],blockquote,code,pre,img[src|alt|title|width|height]',
+                invalid_elements: 'script,iframe,object,embed,applet',
+
+                images_upload_handler: function (blobInfo, success, failure) {
+                    const formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    formData.append('csrf_token', imageCsrfToken);
+
+                    fetch('upload-image.php', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            success(result.location || result.url);
+                        } else {
+                            failure(result.error || 'Upload failed');
+                        }
+                    })
+                    .catch(error => {
+                        failure('Upload failed: ' + error.message);
+                    });
+                },
+
+                paste_data_images: true,
+                paste_as_text: false,
+                relative_urls: false,
+                remove_script_host: false,
+                convert_urls: true
+            });
+        });
+    </script>
+
 </head>
 <body>
     <div class="admin-header">

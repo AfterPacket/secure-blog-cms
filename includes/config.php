@@ -10,7 +10,7 @@ if (!defined("SECURE_CMS_INIT")) {
 }
 
 // Security Configuration
-define("SECURE_CMS_VERSION", "1.0.0");
+define("SECURE_CMS_VERSION", "1.0.9");
 define("SESSION_NAME", "SECURE_CMS_SESSION");
 define("SESSION_LIFETIME", 3600); // 1 hour
 define("CSRF_TOKEN_LENGTH", 32);
@@ -29,7 +29,7 @@ define("COMMENTS_DIR", DATA_DIR . "/comments");
 define("LOGS_DIR", DATA_DIR . "/logs");
 
 // Content Security Policy
-// Note: hCaptcha support requires allowing its script/frame/connect origins.
+// Public pages stay strict; admin pages need inline scripts and TinyMCE CDN.
 define(
     "CSP_POLICY",
     "default-src 'self'; " .
@@ -43,10 +43,12 @@ define(
         "base-uri 'self'; " .
         "form-action 'self';");
 
+// Admin CSP: allows TinyMCE (cdn.tiny.cloud) + inline admin scripts.
+define("CSP_POLICY_ADMIN", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.tiny.cloud https://js.hcaptcha.com https://hcaptcha.com; script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.tiny.cloud https://js.hcaptcha.com https://hcaptcha.com; script-src-attr 'self' 'unsafe-inline'; upgrade-insecure-requests");
 // Sanitization settings
 define(
     "ALLOWED_HTML_TAGS",
-    "<p><br><strong><em><u><h1><h2><h3><h4><ul><ol><li><a><blockquote><code><pre>");
+    "<p><br><strong><em><u><h1><h2><h3><h4><ul><ol><li><a><blockquote><code><pre><img>");
 define("MAX_POST_TITLE_LENGTH", 200);
 define("MAX_POST_CONTENT_LENGTH", 50000);
 define("MAX_POST_EXCERPT_LENGTH", 500);

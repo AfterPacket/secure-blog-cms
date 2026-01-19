@@ -103,7 +103,18 @@ class Security {
      */
     private function setSecurityHeaders() {
         // Content Security Policy
-        header("Content-Security-Policy: " . CSP_POLICY);
+        // - Public pages stay strict
+        // - Admin pages need inline scripts + TinyMCE CDN
+        if ($this->isAdminPage() && defined('CSP_POLICY_ADMIN')) {
+            header("Content-Security-Policy: " . CSP_POLICY_ADMIN);
+        } else {
+            header("Content-Security-Policy: " . CSP_POLICY);
+        }
+
+        // Helpful version header (safe to expose)
+        if (defined('SECURE_CMS_VERSION')) {
+            header('X-SecureBlogCMS-Version: ' . SECURE_CMS_VERSION);
+        }
 
         // Prevent clickjacking
         header("X-Frame-Options: DENY");
@@ -137,8 +148,19 @@ class Security {
      * Check if current page is admin page
      */
     private function isAdminPage() {
-        $scriptName = basename($_SERVER['SCRIPT_NAME'] ?? '');
-        return in_array($scriptName, ['admin.php', 'login.php', 'logout.php', 'create-post.php', 'edit-post.php', 'settings.php', 'users.php', 'categories.php', 'comments.php', 'upload-image.php', 'serve-image.php', 'upgrade.php'] );
+        $scriptPath = (string)($_SERVER['SCRIPT_NAME'] ?? '');
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '');
+        $phpSelf = (string)($_SERVER['PHP_SELF'] ?? '');
+
+        if (strpos($scriptPath, '/admin/') !== false || strpos($uri, '/admin/') !== false || strpos($phpSelf, '/admin/') !== false) {
+            return true;
+        }
+
+        $scriptName = basename($scriptPath ?: $phpSelf);
+        return in_array($scriptName, [
+            'admin.php','login.php','logout.php','create-post.php','edit-post.php','settings.php','users.php','categories.php','comments.php',
+            'upload-image.php','serve-image.php','upgrade.php','updates.php'
+        ], true);
     }
 
     /**
@@ -178,8 +200,11 @@ class Security {
             return false;
         }
 
-        // Token is valid, remove it (one-time use)
-        unset($_SESSION['csrf_tokens'][$formName]);
+        // Token is valid
+        // For image uploads we allow reuse within the token lifetime (TinyMCE may upload multiple images).
+        if ($formName !== 'image_upload') {
+            unset($_SESSION['csrf_tokens'][$formName]);
+        }
         return true;
     }
 

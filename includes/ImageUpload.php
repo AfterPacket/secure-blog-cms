@@ -129,9 +129,11 @@ class ImageUpload
         return [
             "success" => true,
             "filename" => $safeFilename,
+            // Use cms_path() so subfolder installs (e.g. /secure-blog-cms) work
+            // even if SITE_URL is not perfectly configured.
             "url" =>
-                SITE_URL .
-                "/admin/serve-image.php?img=" .
+                cms_path("admin/serve-image.php") .
+                "?img=" .
                 urlencode($safeFilename),
             "path" => $targetPath,
             "size" => filesize($targetPath),
@@ -478,8 +480,8 @@ class ImageUpload
             $images[] = [
                 "filename" => $filename,
                 "url" =>
-                    SITE_URL .
-                    "/admin/serve-image.php?img=" .
+                    cms_path("admin/serve-image.php") .
+                    "?img=" .
                     urlencode($filename),
                 "size" => filesize($file),
                 "uploaded" => filemtime($file),
@@ -521,7 +523,7 @@ class ImageUpload
         return [
             "filename" => $filename,
             "url" =>
-                SITE_URL . "/admin/serve-image.php?img=" . urlencode($filename),
+                cms_path("admin/serve-image.php") . "?img=" . urlencode($filename),
             "path" => $filePath,
             "size" => filesize($filePath),
             "uploaded" => filemtime($filePath),
@@ -663,8 +665,8 @@ class ImageUpload
             "success" => true,
             "filename" => $thumbFilename,
             "url" =>
-                SITE_URL .
-                "/admin/serve-image.php?img=" .
+                cms_path("admin/serve-image.php") .
+                "?img=" .
                 urlencode($thumbFilename),
         ];
     }

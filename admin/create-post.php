@@ -115,8 +115,10 @@ $csrfToken = $security->generateCSRFToken("create_post_form");
     <title>Create New Post - <?php echo $security->escapeHTML(
         SITE_NAME); ?></title>
 
+	<!-- Secure Blog CMS v<?php echo defined('SECURE_CMS_VERSION') ? $security->escapeHTML(SECURE_CMS_VERSION) : 'dev'; ?> -->
+
     <!-- TinyMCE WYSIWYG Editor -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/8.1.2/tinymce.min.js" referrerpolicy="origin"></script>
 
     <style>
         * {
@@ -399,8 +401,14 @@ $csrfToken = $security->generateCSRFToken("create_post_form");
 
         // Initialize TinyMCE WYSIWYG Editor
         document.addEventListener('DOMContentLoaded', function() {
+            if (typeof tinymce === 'undefined') {
+                console.error('TinyMCE failed to load. Check CSP or CDN connectivity.');
+                return;
+            }
             tinymce.init({
-                selector: '#content',
+                
+  license_key: 'gpl',
+selector: '#content',
                 height: 500,
                 menubar: true,
                 branding: false,
@@ -418,7 +426,8 @@ $csrfToken = $security->generateCSRFToken("create_post_form");
                 content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
 
                 // Security: Restrict allowed content
-                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target],blockquote,code,pre',
+                // NOTE: We explicitly allow <img> so uploaded images are preserved.
+                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target],blockquote,code,pre,img[src|alt|title|width|height]',
                 invalid_elements: 'script,iframe,object,embed,applet',
 
                 // Image upload handler

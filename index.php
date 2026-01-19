@@ -33,9 +33,8 @@ $page = max(1, $page);
 
 // Get search query if exists
 $searchQuery = $security->getGetData("q", "string", "");
-if (!ALLOW_SEARCH) {
-    $searchQuery = "";
-}
+if (!ALLOW_SEARCH) { $searchQuery = ""; }
+
 
 // Get posts
 if (!empty($searchQuery)) {
@@ -60,13 +59,11 @@ $pagination = $postsData["pagination"];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<?php echo $security->escapeHTML(
-        SITE_DESCRIPTION,
-    ); ?>">
+        SITE_DESCRIPTION); ?>">
     <meta name="robots" content="index, follow">
     <title><?php echo $security->escapeHTML(SITE_NAME); ?></title>
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for <?php echo $security->escapeHTML(
-        SITE_NAME,
-    ); ?>" href="rss.php" />
+        SITE_NAME); ?>" href="rss.php" />
     <style>
         * {
             margin: 0;
@@ -345,8 +342,7 @@ $pagination = $postsData["pagination"];
     <header>
         <div class="container" style="position: relative;">
             <h1><?php echo $security->escapeHTML(
-                SITE_NAME,
-            ); ?> <span class="security-badge">🔒 SECURED</span></h1>
+                SITE_NAME); ?> <span class="security-badge">🔒 SECURED</span></h1>
             <p><?php echo $security->escapeHTML(SITE_DESCRIPTION); ?></p>
             <?php if ($security->isAuthenticated()): ?>
                 <a href="admin/admin.php" class="admin-link">🔑 Admin Panel</a>
@@ -356,11 +352,10 @@ $pagination = $postsData["pagination"];
 
     <div class="container">
         <!-- Search Form -->
-        <?php if (defined("ALLOW_SEARCH") ? ALLOW_SEARCH : true): ?>
+        <?php if (defined('ALLOW_SEARCH') ? ALLOW_SEARCH : true): ?>
 <form method="get" action="index.php" class="search-form">
             <input type="text" name="q" placeholder="Search posts..." value="<?php echo $security->escapeHTML(
-                $searchQuery,
-            ); ?>">
+                $searchQuery); ?>">
             <button type="submit">🔍 Search</button>
         </form>
 <?php endif; ?>
@@ -369,8 +364,7 @@ $pagination = $postsData["pagination"];
         <?php if (!empty($searchQuery)): ?>
             <p style="margin-bottom: 20px; color: #7f8c8d;">
                 Search results for: <strong><?php echo $security->escapeHTML(
-                    $searchQuery,
-                ); ?></strong>
+                    $searchQuery); ?></strong>
                 (<?php echo count($posts); ?> result<?php echo count($posts) !==
  1
      ? "s"
@@ -389,8 +383,7 @@ $pagination = $postsData["pagination"];
                 <article class="post">
                     <h2 class="post-title">
                         <a href="post.php?slug=<?php echo $security->escapeURL(
-                            $post["slug"],
-                        ); ?>">
+                            $post["slug"]); ?>">
                             <?php echo $security->escapeHTML($post["title"]); ?>
                         </a>
                     </h2>
@@ -398,14 +391,11 @@ $pagination = $postsData["pagination"];
                     <div class="post-meta">
                         <span>📅 <?php echo date(
                             "F j, Y",
-                            $post["created_at"],
-                        ); ?></span>
+                            $post["created_at"]); ?></span>
                         <span>✍️ <?php echo $security->escapeHTML(
-                            $post["author"],
-                        ); ?></span>
+                            $post["author"]); ?></span>
                         <span>👁️ <?php echo number_format(
-                            $post["views"],
-                        ); ?> views</span>
+                            $post["views"]); ?> views</span>
                     </div>
 
                     <div class="post-excerpt">
@@ -413,8 +403,7 @@ $pagination = $postsData["pagination"];
                     </div>
 
                     <a href="post.php?slug=<?php echo $security->escapeURL(
-                        $post["slug"],
-                    ); ?>" class="read-more">
+                        $post["slug"]); ?>" class="read-more">
                         Read More →
                     </a>
                 </article>
@@ -433,8 +422,7 @@ $pagination = $postsData["pagination"];
                     $start = max(1, $pagination["current_page"] - 2);
                     $end = min(
                         $pagination["total_pages"],
-                        $pagination["current_page"] + 2,
-                    );
+                        $pagination["current_page"] + 2);
 
                     for ($i = $start; $i <= $end; $i++):
                         if ($i == $pagination["current_page"]): ?>
@@ -459,20 +447,16 @@ $pagination = $postsData["pagination"];
 
     <footer>
         <p>
-            <a href="<?php echo cms_path(
-                "rss.php",
-            ); ?>" class="rss-link">📡 RSS Feed</a> |
+            <a href="rss.php" class="rss-link">📡 RSS Feed</a> |
             &copy; <?php echo date("Y"); ?> <?php echo $security->escapeHTML(
-     SITE_NAME,
- ); ?> |
+     SITE_NAME); ?> |
             Powered by Secure Blog CMS v<?php echo $security->escapeHTML(
-                SECURE_CMS_VERSION,
-            ); ?> 🔒
+                SECURE_CMS_VERSION); ?> 🔒
         </p>
         <p style="margin-top: 10px; font-size: 14px;">
             Protected against XSS, CSRF, and Injection Attacks | SQL-Free Architecture
         </p>
     </footer>
-<?php include APP_ROOT . "/templates/footer.php"; ?>
+<?php include APP_ROOT . '/templates/footer.php'; ?>
 </body>
 </html>
