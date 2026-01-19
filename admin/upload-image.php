@@ -50,8 +50,16 @@ if (!$security->isAuthenticated()) {
     exit();
 }
 
-// Check 2: Validate CSRF token (from POST or GET)
-$csrfToken = $_POST["csrf_token"] ?? ($_GET["csrf_token"] ?? "");
+// Check 2: Validate CSRF token (from POST, header, or GET)
+$csrfToken = $_POST["csrf_token"] ?? "";
+if (empty($csrfToken)) {
+    $csrfToken =
+        $_SERVER["HTTP_X_CSRF_TOKEN"] ??
+        ($_SERVER["HTTP_X_XSRF_TOKEN"] ?? "");
+}
+if (empty($csrfToken)) {
+    $csrfToken = $_GET["csrf_token"] ?? "";
+}
 
 if (
     empty($csrfToken) ||

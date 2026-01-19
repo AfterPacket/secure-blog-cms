@@ -44,10 +44,19 @@ class Security
             session_name(SESSION_NAME);
 
             // Set secure session parameters
+            $cookieDomain = $_SERVER["HTTP_HOST"] ?? "";
+            if (strpos($cookieDomain, ":") !== false) {
+                $cookieDomain = explode(":", $cookieDomain)[0];
+            }
+
+            if (in_array($cookieDomain, ["localhost", "127.0.0.1", "::1"], true)) {
+                $cookieDomain = "";
+            }
+
             session_set_cookie_params([
                 "lifetime" => 0,
                 "path" => "/",
-                "domain" => $_SERVER["HTTP_HOST"] ?? "",
+                "domain" => $cookieDomain,
                 "secure" =>
                     isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] === "on",
                 "httponly" => true,
@@ -207,6 +216,18 @@ class Security
      */
     public function generateCSRFToken($formName = "default")
     {
+        if (
+            $formName === "image_upload" &&
+            isset($_SESSION["csrf_tokens"][$formName])
+        ) {
+            $existingToken = $_SESSION["csrf_tokens"][$formName]["token"];
+            $tokenTime = $_SESSION["csrf_tokens"][$formName]["time"];
+
+            if (time() - $tokenTime <= CSRF_TOKEN_LIFETIME) {
+                return $existingToken;
+            }
+        }
+
         $token = bin2hex(random_bytes(CSRF_TOKEN_LENGTH));
         $_SESSION["csrf_tokens"][$formName] = [
             "token" => $token,

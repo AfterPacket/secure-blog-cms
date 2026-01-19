@@ -357,6 +357,15 @@ class ImageUpload
             return false;
         }
 
+        $scanContent = preg_replace(
+            "/[^\\x09\\x0A\\x0D\\x20-\\x7E]/",
+            "",
+            $content,
+        );
+        if ($scanContent === null) {
+            $scanContent = $content;
+        }
+
         // Patterns to detect malicious code
         // Build v19: Minimal patterns to avoid binary false positives in image data
         $maliciousPatterns = [
@@ -380,7 +389,7 @@ class ImageUpload
         ];
 
         foreach ($maliciousPatterns as $pattern) {
-            if (preg_match($pattern, $content)) {
+            if (preg_match($pattern, $scanContent)) {
                 return true; // Backdoor detected!
             }
         }
