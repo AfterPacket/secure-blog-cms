@@ -63,7 +63,9 @@ finfo_close($finfo);
 $allowedMimeTypes = [
     "image/jpeg",
     "image/jpg",
+    "image/pjpeg",
     "image/png",
+    "image/x-png",
     "image/gif",
     "image/webp",
 ];

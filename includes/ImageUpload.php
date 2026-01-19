@@ -16,7 +16,9 @@ class ImageUpload
     private $allowedMimeTypes = [
         "image/jpeg",
         "image/jpg",
+        "image/pjpeg",
         "image/png",
+        "image/x-png",
         "image/gif",
         "image/webp",
     ];
@@ -234,13 +236,6 @@ class ImageUpload
         $mimeType = finfo_file($finfo, $tmpFile);
         finfo_close($finfo);
 
-        if (!in_array($mimeType, $this->allowedMimeTypes)) {
-            return [
-                "safe" => false,
-                "reason" => "Invalid MIME type: " . $mimeType,
-            ];
-        }
-
         // Check 2: Verify it's actually an image using getimagesize
         $imageInfo = @getimagesize($tmpFile);
         if ($imageInfo === false) {
@@ -248,6 +243,22 @@ class ImageUpload
                 "safe" => false,
                 "reason" => "Not a valid image file",
             ];
+        }
+
+        $imageMime = $imageInfo["mime"] ?? "";
+        if (!in_array($mimeType, $this->allowedMimeTypes, true)) {
+            if ($imageMime !== "" && in_array(
+                $imageMime,
+                $this->allowedMimeTypes,
+                true,
+            )) {
+                $mimeType = $imageMime;
+            } else {
+                return [
+                    "safe" => false,
+                    "reason" => "Invalid MIME type: " . $mimeType,
+                ];
+            }
         }
 
         // Check 3: Validate file extension
@@ -340,12 +351,10 @@ class ImageUpload
      */
     private function detectBackdoor($filePath)
     {
-        $content = file_get_contents($filePath);
-
-        // Check file size to prevent reading huge files
-        if (strlen($content) > 10485760) {
-            // 10MB
-            return false; // Skip check for very large files
+        // Read only the first 256KB to reduce binary false positives.
+        $content = file_get_contents($filePath, false, null, 0, 262144);
+        if ($content === false) {
+            return false;
         }
 
         // Patterns to detect malicious code
