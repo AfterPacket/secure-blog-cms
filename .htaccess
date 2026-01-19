@@ -1,0 +1,34 @@
+# Secure Blog CMS - Safe Configuration (Apache 2.4+)
+
+# 1. Set default index file
+DirectoryIndex index.php
+
+# 2. Explicitly allow access to the site
+# This fixes 403 errors if the server default is Deny
+Require all granted
+
+# 3. Protect Internal Directories via Rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block access to data directory
+    RewriteRule ^data/ - [F,L]
+
+    # Block access to includes directory
+    RewriteRule ^includes/ - [F,L]
+</IfModule>
+
+# 4. Protect Sensitive Files
+<FilesMatch "^(config\.php|version\.json|install\.php)$">
+    Require all denied
+</FilesMatch>
+
+# 5. Protect Backup and Log Files
+<FilesMatch "\.(bak|old|tmp|log|md|txt|swp)$">
+    Require all denied
+</FilesMatch>
+
+# 6. Disable Directory Listing
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>

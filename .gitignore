@@ -1,0 +1,28 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Vendor (if you ever add composer)
+vendor/
+
+# Runtime data (NEVER commit user content)
+data/posts/*
+data/comments/*
+data/users/*
+data/logs/*
+data/backups/*
+data/sessions/*
+
+# But keep folder placeholders
+!data/**/.gitkeep
+
+# Local config/secrets (never commit)
+.env
+*.local.php
+
+# Temp files
+*.tmp
+*.bak
+*.swp

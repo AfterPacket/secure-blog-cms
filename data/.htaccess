@@ -1,0 +1,11 @@
+# Protect data directory from direct access
+# All data should be accessed through the application's PHP files
+
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
