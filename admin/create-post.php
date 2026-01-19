@@ -494,7 +494,7 @@ selector: '#content',
 
 
                 // Paste handling
-                paste_data_images: true,
+                paste_data_images: false,
                 paste_as_text: false,
 
                 // Link settings

@@ -516,7 +516,7 @@ selector: '#content',
 
 
 
-                paste_data_images: true,
+                paste_data_images: false,
                 paste_as_text: false,
                 relative_urls: false,
                 remove_script_host: false,
