@@ -443,8 +443,8 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
             tinymce.init({
 
   license_key: 'gpl',
-selector: '#content',
-                height: 500,
+  selector: '#content',
+  height: 500,
                 menubar: true,
                 branding: false,
                 promotion: false,
@@ -464,45 +464,49 @@ selector: '#content',
                 invalid_elements: 'script,iframe,object,embed,applet',
 
                 // Image upload handler (TinyMCE 6+ compatible)
-                images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.withCredentials = true;
-                    xhr.open('POST', '<?php echo cms_path(
-                        "admin/upload-image.php",
-                    ); ?>');
+                images_upload_handler: function (blobInfo, progress) {
+                    return new Promise(function (resolve, reject) {
+                        const xhr = new XMLHttpRequest();
+                        xhr.withCredentials = true;
+                        xhr.open('POST', '<?php echo cms_path(
+                            "admin/upload-image.php",
+                        ); ?>');
 
-                    xhr.upload.onprogress = (e) => {
-                        progress(e.loaded / e.total * 100);
-                    };
+                        xhr.upload.onprogress = function (e) {
+                            progress(e.loaded / e.total * 100);
+                        };
 
-                    xhr.onload = () => {
-                        if (xhr.status < 200 || xhr.status >= 300) {
-                            reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
-                            return;
-                        }
+                        xhr.onload = function () {
+                            if (xhr.status < 200 || xhr.status >= 300) {
+                                reject('HTTP Error: ' + xhr.status);
+                                return;
+                            }
 
-                        const json = JSON.parse(xhr.responseText);
+                            try {
+                                const json = JSON.parse(xhr.responseText);
+                                if (!json || typeof json.location !== 'string') {
+                                    reject('Invalid response from server');
+                                    return;
+                                }
+                                resolve(json.location);
+                            } catch (err) {
+                                reject('JSON Parse Error: ' + err.message);
+                            }
+                        };
 
-                        if (!json || typeof json.location != 'string') {
-                            reject('Invalid JSON: ' + xhr.responseText);
-                            return;
-                        }
+                        xhr.onerror = function () {
+                            reject('Image upload failed (Network Error)');
+                        };
 
-                        resolve(json.location);
-                    };
+                        const formData = new FormData();
+                        formData.append('file', blobInfo.blob(), blobInfo.filename());
+                        formData.append('csrf_token', imageCsrfToken);
 
-                    xhr.onerror = () => {
-                        reject('Image upload failed due to a XHR error. Code: ' + xhr.status);
-                    };
+                        xhr.send(formData);
+                    });
+                },
 
-                    const formData = new FormData();
-                    formData.append('file', blobInfo.blob(), blobInfo.filename());
-                    formData.append('csrf_token', imageCsrfToken);
-
-                    xhr.send(formData);
-                }),
-
-
+                automatic_uploads: true,
 
                 paste_data_images: true,
                 paste_as_text: false,
