@@ -454,6 +454,7 @@ selector: '#content',
                         xhr.open('POST', '<?php echo cms_path(
                             "admin/upload-image.php",
                         ); ?>?csrf_token=' + encodeURIComponent(imageCsrfToken) + '&v=' + new Date().getTime());
+                        xhr.setRequestHeader('X-CSRF-Token', imageCsrfToken);
 
                         xhr.upload.onprogress = function (e) {
                             progress(e.loaded / e.total * 100);
@@ -484,6 +485,7 @@ selector: '#content',
 
                         const formData = new FormData();
                         formData.append('file', blobInfo.blob(), blobInfo.filename());
+                        formData.append('csrf_token', imageCsrfToken);
 
                         xhr.send(formData);
                     });
