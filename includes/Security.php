@@ -129,10 +129,12 @@ class Security
         // Content Security Policy
         // - Public pages stay strict
         // - Admin pages need inline scripts + TinyMCE CDN
-        if ($this->isAdminPage() && defined("CSP_POLICY_ADMIN")) {
-            header("Content-Security-Policy: " . CSP_POLICY_ADMIN);
-        } else {
-            header("Content-Security-Policy: " . CSP_POLICY);
+        if (defined("ENABLE_CSP_HEADERS") && ENABLE_CSP_HEADERS) {
+            if ($this->isAdminPage() && defined("CSP_POLICY_ADMIN")) {
+                header("Content-Security-Policy: " . CSP_POLICY_ADMIN);
+            } else {
+                header("Content-Security-Policy: " . CSP_POLICY);
+            }
         }
 
         // Helpful version header (safe to expose)

@@ -300,8 +300,12 @@ class ImageUpload
             }
         }
 
-        // Check 5: Scan for embedded PHP code and backdoors
-        if ($this->detectBackdoor($tmpFile)) {
+        // Check 5: Scan for embedded PHP code and backdoors (optional)
+        if (
+            (!defined("ENABLE_UPLOAD_MALWARE_SCAN") ||
+                ENABLE_UPLOAD_MALWARE_SCAN) &&
+            $this->detectBackdoor($tmpFile)
+        ) {
             error_log(
                 "ImageUpload: detectBackdoor failed for " . $originalName,
             );
