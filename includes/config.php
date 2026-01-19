@@ -10,7 +10,7 @@ if (!defined("SECURE_CMS_INIT")) {
 }
 
 // Security Configuration
-define("SECURE_CMS_VERSION", "1.1.2");
+define("SECURE_CMS_VERSION", "1.1.6");
 define("SESSION_NAME", "SECURE_CMS_SESSION");
 define("SESSION_LIFETIME", 3600); // 1 hour
 define("CSRF_TOKEN_LENGTH", 32);
@@ -41,14 +41,19 @@ define(
         "frame-src https://hcaptcha.com https://*.hcaptcha.com; " .
         "frame-ancestors 'none'; " .
         "base-uri 'self'; " .
-        "form-action 'self';");
+        "form-action 'self';",
+);
 
 // Admin CSP: allows TinyMCE (cdn.tiny.cloud) + inline admin scripts.
-define("CSP_POLICY_ADMIN", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-attr 'self' 'unsafe-inline'; upgrade-insecure-requests");
+define(
+    "CSP_POLICY_ADMIN",
+    "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-attr 'self' 'unsafe-inline'; upgrade-insecure-requests",
+);
 // Sanitization settings
 define(
     "ALLOWED_HTML_TAGS",
-    "<p><br><strong><em><u><h1><h2><h3><h4><ul><ol><li><a><blockquote><code><pre><img>");
+    "<p><br><strong><em><u><h1><h2><h3><h4><ul><ol><li><a><blockquote><code><pre><img>",
+);
 define("MAX_POST_TITLE_LENGTH", 200);
 define("MAX_POST_CONTENT_LENGTH", 50000);
 define("MAX_POST_EXCERPT_LENGTH", 500);
@@ -62,16 +67,26 @@ if (!is_dir(LOGS_DIR)) {
 }
 
 // Ensure storage directories exist
-if (!is_dir(POSTS_DIR)) { @mkdir(POSTS_DIR, 0700, true); }
-if (!is_dir(USERS_DIR)) { @mkdir(USERS_DIR, 0700, true); }
-if (!is_dir(SESSIONS_DIR)) { @mkdir(SESSIONS_DIR, 0700, true); }
-if (!is_dir(COMMENTS_DIR)) { @mkdir(COMMENTS_DIR, 0700, true); }
+if (!is_dir(POSTS_DIR)) {
+    @mkdir(POSTS_DIR, 0700, true);
+}
+if (!is_dir(USERS_DIR)) {
+    @mkdir(USERS_DIR, 0700, true);
+}
+if (!is_dir(SESSIONS_DIR)) {
+    @mkdir(SESSIONS_DIR, 0700, true);
+}
+if (!is_dir(COMMENTS_DIR)) {
+    @mkdir(COMMENTS_DIR, 0700, true);
+}
 
 // Site/runtime settings (loaded from data/settings/site.json)
 define("SETTINGS_DIR", DATA_DIR . "/settings");
 define("SITE_SETTINGS_FILE", SETTINGS_DIR . "/site.json");
 
-if (!is_dir(SETTINGS_DIR)) { @mkdir(SETTINGS_DIR, 0700, true); }
+if (!is_dir(SETTINGS_DIR)) {
+    @mkdir(SETTINGS_DIR, 0700, true);
+}
 
 $__site_settings = [];
 if (is_file(SITE_SETTINGS_FILE)) {
@@ -96,9 +111,12 @@ ini_set("log_errors", "1");
 ini_set("error_log", LOGS_DIR . "/php_errors.log");
 
 // PHP Security Settings
-$__isHttps = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
-    (isset($_SERVER["HTTP_X_FORWARDED_PROTO"]) && strtolower((string)$_SERVER["HTTP_X_FORWARDED_PROTO"]) === "https") ||
-    (isset($_SERVER["HTTP_CF_VISITOR"]) && strpos((string)$_SERVER["HTTP_CF_VISITOR"], "https") !== false);
+$__isHttps =
+    (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
+    (isset($_SERVER["HTTP_X_FORWARDED_PROTO"]) &&
+        strtolower((string) $_SERVER["HTTP_X_FORWARDED_PROTO"]) === "https") ||
+    (isset($_SERVER["HTTP_CF_VISITOR"]) &&
+        strpos((string) $_SERVER["HTTP_CF_VISITOR"], "https") !== false);
 
 ini_set("session.cookie_httponly", "1");
 ini_set("session.cookie_secure", $__isHttps ? "1" : "0");
@@ -124,24 +142,35 @@ define("RATE_LIMIT_REQUESTS", 100);
 define("RATE_LIMIT_PERIOD", 3600); // per hour
 
 // Pagination (defaults to 10, bounded 1..100)
-$__ppp = isset($__site_settings["posts_per_page"]) ? (int)$__site_settings["posts_per_page"] : 10;
+$__ppp = isset($__site_settings["posts_per_page"])
+    ? (int) $__site_settings["posts_per_page"]
+    : 10;
 if ($__ppp < 1 || $__ppp > 100) {
     $__ppp = 10;
 }
 define("POSTS_PER_PAGE", $__ppp);
 
 // Site settings (fallbacks to placeholders)
-$__site_name = isset($__site_settings["site_name"]) && is_string($__site_settings["site_name"]) && $__site_settings["site_name"] !== ""
-    ? $__site_settings["site_name"]
-    : "REPLACE_ME_SITE_NAME";
+$__site_name =
+    isset($__site_settings["site_name"]) &&
+    is_string($__site_settings["site_name"]) &&
+    $__site_settings["site_name"] !== ""
+        ? $__site_settings["site_name"]
+        : "REPLACE_ME_SITE_NAME";
 
-$__site_desc = isset($__site_settings["site_description"]) && is_string($__site_settings["site_description"]) && $__site_settings["site_description"] !== ""
-    ? $__site_settings["site_description"]
-    : "REPLACE_ME_SITE_DESCRIPTION";
+$__site_desc =
+    isset($__site_settings["site_description"]) &&
+    is_string($__site_settings["site_description"]) &&
+    $__site_settings["site_description"] !== ""
+        ? $__site_settings["site_description"]
+        : "REPLACE_ME_SITE_DESCRIPTION";
 
-$__site_url = isset($__site_settings["site_url"]) && is_string($__site_settings["site_url"]) && $__site_settings["site_url"] !== ""
-    ? rtrim($__site_settings["site_url"], "/")
-    : "REPLACE_ME_SITE_URL";
+$__site_url =
+    isset($__site_settings["site_url"]) &&
+    is_string($__site_settings["site_url"]) &&
+    $__site_settings["site_url"] !== ""
+        ? rtrim($__site_settings["site_url"], "/")
+        : "REPLACE_ME_SITE_URL";
 
 define("SITE_NAME", $__site_name);
 define("SITE_DESCRIPTION", $__site_desc);
@@ -150,21 +179,32 @@ define("SITE_URL", $__site_url);
 // Backup settings
 define("AUTO_BACKUP", true);
 define("BACKUP_DIR", DATA_DIR . "/backups");
-if (!is_dir(BACKUP_DIR)) { @mkdir(BACKUP_DIR, 0700, true); }
+if (!is_dir(BACKUP_DIR)) {
+    @mkdir(BACKUP_DIR, 0700, true);
+}
 define("MAX_BACKUPS", 10);
 
-
 // Runtime feature toggles
-define("ALLOW_SEARCH", (bool)($__site_settings["allow_search"] ?? true));
-define("REQUIRE_LOGIN_FOR_POSTS", (bool)($__site_settings["require_login_for_posts"] ?? false));
+define("ALLOW_SEARCH", (bool) ($__site_settings["allow_search"] ?? true));
+define(
+    "REQUIRE_LOGIN_FOR_POSTS",
+    (bool) ($__site_settings["require_login_for_posts"] ?? false),
+);
 define("POST_PASSWORD_TTL", 3600); // seconds
-define("APP_VERSION", defined("SECURE_CMS_VERSION") ? SECURE_CMS_VERSION : "dev");
+define(
+    "APP_VERSION",
+    defined("SECURE_CMS_VERSION") ? SECURE_CMS_VERSION : "dev",
+);
 
 // hCaptcha (comments)
 // Provide secrets via environment variables to avoid storing secrets on disk.
-define("HCAPTCHA_SITEKEY", (string)(getenv('HCAPTCHA_SITEKEY') ?: ($__site_settings['hcaptcha_sitekey'] ?? '')));
-define("HCAPTCHA_SECRET", (string)(getenv('HCAPTCHA_SECRET') ?: ''));
-define("HCAPTCHA_ENABLED", (HCAPTCHA_SITEKEY !== '' && HCAPTCHA_SECRET !== ''));
+define(
+    "HCAPTCHA_SITEKEY",
+    (string) (getenv("HCAPTCHA_SITEKEY") ?:
+    $__site_settings["hcaptcha_sitekey"] ?? ""),
+);
+define("HCAPTCHA_SECRET", (string) (getenv("HCAPTCHA_SECRET") ?: ""));
+define("HCAPTCHA_ENABLED", HCAPTCHA_SITEKEY !== "" && HCAPTCHA_SECRET !== "");
 
 /**
  * App base path (for installs in subfolders like /secure-blog-cms)
@@ -174,19 +214,30 @@ define("HCAPTCHA_ENABLED", (HCAPTCHA_SITEKEY !== '' && HCAPTCHA_SECRET !== ''));
  *  - SCRIPT_NAME: /secure-blog-cms/post.php       -> APP_BASE_PATH=/secure-blog-cms
  *  - SCRIPT_NAME: /admin/admin.php                -> APP_BASE_PATH=
  */
-$__scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
-$__dir = str_replace('\\', '/', (string)dirname($__scriptName));
-$__dir = rtrim($__dir, '/');
+$__scriptName = str_replace(
+    "\\",
+    "/",
+    (string) ($_SERVER["SCRIPT_NAME"] ?? ""),
+);
+$__dir = str_replace("\\", "/", (string) dirname($__scriptName));
+$__dir = rtrim($__dir, "/");
 if (preg_match('#/(admin|install)$#', $__dir)) {
-    $__dir = preg_replace('#/(admin|install)$#', '', $__dir);
+    $__dir = preg_replace('#/(admin|install)$#', "", $__dir);
 }
-if ($__dir === '' || $__dir === '/') { $__dir = ''; }
+if ($__dir === "" || $__dir === "/") {
+    $__dir = "";
+}
 define("APP_BASE_PATH", $__dir);
 
-function cms_path($path = '') {
-    $path = ltrim((string)$path, '/');
+function cms_path($path = "")
+{
+    $path = ltrim((string) $path, "/");
     $base = APP_BASE_PATH;
-    if ($base === '') { return '/' . $path; }
-    if ($path === '') { return $base . '/'; }
-    return $base . '/' . $path;
+    if ($base === "") {
+        return "/" . $path;
+    }
+    if ($path === "") {
+        return $base . "/";
+    }
+    return $base . "/" . $path;
 }

@@ -125,6 +125,7 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- CMS_BUILD_MARKER: v19 tinymce simplified security checks -->
     <!-- CMS_BUILD_MARKER: v12 use images_upload_url (no custom handler) -->
     <!-- CMS_BUILD_MARKER: v11 images_upload_handler async -->
     <meta charset="UTF-8">
@@ -435,6 +436,8 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
             "image_upload",
         ); ?>';
 
+        console.log('%c CMS Debug: edit-post.php loaded (Build v19) ', 'background: #ff0000; color: #ffffff; font-weight: bold; font-size: 16px;');
+
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof tinymce === 'undefined') {
                 console.error('TinyMCE failed to load. Check CSP / CDN access.');
@@ -443,8 +446,8 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
             tinymce.init({
 
   license_key: 'gpl',
-  selector: '#content',
-  height: 500,
+selector: '#content',
+                height: 500,
                 menubar: true,
                 branding: false,
                 promotion: false,
@@ -465,18 +468,21 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
 
                 // Image upload handler (TinyMCE 6+ compatible)
                 images_upload_handler: function (blobInfo, progress) {
+                    console.log('CMS Debug: images_upload_handler triggered (Promise-based)');
+                    console.log('File:', blobInfo.filename(), blobInfo.blob().size, 'bytes');
                     return new Promise(function (resolve, reject) {
                         const xhr = new XMLHttpRequest();
                         xhr.withCredentials = true;
                         xhr.open('POST', '<?php echo cms_path(
                             "admin/upload-image.php",
-                        ); ?>');
+                        ); ?>?csrf_token=' + encodeURIComponent(imageCsrfToken) + '&v=' + new Date().getTime());
 
                         xhr.upload.onprogress = function (e) {
                             progress(e.loaded / e.total * 100);
                         };
 
                         xhr.onload = function () {
+                            console.log('CMS Debug: XHR response:', xhr.status, xhr.responseText);
                             if (xhr.status < 200 || xhr.status >= 300) {
                                 reject('HTTP Error: ' + xhr.status);
                                 return;
@@ -500,13 +506,13 @@ $csrfToken = $security->generateCSRFToken("edit_post_form");
 
                         const formData = new FormData();
                         formData.append('file', blobInfo.blob(), blobInfo.filename());
-                        formData.append('csrf_token', imageCsrfToken);
 
                         xhr.send(formData);
                     });
                 },
-
                 automatic_uploads: true,
+
+
 
                 paste_data_images: true,
                 paste_as_text: false,

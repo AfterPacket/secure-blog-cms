@@ -52,8 +52,7 @@ tinymce.init({
     images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
         // We'll add this functionality in step 2
         reject('Image upload not yet configured');
-    }),
-    }
+    })
 });
 </script>
 ```
@@ -267,11 +266,11 @@ images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => 
         if (result && result.location) {
             resolve(result.location);
         } else {
-            reject('Invalid response from server');
+            reject(result.error || 'Upload failed');
         }
     })
-    .catch(err => {
-        reject('Upload failed: ' + err.message);
+    .catch(error => {
+        reject('Upload failed: ' + error.message);
     });
 })
 ```

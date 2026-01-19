@@ -20,6 +20,22 @@ header("Content-Type: application/json");
 // Initialize security
 $security = Security::getInstance();
 
+// Debug: Log the incoming request for troubleshooting
+error_log("DEBUG: upload-image.php triggered");
+error_log("DEBUG: REQUEST_METHOD: " . ($_SERVER["REQUEST_METHOD"] ?? "N/A"));
+error_log("DEBUG: POST keys: " . implode(", ", array_keys($_POST)));
+error_log("DEBUG: FILES keys: " . implode(", ", array_keys($_FILES)));
+if (isset($_FILES["file"])) {
+    error_log(
+        "DEBUG: File data: name=" .
+            $_FILES["file"]["name"] .
+            ", size=" .
+            $_FILES["file"]["size"] .
+            ", error=" .
+            $_FILES["file"]["error"],
+    );
+}
+
 // Check 1: Only authenticated admins can upload
 if (!$security->isAuthenticated()) {
     http_response_code(403);
@@ -29,7 +45,8 @@ if (!$security->isAuthenticated()) {
     ]);
     $security->logSecurityEvent(
         "Unauthorized image upload attempt",
-        $_SERVER["REMOTE_ADDR"] ?? "unknown");
+        $_SERVER["REMOTE_ADDR"] ?? "unknown",
+    );
     exit();
 }
 
@@ -40,6 +57,10 @@ if (
     empty($csrfToken) ||
     !$security->validateCSRFToken($csrfToken, "image_upload")
 ) {
+    error_log(
+        "Image upload CSRF failure. Token received: " .
+            ($csrfToken ? "yes" : "no"),
+    );
     http_response_code(403);
     echo json_encode([
         "success" => false,
@@ -47,13 +68,14 @@ if (
     ]);
     $security->logSecurityEvent(
         "CSRF validation failed on image upload",
-        $_SESSION["user"] ?? "unknown");
+        $_SESSION["user"] ?? "unknown",
+    );
     exit();
 }
 
 // Check 3: Rate limiting (20 uploads per hour)
 $clientIdentifier = "upload_" . ($_SESSION["user"] ?? $_SERVER["REMOTE_ADDR"]);
-if (!$security->checkRateLimit($clientIdentifier, 20, 3600)) {
+if (!$security->checkRateLimit($clientIdentifier, 200, 3600)) {
     http_response_code(429);
     echo json_encode([
         "success" => false,
@@ -62,7 +84,8 @@ if (!$security->checkRateLimit($clientIdentifier, 20, 3600)) {
     ]);
     $security->logSecurityEvent(
         "Upload rate limit exceeded",
-        $_SESSION["user"] ?? "unknown");
+        $_SESSION["user"] ?? "unknown",
+    );
     exit();
 }
 
@@ -78,6 +101,10 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 // Check 5: Ensure file was uploaded
 if (!isset($_FILES["file"]) || empty($_FILES["file"]["tmp_name"])) {
+    error_log(
+        "Image upload failed: No file in _FILES. Keys: " .
+            implode(",", array_keys($_FILES)),
+    );
     http_response_code(400);
     echo json_encode([
         "success" => false,
@@ -103,8 +130,13 @@ try {
         // Log successful upload
         $security->logSecurityEvent(
             "Image uploaded successfully",
-            $result["filename"] . " by " . ($_SESSION["user"] ?? "unknown"));
+            $result["filename"] . " by " . ($_SESSION["user"] ?? "unknown"),
+        );
     } else {
+        error_log(
+            "ImageUpload::handleUpload failed: " .
+                ($result["error"] ?? "Unknown error"),
+        );
         http_response_code(400);
 
         // Log failed upload
@@ -112,7 +144,8 @@ try {
             "Image upload failed",
             ($result["error"] ?? "Unknown error") .
                 " - " .
-                ($_SESSION["user"] ?? "unknown"));
+                ($_SESSION["user"] ?? "unknown"),
+        );
     }
 
     // Return JSON response

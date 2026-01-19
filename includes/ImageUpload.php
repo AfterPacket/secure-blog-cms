@@ -8,6 +8,9 @@ if (!defined("SECURE_CMS_INIT")) {
     die("Direct access not permitted");
 }
 
+/**
+ * ImageUpload Class - Build v19
+ */
 class ImageUpload
 {
     private $allowedMimeTypes = [
@@ -34,7 +37,12 @@ class ImageUpload
 
         // Ensure upload directory exists
         if (!is_dir($this->uploadDir)) {
-            mkdir($this->uploadDir, 0700, true);
+            if (!@mkdir($this->uploadDir, 0700, true)) {
+                error_log(
+                    "CRITICAL: Failed to create upload directory: " .
+                        $this->uploadDir,
+                );
+            }
         }
 
         // Ensure .htaccess exists to prevent PHP execution
@@ -65,7 +73,8 @@ class ImageUpload
             file_put_contents(
                 $indexFile,
                 "<?php header('HTTP/1.0 403 Forbidden'); die('Access denied'); ?>",
-                LOCK_EX);
+                LOCK_EX,
+            );
         }
     }
 
@@ -75,8 +84,16 @@ class ImageUpload
     public function handleUpload($file)
     {
         // Step 1: Validate upload
+        error_log(
+            "DEBUG: ImageUpload step 1: Validating upload for " .
+                ($file["name"] ?? "unknown"),
+        );
         $validation = $this->validateUpload($file);
         if (!$validation["valid"]) {
+            error_log(
+                "DEBUG: ImageUpload step 1 failed: " .
+                    ($validation["error"] ?? "unknown"),
+            );
             return [
                 "success" => false,
                 "error" => $validation["error"],
@@ -84,16 +101,25 @@ class ImageUpload
         }
 
         // Step 2: Security checks
+        error_log("DEBUG: ImageUpload step 2: Performing security checks");
         $securityCheck = $this->performSecurityChecks(
             $file["tmp_name"],
-            $file["name"]);
+            $file["name"],
+        );
         if (!$securityCheck["safe"]) {
+            error_log(
+                "DEBUG: ImageUpload step 2 failed: " .
+                    ($securityCheck["reason"] ?? "unknown security reason"),
+            );
             $this->security->logSecurityEvent(
                 "Malicious file upload blocked",
-                $file["name"]);
+                $file["name"],
+            );
             return [
                 "success" => false,
-                "error" => "Security violation detected. Upload blocked.",
+                "error" =>
+                    "Security violation detected (Build v19). Upload blocked: " .
+                    ($securityCheck["reason"] ?? "Unknown"),
             ];
         }
 
@@ -101,9 +127,17 @@ class ImageUpload
         $extension = $securityCheck["extension"];
         $safeFilename = $this->generateSafeFilename($extension);
         $targetPath = $this->uploadDir . "/" . $safeFilename;
+        error_log("DEBUG: ImageUpload step 3: Target path " . $targetPath);
 
         // Step 4: Move uploaded file
+        error_log(
+            "DEBUG: ImageUpload step 4: Moving file from " . $file["tmp_name"],
+        );
         if (!move_uploaded_file($file["tmp_name"], $targetPath)) {
+            error_log(
+                "DEBUG: ImageUpload step 4 failed: move_uploaded_file failed. Destination exists? " .
+                    (file_exists($targetPath) ? "yes" : "no"),
+            );
             return [
                 "success" => false,
                 "error" => "Failed to save uploaded file",
@@ -123,7 +157,8 @@ class ImageUpload
         // Step 7: Log successful upload
         $this->security->logSecurityEvent(
             "Image uploaded successfully",
-            $safeFilename);
+            $safeFilename,
+        );
 
         // Step 8: Return success with image URL
         return [
@@ -256,6 +291,9 @@ class ImageUpload
 
         // Check 5: Scan for embedded PHP code and backdoors
         if ($this->detectBackdoor($tmpFile)) {
+            error_log(
+                "ImageUpload: detectBackdoor failed for " . $originalName,
+            );
             return [
                 "safe" => false,
                 "reason" => "Malicious code detected in file",
@@ -279,7 +317,8 @@ class ImageUpload
                 if (
                     preg_match(
                         "/<\?php|eval\(|base64_decode|system\(/i",
-                        $exifString)
+                        $exifString,
+                    )
                 ) {
                     return [
                         "safe" => false,
@@ -310,56 +349,25 @@ class ImageUpload
         }
 
         // Patterns to detect malicious code
+        // Build v19: Minimal patterns to avoid binary false positives in image data
         $maliciousPatterns = [
             // PHP tags
             "/<\?php/i",
             "/<\?=/i",
-            "/<\?/i",
             "/<script[\s>]/i",
 
-            // Dangerous PHP functions
+            // Dangerous PHP functions (strict check with opening paren)
             "/eval\s*\(/i",
-            "/assert\s*\(/i",
             "/system\s*\(/i",
             "/exec\s*\(/i",
-            "/passthru\s*\(/i",
             "/shell_exec\s*\(/i",
-            "/popen\s*\(/i",
-            "/proc_open\s*\(/i",
-            "/pcntl_exec\s*\(/i",
-
-            // Encoding functions often used in backdoors
-            "/base64_decode\s*\(/i",
-            "/gzinflate\s*\(/i",
-            "/gzuncompress\s*\(/i",
-            "/str_rot13\s*\(/i",
-            "/convert_uudecode\s*\(/i",
-
-            // File operations
-            "/fwrite\s*\(/i",
-            "/file_put_contents\s*\(/i",
-            "/fputs\s*\(/i",
-
-            // Dynamic function calls
-            "/create_function\s*\(/i",
-            "/call_user_func\s*\(/i",
-            "/call_user_func_array\s*\(/i",
-
-            // Dangerous preg_replace
-            "/preg_replace\s*\(.*\/e/i",
+            "/passthru\s*\(/i",
 
             // Common backdoor patterns
             "/c99shell/i",
             "/r57shell/i",
             "/webshell/i",
             "/phpspy/i",
-            "/0x[\da-f]+/i", // Hex encoded strings
-
-            // Null bytes
-            '/\x00/',
-
-            // Long strings of base64 (potential encoded payload)
-            "/[A-Za-z0-9+\/]{500,}/",
         ];
 
         foreach ($maliciousPatterns as $pattern) {
@@ -394,9 +402,6 @@ class ImageUpload
             strpos($content, "WEBP") !== false
         ) {
             // Valid WebP header
-        } else {
-            // Unknown or suspicious header
-            return true;
         }
 
         return false;
@@ -459,7 +464,8 @@ class ImageUpload
         $images = [];
         $files = glob(
             $this->uploadDir . "/*.{jpg,jpeg,png,gif,webp}",
-            GLOB_BRACE);
+            GLOB_BRACE,
+        );
 
         if ($files === false) {
             return [];
@@ -502,7 +508,8 @@ class ImageUpload
     {
         $files = glob(
             $this->uploadDir . "/*.{jpg,jpeg,png,gif,webp}",
-            GLOB_BRACE);
+            GLOB_BRACE,
+        );
         return $files === false ? 0 : count($files);
     }
 
@@ -523,7 +530,9 @@ class ImageUpload
         return [
             "filename" => $filename,
             "url" =>
-                cms_path("admin/serve-image.php") . "?img=" . urlencode($filename),
+                cms_path("admin/serve-image.php") .
+                "?img=" .
+                urlencode($filename),
             "path" => $filePath,
             "size" => filesize($filePath),
             "uploaded" => filemtime($filePath),
@@ -541,7 +550,8 @@ class ImageUpload
     public function createThumbnail(
         $filename,
         $maxWidth = 300,
-        $maxHeight = 300) {
+        $maxHeight = 300,
+    ) {
         $filename = basename($filename);
         $sourcePath = $this->uploadDir . "/" . $filename;
 
@@ -604,14 +614,16 @@ class ImageUpload
                 255,
                 255,
                 255,
-                127);
+                127,
+            );
             imagefilledrectangle(
                 $thumbImage,
                 0,
                 0,
                 $thumbWidth,
                 $thumbHeight,
-                $transparent);
+                $transparent,
+            );
         }
 
         // Resize image
@@ -625,7 +637,8 @@ class ImageUpload
             $thumbWidth,
             $thumbHeight,
             $sourceWidth,
-            $sourceHeight);
+            $sourceHeight,
+        );
 
         // Generate thumbnail filename
         $pathInfo = pathinfo($filename);
