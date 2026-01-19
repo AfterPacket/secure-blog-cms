@@ -407,7 +407,7 @@ $csrfToken = $security->generateCSRFToken("create_post_form");
 
     <script>
         // Generate CSRF token for image uploads
-        const imageCsrfToken = '<?php echo $security->generateCSRFToken(
+        let imageCsrfToken = '<?php echo $security->generateCSRFToken(
             "image_upload",
         ); ?>';
 
@@ -440,7 +440,7 @@ selector: '#content',
                 content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
 
                 // Security: Restrict allowed content
-                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target],blockquote,code,pre',
+                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target|rel],img[src|alt|title|width|height|loading],blockquote,code,pre',
                 invalid_elements: 'script,iframe,object,embed,applet',
 
                 // Image upload handler (TinyMCE 6+ compatible)
@@ -448,45 +448,66 @@ selector: '#content',
                     console.log('CMS Debug: images_upload_handler triggered (Promise-based)');
                     console.log('File:', blobInfo.filename(), blobInfo.blob().size, 'bytes');
                     return new Promise(function (resolve, reject) {
-                        const xhr = new XMLHttpRequest();
-                        xhr.withCredentials = true;
-                        xhr.open('POST', '<?php echo cms_path(
-                            "admin/upload-image.php",
-                        ); ?>?csrf_token=' + encodeURIComponent(imageCsrfToken) + '&v=' + new Date().getTime());
-                        xhr.setRequestHeader('X-CSRF-Token', imageCsrfToken);
+                        const uploadWithToken = function (csrfToken, hasRetried) {
+                            const xhr = new XMLHttpRequest();
+                            xhr.withCredentials = true;
+                            xhr.open('POST', '<?php echo cms_path(
+                                "admin/upload-image.php",
+                            ); ?>?csrf_token=' + encodeURIComponent(csrfToken) + '&v=' + new Date().getTime());
+                            xhr.setRequestHeader('X-CSRF-Token', csrfToken);
 
-                        xhr.upload.onprogress = function (e) {
-                            progress(e.loaded / e.total * 100);
-                        };
+                            xhr.upload.onprogress = function (e) {
+                                progress(e.loaded / e.total * 100);
+                            };
 
-                        xhr.onload = function () {
-                            console.log('CMS Debug: XHR response:', xhr.status, xhr.responseText);
-                            if (xhr.status < 200 || xhr.status >= 300) {
-                                reject('HTTP Error: ' + xhr.status);
-                                return;
-                            }
+                            xhr.onload = function () {
+                                console.log('CMS Debug: XHR response:', xhr.status, xhr.responseText);
+                                let json = null;
+                                if (xhr.responseText) {
+                                    try {
+                                        json = JSON.parse(xhr.responseText);
+                                    } catch (err) {
+                                        reject('JSON Parse Error: ' + err.message);
+                                        return;
+                                    }
+                                }
 
-                            try {
-                                const json = JSON.parse(xhr.responseText);
+                                if (
+                                    xhr.status === 403 &&
+                                    json &&
+                                    typeof json.new_token === 'string' &&
+                                    !hasRetried
+                                ) {
+                                    imageCsrfToken = json.new_token;
+                                    uploadWithToken(imageCsrfToken, true);
+                                    return;
+                                }
+
+                                if (xhr.status < 200 || xhr.status >= 300) {
+                                    reject('HTTP Error: ' + xhr.status);
+                                    return;
+                                }
+
                                 if (!json || typeof json.location !== 'string') {
                                     reject('Invalid response from server');
                                     return;
                                 }
+
                                 resolve(json.location);
-                            } catch (err) {
-                                reject('JSON Parse Error: ' + err.message);
-                            }
+                            };
+
+                            xhr.onerror = function () {
+                                reject('Image upload failed (Network Error)');
+                            };
+
+                            const formData = new FormData();
+                            formData.append('file', blobInfo.blob(), blobInfo.filename());
+                            formData.append('csrf_token', csrfToken);
+
+                            xhr.send(formData);
                         };
 
-                        xhr.onerror = function () {
-                            reject('Image upload failed (Network Error)');
-                        };
-
-                        const formData = new FormData();
-                        formData.append('file', blobInfo.blob(), blobInfo.filename());
-                        formData.append('csrf_token', imageCsrfToken);
-
-                        xhr.send(formData);
+                        uploadWithToken(imageCsrfToken, false);
                     });
                 },
                 automatic_uploads: true,
@@ -494,7 +515,7 @@ selector: '#content',
 
 
                 // Paste handling
-                paste_data_images: true,
+                paste_data_images: false,
                 paste_as_text: false,
 
                 // Link settings
