@@ -404,6 +404,8 @@ $csrfToken = $security->generateCSRFToken("login_form");
                 All login attempts are logged and monitored for security.
             </p>
         </div>
+        <?php include APP_ROOT . '/templates/footer.php'; ?>
+
     </div>
 
     <script>
@@ -422,6 +424,5 @@ $csrfToken = $security->generateCSRFToken("login_form");
             window.history.replaceState(null, null, window.location.href);
         }
     </script>
-<?php include APP_ROOT . '/templates/footer.php'; ?>
 </body>
 </html>
