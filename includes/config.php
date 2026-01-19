@@ -29,26 +29,45 @@ define("COMMENTS_DIR", DATA_DIR . "/comments");
 define("LOGS_DIR", DATA_DIR . "/logs");
 
 // Content Security Policy
+// Set to false to disable CSP headers entirely (eases compatibility).
+define("ENABLE_CSP_HEADERS", false);
+
 // Public pages stay strict; admin pages need inline scripts and TinyMCE CDN.
 define(
     "CSP_POLICY",
-    "default-src 'self'; " .
-        "script-src 'self' https://js.hcaptcha.com https://hcaptcha.com; " .
-        "style-src 'self' 'unsafe-inline'; " .
-        "img-src 'self' data:; " .
-        "font-src 'self'; " .
-        "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; " .
-        "frame-src https://hcaptcha.com https://*.hcaptcha.com; " .
-        "frame-ancestors 'none'; " .
+    "default-src 'self' https: data: blob:; " .
+        "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; " .
+        "style-src 'self' 'unsafe-inline' https:; " .
+        "img-src 'self' data: blob: https:; " .
+        "font-src 'self' data: https:; " .
+        "connect-src 'self' https:; " .
+        "frame-src https:; " .
+        "frame-ancestors 'self' https:; " .
         "base-uri 'self'; " .
-        "form-action 'self';",
+        "form-action 'self' https:;",
 );
 
 // Admin CSP: allows TinyMCE (cdn.tiny.cloud) + inline admin scripts.
 define(
     "CSP_POLICY_ADMIN",
-    "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.hcaptcha.com https://hcaptcha.com; script-src-attr 'self' 'unsafe-inline'; upgrade-insecure-requests",
+    "default-src 'self' https: data: blob:; " .
+        "base-uri 'self'; " .
+        "object-src 'none'; " .
+        "frame-ancestors 'self' https:; " .
+        "form-action 'self' https:; " .
+        "img-src 'self' data: blob: https:; " .
+        "style-src 'self' 'unsafe-inline' https:; " .
+        "style-src-elem 'self' 'unsafe-inline' https:; " .
+        "font-src 'self' data: https:; " .
+        "connect-src 'self' https:; " .
+        "frame-src 'self' https:; " .
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; " .
+        "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https:; " .
+        "script-src-attr 'self' 'unsafe-inline';",
 );
+
+// Upload security toggles
+define("ENABLE_UPLOAD_MALWARE_SCAN", false);
 // Sanitization settings
 define(
     "ALLOWED_HTML_TAGS",

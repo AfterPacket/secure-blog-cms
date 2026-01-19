@@ -129,8 +129,11 @@ header("X-Content-Type-Options: nosniff");
 
 // Disable script execution in case of browser bugs
 header("X-Content-Type-Options: nosniff");
-header(
-    'Content-Security-Policy: default-src \'none\'; img-src \'self\'; style-src \'none\'; script-src \'none\';');
+if (defined("ENABLE_CSP_HEADERS") && ENABLE_CSP_HEADERS) {
+    header(
+        'Content-Security-Policy: default-src \'none\'; img-src \'self\'; style-src \'none\'; script-src \'none\';',
+    );
+}
 
 // Send the file
 readfile($imagePath);
