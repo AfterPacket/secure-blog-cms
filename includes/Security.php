@@ -433,9 +433,9 @@ class Security
             );
         }
 
-        // Remove javascript: and data: protocols from href and src
+        // Remove javascript:, vbscript:, and non-image data: protocols from href and src
         $html = preg_replace(
-            '/(<[^>]+)(href|src)\s*=\s*["\']?(javascript|data|vbscript):[^"\'\s>]*/i',
+            '/(<[^>]+)(href|src)\s*=\s*["\']?(javascript|vbscript|data:(?!image\/(?:png|gif|jpe?g|webp)))[^"\'\s>]*/i',
             '$1',
             $html,
         );
