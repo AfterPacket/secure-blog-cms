@@ -440,7 +440,7 @@ selector: '#content',
                 content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
 
                 // Security: Restrict allowed content
-                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target],blockquote,code,pre',
+                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target|rel],img[src|alt|title|width|height|loading],blockquote,code,pre',
                 invalid_elements: 'script,iframe,object,embed,applet',
 
                 // Image upload handler (TinyMCE 6+ compatible)
@@ -494,7 +494,7 @@ selector: '#content',
 
 
                 // Paste handling
-                paste_data_images: true,
+                paste_data_images: false,
                 paste_as_text: false,
 
                 // Link settings
