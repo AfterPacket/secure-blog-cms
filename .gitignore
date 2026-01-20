@@ -26,3 +26,6 @@ data/sessions/*
 *.tmp
 *.bak
 *.swp
+
+# Tools
+tools/
