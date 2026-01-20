@@ -128,8 +128,8 @@
             "size": 26285
         },
         "includes/Updater.php": {
-            "sha256": "c1270c7d5226029f89252179d4eb5e02ce1806ec40fcbc6eb283e220ca373cd9",
-            "size": 2420
+            "sha256": "d9cd13f891ff76fd3a1cc92882a7681ce70ae94210dc2a109eb70bcb1aaf2f95",
+            "size": 2781
         },
         "includes/Upgrader.php": {
             "sha256": "8b6a0281f7501f9118b25519d18b85107771559b4ad8c4bd605556f0b9b1483c",
