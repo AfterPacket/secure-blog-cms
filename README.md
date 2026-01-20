@@ -323,6 +323,34 @@ This project is provided as-is for educational and production use.
 - **Production Ready**: Designed with security-first approach
 - **No Dependencies**: Pure PHP, no external libraries required
 
+## 🐛 Troubleshooting
+
+### Cannot Login
+- **Check credentials**: Default username is `admin`
+- **Check lockout**: Wait 15 minutes if account is locked
+- **Check logs**: View `data/logs/security_*.log`
+- **Reset password**: Generate new hash and update `config.php`
+
+### Permission Errors
+```bash
+# Fix directory permissions
+chmod -R 700 data/
+chown -R www-data:www-data data/  # Linux
+```
+
+### Posts Not Saving
+- Check write permissions on `data/posts/` directory
+- Check PHP error logs
+- Verify PHP has enough memory (`memory_limit` in php.ini)
+
+### Image Upload Issues
+- Image uploads need to be fixed and implemented properly
+- Current implementation requires security and functionality improvements
+
+### Session Issues
+- Clear browser cookies
+- Check `data/sessions/` permissions
+- Verify `session.save_path` in PHP configuration
 ## 🆘 Support
 
 For issues or questions:
