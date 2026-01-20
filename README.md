@@ -40,17 +40,38 @@ A highly secure, SQL-free blog content management system built with PHP, featuri
 Place all files in your web server directory (e.g., `/var/www/html/blog/` or `C:\xampp\htdocs\blog\`)
 
 ### Step 2: Set Permissions
-```bash
-# Linux/Unix
-chmod 700 data/
-chmod 700 data/posts/
-chmod 700 data/users/
-chmod 700 data/sessions/
-chmod 700 data/logs/
-chmod 700 data/backups/
+**Crucial for Security & Updates!**
 
-# Windows - Use File Explorer to set permissions
-# Right-click folders > Properties > Security > Edit
+For the blog to function and the **One-Click Updater** to work, the web server needs write access to the directories.
+
+**Linux/Unix/macOS:**
+```bash
+# Navigate to installation directory
+cd /path/to/blog/
+
+# Set ownership to web server user (e.g., www-data, apache, or nginx)
+chown -R www-data:www-data .
+
+# Set directory permissions (755 allows owner write, others read/execute)
+find . -type d -exec chmod 755 {} \;
+
+# Set file permissions
+find . -type f -exec chmod 644 {} \;
+
+# STRICT SECURITY: Lock down configuration
+chmod 640 includes/config.php
+```
+
+**Shared Hosting (cPanel/FTP):**
+- Folders should typically be `755`.
+- Files should be `644`.
+- If the **Updater** fails with permission errors, ensure the script owner has write permissions to all CMS folders (`admin`, `includes`, `templates`, etc.), not just `data`.
+
+**Windows (XAMPP/WAMP):**
+1. Right-click the blog folder.
+2. Properties > Security.
+3. Edit permissions.
+4. Grant **Modify/Write** permissions to the `Users` group (local dev) or `IUSR` (IIS).
 ```
 
 ### Step 3: Configure Admin Credentials
@@ -298,10 +319,25 @@ All security events are logged to `data/logs/security_YYYY-MM-DD.log`
 
 ## 🔄 Updating
 
-1. **Backup your data**: Download `data/` folder
-2. **Replace files**: Update all PHP files except `config.php`
-3. **Check config**: Compare new `config.php` for new settings
-4. **Test**: Verify functionality in a test environment first
+### Option 1: One-Click Updater (Recommended)
+The CMS includes a built-in updater that fetches the latest secure version from the official repository.
+
+1. Log in to the Admin Dashboard.
+2. Navigate to **Updates**.
+3. If an update is available, click **Apply Update**.
+   - The system verifies file integrity.
+   - Updates `config.php` version number automatically.
+   - Preserves your settings and data.
+
+**Note:** The web server requires write permissions to the installation directory for this to work.
+
+### Option 2: Manual Update
+1. **Backup**: Download your `data/` folder and `includes/config.php`.
+2. **Download**: Get the latest release zip or pull from GitHub.
+3. **Replace**: Overwrite all files **EXCEPT**:
+   - `data/` directory (your content)
+   - `includes/config.php` (your settings)
+4. **Update Config**: If the new version introduces new security settings, verify `includes/config.php` against the new sample config.
 
 ## 🤝 Contributing
 
@@ -376,8 +412,8 @@ If you discover a security vulnerability, please:
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-01-14  
+**Version**: 1.1.8  
+**Last Updated**: 2025-01-20  
 **Security Level**: High 🔒
 
 **Remember**: Security is a continuous process. Regularly update, monitor, and audit your system.
