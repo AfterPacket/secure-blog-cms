@@ -1,5 +1,5 @@
 {
-    "version": "1.1.9",
+    "version": "1.2.0",
     "released": "2026-01-20",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
     "description": "Fixed 500 error in upgrade manager, added automatic update checking to dashboard, and improved system stability.",
@@ -15,7 +15,7 @@
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "953be4604d5e4fee5d196ea70378f611ddb5ae8833d7f79326257fb9f1b08331"
+            "sha256": "cf1114f1d143afa80a6c6bb26f2afb9662a3c5ead3d778d336d3705d58364c41"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
@@ -23,11 +23,11 @@
         },
         "README.md": {
             "path": "README.md",
-            "sha256": "2320effc46e082890a482be84b71a032c0be7a63a97029b4c405f4a420708f59"
+            "sha256": "2f551c26eb94496bde0c4f34fd80bd8f5cd81e6114e561adf45c689dd3a67bdd"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "0cceac404fa4b2866250223cd165a55876ee10ba288e62a7b8487c6a7cbbd8bf"
+            "sha256": "cd29f2832dcc3f710b9eaf449f74fa6af3a3ece4dc38d8473e5f4f1f46a7266a"
         }
     },
     "changes": [
@@ -35,7 +35,7 @@
         "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL)",
         "Fixed incorrect include path in admin/upgrade.php causing 500 error",
         "Improved security escaping in admin management pages",
-        "Updated system version to 1.1.9 in configuration and data files",
+        "Updated system version to 1.2.0 in configuration and data files",
         "Fixed persistence of automatic update toggle setting"
     ]
 }
