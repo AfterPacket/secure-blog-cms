@@ -13,7 +13,7 @@ require_once __DIR__ . "/../includes/config.php";
 // Load required classes
 require_once __DIR__ . "/../includes/Security.php";
 require_once __DIR__ . "/../includes/Storage.php";
-require_once __DIR__ . "/includes/Upgrader.php";
+require_once __DIR__ . "/../includes/Upgrader.php";
 
 // Initialize security, storage, and upgrader
 $security = Security::getInstance();
@@ -40,7 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $messageType = "error";
         $security->logSecurityEvent(
             "CSRF validation failed on upgrade action",
-            $_SESSION["user"]);
+            $_SESSION["user"],
+        );
     } else {
         switch ($action) {
             case "check_updates":
@@ -68,7 +69,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $downloadUrl = $security->getPostData(
                     "download_url",
                     "url",
-                    "");
+                    "",
+                );
                 $checksum = $security->getPostData("checksum", "string", "");
 
                 if (empty($version)) {
@@ -78,7 +80,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $result = $upgrader->performUpgrade(
                         $version,
                         $downloadUrl,
-                        $checksum);
+                        $checksum,
+                    );
                     $message =
                         $result["message"] ??
                         ($result["error"] ?? "Upgrade failed");
@@ -120,7 +123,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>System Upgrade - <?php echo $security->escapeHTML(
-        SITE_NAME); ?></title>
+        SITE_NAME,
+    ); ?></title>
     <style>
         * {
             margin: 0;
@@ -489,7 +493,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
     <div class="container">
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $security->escapeHTML(
-                $messageType); ?>">
+                $messageType,
+            ); ?>">
                 <?php echo $security->escapeHTML($message); ?>
             </div>
         <?php endif; ?>
@@ -500,7 +505,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                 <h2>📊 System Information</h2>
                 <form method="post" style="display: inline;">
                     <input type="hidden" name="csrf_token" value="<?php echo $security->escapeHTML(
-                        $csrfToken); ?>">
+                        $csrfToken,
+                    ); ?>">
                     <input type="hidden" name="action" value="check_updates">
                     <button type="submit" class="btn btn-success">
                         🔍 Check for Updates
@@ -513,27 +519,31 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                     <div class="label">Current Version</div>
                     <div class="value">
                         <span class="version-badge">v<?php echo $security->escapeHTML(
-                            $systemInfo["current_version"]); ?></span>
+                            $systemInfo["current_version"],
+                        ); ?></span>
                     </div>
                 </div>
 
                 <div class="info-card">
                     <div class="label">PHP Version</div>
                     <div class="value"><?php echo $security->escapeHTML(
-                        $systemInfo["php_version"]); ?></div>
+                        $systemInfo["php_version"],
+                    ); ?></div>
                 </div>
 
                 <div class="info-card">
                     <div class="label">Total Upgrades</div>
                     <div class="value"><?php echo number_format(
-                        $systemInfo["total_upgrades"]); ?></div>
+                        $systemInfo["total_upgrades"],
+                    ); ?></div>
                 </div>
 
                 <div class="info-card">
                     <div class="label">Disk Space Available</div>
                     <div class="value"><?php echo number_format(
                         $systemInfo["disk_space"] / 1024 / 1024 / 1024,
-                        2); ?> GB</div>
+                        2,
+                    ); ?> GB</div>
                 </div>
 
                 <?php if ($systemInfo["last_check"]): ?>
@@ -542,7 +552,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                     <div class="value" style="font-size: 14px;">
                         <?php echo date(
                             "Y-m-d H:i:s",
-                            $systemInfo["last_check"]); ?>
+                            $systemInfo["last_check"],
+                        ); ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -553,7 +564,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                     <div class="value" style="font-size: 14px;">
                         <?php echo date(
                             "Y-m-d H:i:s",
-                            $systemInfo["last_upgrade"]); ?>
+                            $systemInfo["last_upgrade"],
+                        ); ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -562,7 +574,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
             <div class="checkbox-group">
                 <form method="post" id="autoUpgradeForm">
                     <input type="hidden" name="csrf_token" value="<?php echo $security->escapeHTML(
-                        $csrfToken); ?>">
+                        $csrfToken,
+                    ); ?>">
                     <input type="hidden" name="action" value="toggle_auto_upgrade">
                     <div class="checkbox-item">
                         <input type="checkbox"
@@ -592,7 +605,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                     <span class="version-badge latest">✓ Up to Date</span>
                 <?php else: ?>
                     <span class="version-badge outdated"><?php echo count(
-                        $updateCheck["updates"]); ?> Update(s) Available</span>
+                        $updateCheck["updates"],
+                    ); ?> Update(s) Available</span>
                 <?php endif; ?>
             </div>
 
@@ -609,25 +623,31 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                     <div class="update-header">
                         <div>
                             <span class="update-version">Version <?php echo $security->escapeHTML(
-                                $update["version"]); ?></span>
+                                $update["version"],
+                            ); ?></span>
                             <?php if ($update["critical"]): ?>
                                 <span class="critical-badge">Critical Security Update</span>
                             <?php endif; ?>
                         </div>
                         <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to upgrade to version <?php echo $security->escapeHTML(
-                            $update["version"]); ?>? A backup will be created automatically.');">
+                            $update["version"],
+                        ); ?>? A backup will be created automatically.');">
                             <input type="hidden" name="csrf_token" value="<?php echo $security->escapeHTML(
-                                $csrfToken); ?>">
+                                $csrfToken,
+                            ); ?>">
                             <input type="hidden" name="action" value="perform_upgrade">
                             <input type="hidden" name="version" value="<?php echo $security->escapeHTML(
-                                $update["version"]); ?>">
+                                $update["version"],
+                            ); ?>">
                             <?php if ($update["download_url"]): ?>
                                 <input type="hidden" name="download_url" value="<?php echo $security->escapeHTML(
-                                    $update["download_url"]); ?>">
+                                    $update["download_url"],
+                                ); ?>">
                             <?php endif; ?>
                             <?php if ($update["checksum"]): ?>
                                 <input type="hidden" name="checksum" value="<?php echo $security->escapeHTML(
-                                    $update["checksum"]); ?>">
+                                    $update["checksum"],
+                                ); ?>">
                             <?php endif; ?>
                             <button type="submit" class="btn <?php echo $update[
                                 "critical"
@@ -642,14 +662,16 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                     <?php if ($update["release_date"]): ?>
                         <p style="font-size: 12px; color: #7f8c8d; margin-bottom: 10px;">
                             Released: <?php echo $security->escapeHTML(
-                                $update["release_date"]); ?>
+                                $update["release_date"],
+                            ); ?>
                         </p>
                     <?php endif; ?>
 
                     <?php if ($update["description"]): ?>
                         <div class="update-description">
                             <?php echo $security->escapeHTML(
-                                $update["description"]); ?>
+                                $update["description"],
+                            ); ?>
                         </div>
                     <?php endif; ?>
 
@@ -658,7 +680,8 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                         <ul class="changes-list">
                             <?php foreach ($update["changes"] as $change): ?>
                                 <li><?php echo $security->escapeHTML(
-                                    $change); ?></li>
+                                    $change,
+                                ); ?></li>
                             <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
@@ -694,15 +717,20 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                         <tr>
                             <td><?php echo date(
                                 "Y-m-d H:i:s",
-                                $history["upgraded_at"]); ?></td>
+                                $history["upgraded_at"],
+                            ); ?></td>
                             <td><?php echo $security->escapeHTML(
-                                $history["from_version"]); ?></td>
+                                $history["from_version"],
+                            ); ?></td>
                             <td><strong><?php echo $security->escapeHTML(
-                                $history["to_version"]); ?></strong></td>
+                                $history["to_version"],
+                            ); ?></strong></td>
                             <td><?php echo $security->escapeHTML(
-                                $history["upgraded_by"]); ?></td>
+                                $history["upgraded_by"],
+                            ); ?></td>
                             <td><?php echo count(
-                                $history["migrations_run"]); ?> migration(s)</td>
+                                $history["migrations_run"],
+                            ); ?> migration(s)</td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -744,6 +772,6 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
             window.history.replaceState(null, null, window.location.href);
         }
     </script>
-<?php include APP_ROOT . '/templates/footer.php'; ?>
+<?php include APP_ROOT . "/templates/footer.php"; ?>
 </body>
 </html>

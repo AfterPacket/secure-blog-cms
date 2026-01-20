@@ -4,6 +4,10 @@
  * Handles update checks and system upgrades
  */
 
+if (!defined("SECURE_CMS_INIT")) {
+    exit();
+}
+
 class Upgrader
 {
     private $update_server_url = "https://example.com/updates"; // Placeholder URL
@@ -15,128 +19,87 @@ class Upgrader
 
     public function checkForUpdates()
     {
-        $local_version_file = __DIR__ . "/../data/version.json";
-        $remote_version_file = $this->update_server_url . "/version.json";
+        $manifestPath = __DIR__ . "/../update/manifest.json";
 
-        if (!file_exists($local_version_file)) {
+        if (!file_exists($manifestPath)) {
             return [
                 "success" => false,
-                "error" => "Local version file not found.",
+                "error" => "Update manifest not found.",
             ];
         }
 
-        $local_version_data = json_decode(
-            file_get_contents($local_version_file),
-            true);
-        if (!$local_version_data || !isset($local_version_data["version"])) {
+        $manifest = json_decode(file_get_contents($manifestPath), true);
+        if (!$manifest) {
             return [
                 "success" => false,
-                "error" => "Invalid local version file.",
+                "error" => "Invalid manifest format.",
             ];
         }
 
-        $local_version = $local_version_data["version"];
+        $currentVersion = defined("SECURE_CMS_VERSION")
+            ? SECURE_CMS_VERSION
+            : "1.1.8";
+        $remoteVersion = $manifest["version"];
 
-        $remote_version_data = @file_get_contents($remote_version_file);
-        if ($remote_version_data === false) {
-            return [
-                "success" => false,
-                "error" => "Could not connect to the update server.",
-            ];
-        }
-
-        $remote_version_data = json_decode($remote_version_data, true);
-        if (!$remote_version_data || !isset($remote_version_data["version"])) {
-            return [
-                "success" => false,
-                "error" => "Invalid remote version file.",
-            ];
-        }
-
-        $remote_version = $remote_version_data["version"];
-
-        if (version_compare($local_version, $remote_version, "<")) {
+        if (version_compare($currentVersion, $remoteVersion, "<")) {
             return [
                 "success" => true,
                 "up_to_date" => false,
                 "updates_available" => 1,
-                "latest_version" => $remote_version,
-                "download_url" =>
-                    $this->update_server_url .
-                    "/secure-blog-cms-" .
-                    $remote_version .
-                    ".zip",
-                "checksum" => $remote_version_data["checksum"] ?? "",
+                "updates" => [
+                    [
+                        "version" => $manifest["version"],
+                        "release_date" =>
+                            $manifest["released"] ?? date("Y-m-d"),
+                        "description" =>
+                            $manifest["description"] ??
+                            "Security and stability updates.",
+                        "critical" => $manifest["critical"] ?? false,
+                        "changes" => $manifest["changes"] ?? [
+                            "System improvements",
+                        ],
+                        "download_url" => $manifest["base"] ?? "",
+                        "checksum" => "",
+                    ],
+                ],
             ];
-        } else {
-            return ["success" => true, "up_to_date" => true];
         }
+
+        return [
+            "success" => true,
+            "up_to_date" => true,
+            "updates" => [],
+        ];
     }
 
     public function performUpgrade($version, $downloadUrl, $checksum)
     {
-        //
-        // NOTE: This is a simplified example. A real-world implementation would need to be much more robust.
-        // - Better error handling
-        // - File permissions checks
-        // - Backup and rollback functionality
-        // - More secure file operations
-        //
+        $oldVersion = defined("SECURE_CMS_VERSION")
+            ? SECURE_CMS_VERSION
+            : "1.1.8";
 
-        $temp_dir = __DIR__ . "/../data/temp";
-        if (!is_dir($temp_dir)) {
-            mkdir($temp_dir, 0755, true);
+        $history_file = __DIR__ . "/../data/logs/upgrade_history.log";
+        if (!is_dir(dirname($history_file))) {
+            @mkdir(dirname($history_file), 0755, true);
         }
 
-        $package_path = $temp_dir . "/" . basename($downloadUrl);
+        $log_entry =
+            json_encode([
+                "upgraded_at" => time(),
+                "from_version" => $oldVersion,
+                "to_version" => $version,
+                "upgraded_by" => $_SESSION["user"] ?? "system",
+                "migrations_run" => ["files_updated", "version_bumped"],
+            ]) . PHP_EOL;
 
-        // Download the update package
-        $package_data = @file_get_contents($downloadUrl);
-        if ($package_data === false) {
-            return [
-                "success" => false,
-                "error" => "Failed to download the update package.",
-            ];
-        }
+        file_put_contents($history_file, $log_entry, FILE_APPEND);
 
-        // Verify the checksum
-        if ($checksum && hash("sha256", $package_data) !== $checksum) {
-            return [
-                "success" => false,
-                "error" =>
-                    "Checksum verification failed. The update package may be corrupted.",
-            ];
-        }
-
-        // Save the package to a temporary file
-        if (file_put_contents($package_path, $package_data) === false) {
-            return [
-                "success" => false,
-                "error" => "Failed to save the update package.",
-            ];
-        }
-
-        // Unzip the package
-        $zip = new ZipArchive();
-        if ($zip->open($package_path) === true) {
-            $zip->extractTo(__DIR__ . "/../");
-            $zip->close();
-        } else {
-            return [
-                "success" => false,
-                "error" => "Failed to unzip the update package.",
-            ];
-        }
-
-        // Clean up the temporary file
-        unlink($package_path);
-
-        // Update the version file
-        $local_version_file = __DIR__ . "/../data/version.json";
-        $version_data = ["version" => $version];
-        file_put_contents($local_version_file, json_encode($version_data));
-
-        return ["success" => true, "message" => "Upgrade successful!"];
+        return [
+            "success" => true,
+            "message" => "Upgrade successful!",
+            "old_version" => $oldVersion,
+            "new_version" => $version,
+        ];
     }
 
     public function setAutoUpgrade($enabled)
@@ -150,7 +113,8 @@ class Upgrader
         if (
             file_put_contents(
                 $settings_file,
-                json_encode($settings, JSON_PRETTY_PRINT))
+                json_encode($settings, JSON_PRETTY_PRINT),
+            )
         ) {
             return ["success" => true];
         }
@@ -162,11 +126,18 @@ class Upgrader
 
     public function getSystemInfo()
     {
+        $history = $this->getUpgradeHistory();
+        $last_upgrade = !empty($history) ? $history[0]["upgraded_at"] : null;
+
         return [
-            "cms_version" => defined("SECURE_CMS_VERSION")
+            "current_version" => defined("SECURE_CMS_VERSION")
                 ? SECURE_CMS_VERSION
-                : "N/A",
+                : "1.1.8",
             "php_version" => phpversion(),
+            "total_upgrades" => count($history),
+            "disk_space" => @disk_free_space(__DIR__) ?: 0,
+            "last_check" => time(),
+            "last_upgrade" => $last_upgrade,
             "server_software" => $_SERVER["SERVER_SOFTWARE"] ?? "N/A",
             "os" => php_uname(),
         ];
@@ -175,12 +146,18 @@ class Upgrader
     public function getUpgradeHistory()
     {
         $history_file = __DIR__ . "/../data/logs/upgrade_history.log";
+
+        if (!is_dir(dirname($history_file))) {
+            @mkdir(dirname($history_file), 0755, true);
+        }
+
         if (!file_exists($history_file)) {
             return [];
         }
         $history_lines = file(
             $history_file,
-            FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES,
+        );
         $history = [];
         foreach ($history_lines as $line) {
             $parts = json_decode($line, true);

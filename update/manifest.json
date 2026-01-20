@@ -1,199 +1,35 @@
 {
-    "version": "1.1.8",
-    "released": "2026-01-20",
-    "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "files": {
-        "admin/admin.php": {
-            "sha256": "9ccb4c6f20315457f6ef8d46579c468bc7be03626da69561fe00836738e7d5f8",
-            "size": 22859
-        },
-        "admin/categories.php": {
-            "sha256": "24320a57fd545d0ba81a56f2b6ed81583092b8e533c5619cf31d9a44c4e7c788",
-            "size": 9707
-        },
-        "admin/comments.php": {
-            "sha256": "492d231d6d7196233038867f81e01b1148922e98d955016ec2c596532dff91f6",
-            "size": 14338
-        },
-        "admin/create-post.php": {
-            "sha256": "7030dcd506cadf26f26b9ae9cb1b1c3b925ad50d4c3330189382cadddd759275",
-            "size": 35671
-        },
-        "admin/edit-post.php": {
-            "sha256": "7bdce16e9d3ef19c4b9760989940db6523503cee8e2685873221aaa854f5c899",
-            "size": 35908
-        },
-        "admin/login.php": {
-            "sha256": "c289b4eca053e319b99eb8b2cae6cb31ea4be2a27a2f3b10ceae4968512ae4bb",
-            "size": 12456
-        },
-        "admin/logout.php": {
-            "sha256": "205194de7122381b8451e0966dcf2cbda1a4ea9862e24b4755b10959cfaeef99",
-            "size": 699
-        },
-        "admin/serve-image.php": {
-            "sha256": "04ed112e9da1c561d6776f29756d240bf837f7bff86c5b9d3f58d1bb69e90884",
-            "size": 4191
-        },
-        "admin/settings.php": {
-            "sha256": "0dc3deb3e4224dda20f982c742019b7c20784a81fb4689e5d57c6caeb5e77abf",
-            "size": 22291
-        },
-        "admin/updates.php": {
-            "sha256": "e8e75de57cb473bd6fc05e85c74eaa861e9eb208960ad7810398fd184ba48f3f",
-            "size": 968
-        },
-        "admin/upgrade.php": {
-            "sha256": "74cd62622bf92c15de3e3f80879f716cb84ad011bf7d5256c21f774626420e3f",
-            "size": 25031
-        },
-        "admin/upload-image.php": {
-            "sha256": "f377a9b7fd441880a756d5547586a897e91abbe97db8282ada0b54f4dd555b3a",
-            "size": 5772
-        },
-        "admin/users.php": {
-            "sha256": "bf52f9efe8a123f66ce489ee5835ca5bbf031af48787a7ce58a54a0903e16dd0",
-            "size": 11087
-        },
-        "admin.php": {
-            "sha256": "4b882d6bda175ac36eea04a5589a1e15cd016bf2e60b960a8ce1283b4b4b0bda",
-            "size": 339
-        },
-        "debug_hash.php": {
-            "sha256": "df3e666700866d5fba085b7ffcaf742973e5f270dedbfd7bc00c095116739829",
-            "size": 2926
-        },
-        "Docs/FEATURES.md": {
-            "sha256": "660ce2716db4a783ddcd566f45f910330c6c0faf18c795a34fb7f20bcf5e5146",
-            "size": 12505
-        },
-        "Docs/IMPLEMENTATION_COMPLETE.md": {
-            "sha256": "4d875c03117779c67132c2c7d602a1d42d13fa90066ff616cdc08a79f7352841",
-            "size": 16165
-        },
-        "Docs/NEXT_STEPS.md": {
-            "sha256": "139030cd17fc887df0c2b469afc5fab6d842807529627f5a7c2f7a0c533b0c3f",
-            "size": 18685
-        },
-        "Docs/PROJECT_SUMMARY.md": {
-            "sha256": "33adb5143ad8bc73431d2c8ed8e840db7d7ca731eedf9224437c36a30f063ee4",
-            "size": 17261
-        },
-        "Docs/QUICK_REFERENCE.md": {
-            "sha256": "85e265f4d893bfef0fa8123fa30313779435f579f1ead86a3b9f375f8b5c3f91",
-            "size": 8203
-        },
-        "Docs/SETUP.md": {
-            "sha256": "1fc9e0cd4f45ffda3e3b384a1a9ad62657706a48ec73a48ba3db71a66289c17f",
-            "size": 6128
-        },
-        "Docs/UPDATER.md": {
-            "sha256": "6e1d57b219829197d5524afca332d1da5f3427be2cdaa2741a6fe45ccf7c7bc1",
-            "size": 669
-        },
-        "edit-post.php": {
-            "sha256": "3c746b673b65a0f8ec8e4b59e753a82d7e2171eed7f8954346b8365576fdd0bc",
-            "size": 435
-        },
-        "FEATURES.md": {
-            "sha256": "660ce2716db4a783ddcd566f45f910330c6c0faf18c795a34fb7f20bcf5e5146",
-            "size": 12505
-        },
-        "IMPLEMENTATION_COMPLETE.md": {
-            "sha256": "4d875c03117779c67132c2c7d602a1d42d13fa90066ff616cdc08a79f7352841",
-            "size": 16165
-        },
-        "includes/Captcha.php": {
-            "sha256": "60c370d6413036aac7abc30eeaafcedc2eeb3a0092af16f7e2654d587a913773",
-            "size": 668
-        },
-        "includes/categories.php": {
-            "sha256": "44fe0ecdd1eff8ef041686f08e4a5c7194621b9a04a3904f45e07477f5d49f59",
-            "size": 6687
-        },
-        "includes/comments.php": {
-            "sha256": "963e474b7cf6f9e598d8e695c49356244400b2259c7f42a148c52767e0c74c4b",
-            "size": 9652
-        },
-        "includes/ImageUpload.php": {
-            "sha256": "1faaa40f63cba7b422db857e38997c8b4f9c99b5670debd54663a8284d8cba41",
-            "size": 21684
-        },
-        "includes/notifications.php": {
-            "sha256": "b4aeaa155ac1b0f0f7c9e21191b22c013a66861952e7b454e5bc58b5c03dc071",
-            "size": 4439
-        },
-        "includes/Security.php": {
-            "sha256": "a9bc56e673cc04b7af3996b1e627c93419e5890140687fb18102fc8ad94560f2",
-            "size": 24534
-        },
-        "includes/Storage.php": {
-            "sha256": "e67fc6910ac03c6cba4c11c13e7d099c7d6c606d4f26bcb4db383dcb797054e4",
-            "size": 26285
-        },
-        "includes/Updater.php": {
-            "sha256": "023bd5dfde156e004ecc6ca4665f7897b4f0bff3a71b72183575f68cad436bee",
-            "size": 4413
-        },
-        "includes/Upgrader.php": {
-            "sha256": "8b6a0281f7501f9118b25519d18b85107771559b4ad8c4bd605556f0b9b1483c",
-            "size": 5997
-        },
-        "includes/UrlShortener.php": {
-            "sha256": "39f647bf780e4b6dc33b76f2861907a98b2376d1f71dd42a4b1dc4ab99d2b029",
-            "size": 12240
-        },
-        "includes/users.php": {
-            "sha256": "3edd168ccc17bd9fbf3eedd2ceab6dd078f0a791aedea8a27c700d87bc9ffdd7",
-            "size": 5975
-        },
-        "index.php": {
-            "sha256": "91b152d05be50ecb0881a96845b87dd5fe18ce8a099416dc4d528c575afc656e",
-            "size": 13055
-        },
-        "install/index.php": {
-            "sha256": "f59ded6dfb59e79d32dd88ddcf5a49cdef4216063ac65e5296f0fcec3a8a7560",
-            "size": 26903
-        },
-        "NEXT_STEPS.md": {
-            "sha256": "be0ca77a234ae489b2a60421eba139f704d09f210ea6ab12727efbd7201cd246",
-            "size": 18678
-        },
-        "post.php": {
-            "sha256": "02be818c3e9793e2a57e390d2e51c711dc56823daa45dd9837f95f2154485a77",
-            "size": 24671
-        },
-        "PROJECT_SUMMARY.md": {
-            "sha256": "33adb5143ad8bc73431d2c8ed8e840db7d7ca731eedf9224437c36a30f063ee4",
-            "size": 17261
-        },
-        "QUICK_REFERENCE.md": {
-            "sha256": "85e265f4d893bfef0fa8123fa30313779435f579f1ead86a3b9f375f8b5c3f91",
-            "size": 8203
-        },
-        "README.md": {
-            "sha256": "915aa7ca1c1e5998a24e018b281b93884bb409263e6a1222dad50c86f8d89177",
-            "size": 12482
-        },
-        "rss.php": {
-            "sha256": "d6bdfabef1559cf9c2e5bef723101d9a6292ca6aa5fad0b711e600407b68d5ac",
-            "size": 2267
-        },
-        "s.php": {
-            "sha256": "2e3f0544d3c23b60d3c5988cdeda01e0c025508bcd58e90b027ac2c3c0e2dea8",
-            "size": 4550
-        },
-        "SETUP.md": {
-            "sha256": "1fc9e0cd4f45ffda3e3b384a1a9ad62657706a48ec73a48ba3db71a66289c17f",
-            "size": 6128
-        },
-        "templates/footer.php": {
-            "sha256": "42be32b2da1d1ab7bbf069f2141e4d9e2276cfc924c0b414a0e42e6806efaf8d",
-            "size": 491
-        },
-        "tools/build-update.php": {
-            "sha256": "f002dde3557d7a6ea13131201f7555214116c6ab726aa0b7b57eef7fa4875e5c",
-            "size": 3035
-        }
+  "version": "1.1.9",
+  "released": "2026-01-20",
+  "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
+  "description": "Fixed 500 error in upgrade manager and bumped system version.",
+  "critical": true,
+  "files": {
+    "admin/upgrade.php": {
+      "path": "admin/upgrade.php",
+      "sha256": "f22d7faebd2132f912eed23defac39c7f724ef685c9841ca70aacc29702c554f"
+    },
+    "includes/config.php": {
+      "path": "includes/config.php",
+      "sha256": "953be4604d5e4fee5d196ea70378f611ddb5ae8833d7f79326257fb9f1b08331"
+    },
+    "includes/Upgrader.php": {
+      "path": "includes/Upgrader.php",
+      "sha256": "bf8833b706ae7a9cd0ae7740fc5b1af6ab2150d9859e3177b3dbab9ce2ec2876"
+    },
+    "README.md": {
+      "path": "README.md",
+      "sha256": "2320effc46e082890a482be84b71a032c0be7a63a97029b4c405f4a420708f59"
+    },
+    "data/version.json": {
+      "path": "data/version.json",
+      "sha256": "0cceac404fa4b2866250223cd165a55876ee10ba288e62a7b8487c6a7cbbd8bf"
     }
+  },
+  "changes": [
+    "Fixed incorrect include path in admin/upgrade.php causing 500 error",
+    "Updated system version to 1.1.9 in configuration",
+    "Updated README with version 1.1.9 information",
+    "Updated data/version.json to 1.1.9"
+  ]
 }
