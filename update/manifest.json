@@ -19,7 +19,7 @@
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "b22ad8228132666b062312df9c24efb5221f4a8576dd5127e0634878e50026a9"
+            "sha256": "64917fca26767f3061bd1860d35ce82e9ce1b5ddcd8cfad41cbc09887576662a"
         },
         "README.md": {
             "path": "README.md",
@@ -35,6 +35,7 @@
         "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL)",
         "Fixed incorrect include path in admin/upgrade.php causing 500 error",
         "Improved security escaping in admin management pages",
-        "Updated system version to 1.1.9 in configuration and data files"
+        "Updated system version to 1.1.9 in configuration and data files",
+        "Fixed persistence of automatic update toggle setting"
     ]
 }

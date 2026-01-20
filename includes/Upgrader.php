@@ -159,12 +159,12 @@ class Upgrader
 
     public function setAutoUpgrade($enabled)
     {
-        $settings_file = __DIR__ . "/../data/settings.json";
+        $settings_file = SETTINGS_DIR . "/site.json";
         $settings = [];
         if (file_exists($settings_file)) {
             $settings = json_decode(file_get_contents($settings_file), true);
         }
-        $settings["auto_upgrade"] = (bool) $enabled;
+        $settings["auto_upgrade_enabled"] = (bool) $enabled;
         if (
             file_put_contents(
                 $settings_file,
@@ -184,6 +184,13 @@ class Upgrader
         $history = $this->getUpgradeHistory();
         $last_upgrade = !empty($history) ? $history[0]["upgraded_at"] : null;
 
+        $settings_file = SETTINGS_DIR . "/site.json";
+        $auto_upgrade = false;
+        if (file_exists($settings_file)) {
+            $settings = json_decode(file_get_contents($settings_file), true);
+            $auto_upgrade = (bool) ($settings["auto_upgrade_enabled"] ?? false);
+        }
+
         return [
             "current_version" => defined("SECURE_CMS_VERSION")
                 ? SECURE_CMS_VERSION
@@ -193,6 +200,7 @@ class Upgrader
             "disk_space" => @disk_free_space(__DIR__) ?: 0,
             "last_check" => time(),
             "last_upgrade" => $last_upgrade,
+            "auto_upgrade_enabled" => $auto_upgrade,
             "server_software" => $_SERVER["SERVER_SOFTWARE"] ?? "N/A",
             "os" => php_uname(),
         ];
