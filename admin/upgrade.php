@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         switch ($action) {
             case "check_updates":
-                $updateCheck = $upgrader->checkForUpdates();
+                $updateCheck = $upgrader->checkForUpdates(true);
                 if ($updateCheck["success"]) {
                     if ($updateCheck["up_to_date"]) {
                         $message = "Your system is up to date!";

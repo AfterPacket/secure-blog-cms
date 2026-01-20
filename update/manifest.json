@@ -11,7 +11,7 @@
         },
         "admin/upgrade.php": {
             "path": "admin/upgrade.php",
-            "sha256": "f22d7faebd2132f912eed23defac39c7f724ef685c9841ca70aacc29702c554f"
+            "sha256": "01c41d87b978be35ae9c8f5bf2462d6f85ea7215b3d2133526cadfefa7c4bed3"
         },
         "includes/config.php": {
             "path": "includes/config.php",
@@ -36,6 +36,7 @@
         "Fixed incorrect include path in admin/upgrade.php causing 500 error",
         "Improved security escaping in admin management pages",
         "Updated system version to 1.2.0 in configuration and data files",
-        "Fixed persistence of automatic update toggle setting"
+        "Fixed persistence of automatic update toggle setting",
+        "Added manual cache bypass when checking for updates"
     ]
 }
