@@ -133,28 +133,115 @@ class Upgrader
             ? SECURE_CMS_VERSION
             : "1.1.8";
 
-        $history_file = __DIR__ . "/../data/logs/upgrade_history.log";
-        if (!is_dir(dirname($history_file))) {
-            @mkdir(dirname($history_file), 0755, true);
+        try {
+            // 1. Fetch the manifest to get file list
+            $manifestData = $this->fetchRemoteManifest();
+            if (!$manifestData || !isset($manifestData["files"])) {
+                throw new Exception("Could not retrieve update manifest.");
+            }
+
+            // 2. Create backup directory
+            $backupDir =
+                BACKUP_DIR . "/before-upgrade-" . $version . "-" . time();
+            if (!is_dir($backupDir)) {
+                @mkdir($backupDir, 0755, true);
+            }
+
+            $baseUpdateUrl = $manifestData["base"];
+            $updatedCount = 0;
+
+            // 3. Update files
+            foreach ($manifestData["files"] as $fileRelativePath => $info) {
+                // Skip sensitive files that shouldn't be overwritten blindly
+                if ($fileRelativePath === "data/settings/site.json") {
+                    continue;
+                }
+
+                $targetPath = APP_ROOT . "/" . $fileRelativePath;
+                $targetDir = dirname($targetPath);
+
+                if (!is_dir($targetDir)) {
+                    @mkdir($targetDir, 0755, true);
+                }
+
+                // Backup existing file
+                if (file_exists($targetPath)) {
+                    $backupPath = $backupDir . "/" . $fileRelativePath;
+                    @mkdir(dirname($backupPath), 0755, true);
+                    copy($targetPath, $backupPath);
+                }
+
+                // Download new content
+                $fileUrl = $baseUpdateUrl . "/" . $fileRelativePath;
+                $newContent = @file_get_contents($fileUrl);
+
+                if ($newContent === false) {
+                    throw new Exception(
+                        "Failed to download file: " . $fileRelativePath,
+                    );
+                }
+
+                // Verify hash if provided
+                if (isset($info["sha256"]) && $info["sha256"] !== "auto") {
+                    if (hash("sha256", $newContent) !== $info["sha256"]) {
+                        throw new Exception(
+                            "Integrity check failed for: " . $fileRelativePath,
+                        );
+                    }
+                }
+
+                file_put_contents($targetPath, $newContent);
+                $updatedCount++;
+            }
+
+            // 4. Update local version records
+            $local_version_file = DATA_DIR . "/version.json";
+            file_put_contents(
+                $local_version_file,
+                json_encode(["version" => $version], JSON_PRETTY_PRINT),
+            );
+
+            // 5. Log history
+            $history_file = LOGS_DIR . "/upgrade_history.log";
+            if (!is_dir(dirname($history_file))) {
+                @mkdir(dirname($history_file), 0755, true);
+            }
+
+            $log_entry =
+                json_encode([
+                    "upgraded_at" => time(),
+                    "from_version" => $oldVersion,
+                    "to_version" => $version,
+                    "upgraded_by" => $_SESSION["user"] ?? "system",
+                    "files_updated" => $updatedCount,
+                    "backup_path" => str_replace(APP_ROOT, "", $backupDir),
+                    "migrations_run" => ["files_updated", "version_bumped"],
+                ]) . PHP_EOL;
+
+            file_put_contents($history_file, $log_entry, FILE_APPEND);
+
+            // Clear update cache
+            $cacheFile = SETTINGS_DIR . "/update_check.json";
+            if (file_exists($cacheFile)) {
+                unlink($cacheFile);
+            }
+
+            return [
+                "success" => true,
+                "message" =>
+                    "Successfully updated " .
+                    $updatedCount .
+                    " files to version " .
+                    $version,
+                "old_version" => $oldVersion,
+                "new_version" => $version,
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "error" => "Upgrade failed: " . $e->getMessage(),
+            ];
         }
-
-        $log_entry =
-            json_encode([
-                "upgraded_at" => time(),
-                "from_version" => $oldVersion,
-                "to_version" => $version,
-                "upgraded_by" => $_SESSION["user"] ?? "system",
-                "migrations_run" => ["files_updated", "version_bumped"],
-            ]) . PHP_EOL;
-
-        file_put_contents($history_file, $log_entry, FILE_APPEND);
-
-        return [
-            "success" => true,
-            "message" => "Upgrade successful!",
-            "old_version" => $oldVersion,
-            "new_version" => $version,
-        ];
     }
 
     public function setAutoUpgrade($enabled)
