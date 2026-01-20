@@ -49,7 +49,9 @@ class Security
                 $cookieDomain = explode(":", $cookieDomain)[0];
             }
 
-            if (in_array($cookieDomain, ["localhost", "127.0.0.1", "::1"], true)) {
+            if (
+                in_array($cookieDomain, ["localhost", "127.0.0.1", "::1"], true)
+            ) {
                 $cookieDomain = "";
             }
 
@@ -218,10 +220,8 @@ class Security
      */
     public function generateCSRFToken($formName = "default")
     {
-        if (
-            $formName === "image_upload" &&
-            isset($_SESSION["csrf_tokens"][$formName])
-        ) {
+        // Reuse valid tokens to support multiple tabs/windows
+        if (isset($_SESSION["csrf_tokens"][$formName])) {
             $existingToken = $_SESSION["csrf_tokens"][$formName]["token"];
             $tokenTime = $_SESSION["csrf_tokens"][$formName]["time"];
 
@@ -265,8 +265,9 @@ class Security
         }
 
         // Token is valid
-        // For image uploads we allow reuse within the token lifetime (TinyMCE may upload multiple images).
-        if ($formName !== "image_upload") {
+        // For image uploads and post editing, allow reuse within the token lifetime.
+        // This improves UX for multiple tabs and autosaves.
+        if ($formName !== "image_upload" && $formName !== "edit_post_form") {
             unset($_SESSION["csrf_tokens"][$formName]);
         }
         return true;

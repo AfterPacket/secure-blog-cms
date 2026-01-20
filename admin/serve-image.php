@@ -11,6 +11,10 @@ define("SECURE_CMS_INIT", true);
 require_once __DIR__ . "/../includes/config.php";
 require_once __DIR__ . "/../includes/Security.php";
 
+// Add CORS headers for editor compatibility
+header("Access-Control-Allow-Origin: " . SITE_URL);
+header("Access-Control-Allow-Credentials: true");
+
 // Initialize security
 $security = Security::getInstance();
 
@@ -50,7 +54,8 @@ if (!is_file($imagePath)) {
     http_response_code(403);
     $security->logSecurityEvent(
         "Attempt to access non-file resource",
-        $filename);
+        $filename,
+    );
     die("Invalid resource");
 }
 
@@ -74,7 +79,8 @@ if (!in_array($mimeType, $allowedMimeTypes)) {
     http_response_code(403);
     $security->logSecurityEvent(
         "Attempt to access non-image file via serve-image.php",
-        $filename . " - MIME: " . $mimeType);
+        $filename . " - MIME: " . $mimeType,
+    );
     die("Invalid file type");
 }
 
@@ -92,7 +98,8 @@ if ($imageInfo === false) {
     http_response_code(403);
     $security->logSecurityEvent(
         "Corrupted image file access attempt",
-        $filename);
+        $filename,
+    );
     die("Corrupted or invalid image file");
 }
 

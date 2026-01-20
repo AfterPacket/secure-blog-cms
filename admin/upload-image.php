@@ -17,6 +17,19 @@ require_once __DIR__ . "/../includes/ImageUpload.php";
 // Set JSON response header
 header("Content-Type: application/json");
 
+// Add CORS headers for editor compatibility
+header("Access-Control-Allow-Origin: " . SITE_URL);
+header("Access-Control-Allow-Credentials: true");
+header(
+    "Access-Control-Allow-Headers: X-CSRF-Token, Content-Type, X-Requested-With",
+);
+
+// Handle preflight requests
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    http_response_code(200);
+    exit();
+}
+
 // Initialize security
 $security = Security::getInstance();
 
@@ -54,8 +67,7 @@ if (!$security->isAuthenticated()) {
 $csrfToken = $_POST["csrf_token"] ?? "";
 if (empty($csrfToken)) {
     $csrfToken =
-        $_SERVER["HTTP_X_CSRF_TOKEN"] ??
-        ($_SERVER["HTTP_X_XSRF_TOKEN"] ?? "");
+        $_SERVER["HTTP_X_CSRF_TOKEN"] ?? ($_SERVER["HTTP_X_XSRF_TOKEN"] ?? "");
 }
 if (empty($csrfToken)) {
     $csrfToken = $_GET["csrf_token"] ?? "";
@@ -109,7 +121,26 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit();
 }
 
-// Check 5: Ensure file was uploaded
+// Check 5: Check for post_max_size violation
+if (
+    empty($_FILES) &&
+    empty($_POST) &&
+    isset($_SERVER["CONTENT_LENGTH"]) &&
+    $_SERVER["CONTENT_LENGTH"] > 0
+) {
+    $maxPostSize = ini_get("post_max_size");
+    error_log(
+        "Upload failed: Content-Length exceeds post_max_size ($maxPostSize)",
+    );
+    http_response_code(413);
+    echo json_encode([
+        "success" => false,
+        "error" => "Upload exceeds server limit (post_max_size: $maxPostSize).",
+    ]);
+    exit();
+}
+
+// Check 6: Ensure file was uploaded
 if (!isset($_FILES["file"]) || empty($_FILES["file"]["tmp_name"])) {
     error_log(
         "Image upload failed: No file in _FILES. Keys: " .

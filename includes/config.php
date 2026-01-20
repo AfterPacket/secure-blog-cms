@@ -12,9 +12,9 @@ if (!defined("SECURE_CMS_INIT")) {
 // Security Configuration
 define("SECURE_CMS_VERSION", "1.1.6");
 define("SESSION_NAME", "SECURE_CMS_SESSION");
-define("SESSION_LIFETIME", 3600); // 1 hour
+define("SESSION_LIFETIME", 172800); // 48 hours
 define("CSRF_TOKEN_LENGTH", 32);
-define("CSRF_TOKEN_LIFETIME", 3600);
+define("CSRF_TOKEN_LIFETIME", 172800);
 define("MAX_LOGIN_ATTEMPTS", 5);
 define("LOGIN_LOCKOUT_TIME", 900); // 15 minutes
 define("PASSWORD_MIN_LENGTH", 12);
