@@ -1,35 +1,40 @@
 {
-  "version": "1.1.9",
-  "released": "2026-01-20",
-  "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-  "description": "Fixed 500 error in upgrade manager and bumped system version.",
-  "critical": true,
-  "files": {
-    "admin/upgrade.php": {
-      "path": "admin/upgrade.php",
-      "sha256": "f22d7faebd2132f912eed23defac39c7f724ef685c9841ca70aacc29702c554f"
+    "version": "1.1.9",
+    "released": "2026-01-20",
+    "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
+    "description": "Fixed 500 error in upgrade manager, added automatic update checking to dashboard, and improved system stability.",
+    "critical": true,
+    "files": {
+        "admin/admin.php": {
+            "path": "admin/admin.php",
+            "sha256": "da07477a47328e89e06f114be561537dd528c3f4e45e4b8346a3b00c4335ade4"
+        },
+        "admin/upgrade.php": {
+            "path": "admin/upgrade.php",
+            "sha256": "f22d7faebd2132f912eed23defac39c7f724ef685c9841ca70aacc29702c554f"
+        },
+        "includes/config.php": {
+            "path": "includes/config.php",
+            "sha256": "953be4604d5e4fee5d196ea70378f611ddb5ae8833d7f79326257fb9f1b08331"
+        },
+        "includes/Upgrader.php": {
+            "path": "includes/Upgrader.php",
+            "sha256": "b22ad8228132666b062312df9c24efb5221f4a8576dd5127e0634878e50026a9"
+        },
+        "README.md": {
+            "path": "README.md",
+            "sha256": "2320effc46e082890a482be84b71a032c0be7a63a97029b4c405f4a420708f59"
+        },
+        "data/version.json": {
+            "path": "data/version.json",
+            "sha256": "0cceac404fa4b2866250223cd165a55876ee10ba288e62a7b8487c6a7cbbd8bf"
+        }
     },
-    "includes/config.php": {
-      "path": "includes/config.php",
-      "sha256": "953be4604d5e4fee5d196ea70378f611ddb5ae8833d7f79326257fb9f1b08331"
-    },
-    "includes/Upgrader.php": {
-      "path": "includes/Upgrader.php",
-      "sha256": "bf8833b706ae7a9cd0ae7740fc5b1af6ab2150d9859e3177b3dbab9ce2ec2876"
-    },
-    "README.md": {
-      "path": "README.md",
-      "sha256": "2320effc46e082890a482be84b71a032c0be7a63a97029b4c405f4a420708f59"
-    },
-    "data/version.json": {
-      "path": "data/version.json",
-      "sha256": "0cceac404fa4b2866250223cd165a55876ee10ba288e62a7b8487c6a7cbbd8bf"
-    }
-  },
-  "changes": [
-    "Fixed incorrect include path in admin/upgrade.php causing 500 error",
-    "Updated system version to 1.1.9 in configuration",
-    "Updated README with version 1.1.9 information",
-    "Updated data/version.json to 1.1.9"
-  ]
+    "changes": [
+        "Added automatic update check notification to the admin dashboard",
+        "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL)",
+        "Fixed incorrect include path in admin/upgrade.php causing 500 error",
+        "Improved security escaping in admin management pages",
+        "Updated system version to 1.1.9 in configuration and data files"
+    ]
 }

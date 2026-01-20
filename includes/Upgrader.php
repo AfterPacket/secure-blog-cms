@@ -10,29 +10,70 @@ if (!defined("SECURE_CMS_INIT")) {
 
 class Upgrader
 {
-    private $update_server_url = "https://example.com/updates"; // Placeholder URL
+    private $update_server_url = "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/manifest.json";
 
     public function __construct()
     {
         // Constructor
     }
 
-    public function checkForUpdates()
+    /**
+     * Fetch remote manifest via CURL
+     */
+    private function fetchRemoteManifest()
     {
-        $manifestPath = __DIR__ . "/../update/manifest.json";
-
-        if (!file_exists($manifestPath)) {
-            return [
-                "success" => false,
-                "error" => "Update manifest not found.",
-            ];
+        if (!function_exists("curl_init")) {
+            return null;
         }
 
-        $manifest = json_decode(file_get_contents($manifestPath), true);
+        $ch = curl_init($this->update_server_url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_USERAGENT => "SecureBlogCMS-Upgrader",
+        ]);
+        $data = curl_exec($ch);
+        curl_close($ch);
+
+        if ($data === false) {
+            return null;
+        }
+
+        return json_decode($data, true);
+    }
+
+    public function checkForUpdates($forceRefresh = false)
+    {
+        $cacheFile = SETTINGS_DIR . "/update_check.json";
+        $cacheTime = 3600; // 1 hour cache
+
+        if (!$forceRefresh && file_exists($cacheFile)) {
+            $cache = json_decode(file_get_contents($cacheFile), true);
+            if (
+                $cache &&
+                isset($cache["last_check"]) &&
+                time() - $cache["last_check"] < $cacheTime
+            ) {
+                return $cache["result"];
+            }
+        }
+
+        $manifest = $this->fetchRemoteManifest();
+
+        if (!$manifest) {
+            // Fallback to local manifest if remote check fails
+            $manifestPath = __DIR__ . "/../update/manifest.json";
+            if (file_exists($manifestPath)) {
+                $manifest = json_decode(file_get_contents($manifestPath), true);
+            }
+        }
+
         if (!$manifest) {
             return [
                 "success" => false,
-                "error" => "Invalid manifest format.",
+                "error" => "Could not retrieve update manifest.",
             ];
         }
 
@@ -41,12 +82,18 @@ class Upgrader
             : "1.1.8";
         $remoteVersion = $manifest["version"];
 
-        if (version_compare($currentVersion, $remoteVersion, "<")) {
-            return [
-                "success" => true,
-                "up_to_date" => false,
-                "updates_available" => 1,
-                "updates" => [
+        $isUpdateAvailable = version_compare(
+            $currentVersion,
+            $remoteVersion,
+            "<",
+        );
+
+        $result = [
+            "success" => true,
+            "up_to_date" => !$isUpdateAvailable,
+            "updates_available" => $isUpdateAvailable ? 1 : 0,
+            "updates" => $isUpdateAvailable
+                ? [
                     [
                         "version" => $manifest["version"],
                         "release_date" =>
@@ -61,15 +108,23 @@ class Upgrader
                         "download_url" => $manifest["base"] ?? "",
                         "checksum" => "",
                     ],
-                ],
-            ];
-        }
-
-        return [
-            "success" => true,
-            "up_to_date" => true,
-            "updates" => [],
+                ]
+                : [],
         ];
+
+        // Cache the result
+        if (!is_dir(dirname($cacheFile))) {
+            @mkdir(dirname($cacheFile), 0755, true);
+        }
+        file_put_contents(
+            $cacheFile,
+            json_encode([
+                "last_check" => time(),
+                "result" => $result,
+            ]),
+        );
+
+        return $result;
     }
 
     public function performUpgrade($version, $downloadUrl, $checksum)
