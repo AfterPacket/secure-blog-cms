@@ -106,11 +106,15 @@ foreach ($it as $file) {
 
     $dest = $filesDir . "/" . $rel;
     @mkdir(dirname($dest), 0755, true);
-    copy($abs, $dest);
+
+    // Normalize line endings to LF to avoid hash mismatches on Windows
+    $content = file_get_contents($abs);
+    $content = str_replace("\r\n", "\n", $content);
+    file_put_contents($dest, $content);
 
     $manifest["files"][$rel] = [
-        "sha256" => hash_file("sha256", $abs),
-        "size" => filesize($abs),
+        "sha256" => hash("sha256", $content),
+        "size" => strlen($content),
     ];
 }
 
