@@ -69,10 +69,14 @@ class Updater
 
             if (file_exists($target)) {
                 $currentHash = hash_file("sha256", $target);
-                if ($currentHash !== $info["sha256"]) {
-                    mkdir(dirname($this->backupDir . "/" . $file), 0755, true);
-                    copy($target, $this->backupDir . "/" . $file);
+
+                // Optimization: Skip download if file is already up-to-date
+                if ($currentHash === $info["sha256"]) {
+                    continue;
                 }
+
+                mkdir(dirname($this->backupDir . "/" . $file), 0755, true);
+                copy($target, $this->backupDir . "/" . $file);
             }
 
             $data = $this->httpGet($manifest["base"] . "/" . $file);

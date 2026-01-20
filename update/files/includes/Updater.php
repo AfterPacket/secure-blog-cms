@@ -69,22 +69,67 @@ class Updater
 
             if (file_exists($target)) {
                 $currentHash = hash_file("sha256", $target);
-                if ($currentHash !== $info["sha256"]) {
-                    mkdir(dirname($this->backupDir . "/" . $file), 0755, true);
-                    copy($target, $this->backupDir . "/" . $file);
+
+                // Optimization: Skip download if file is already up-to-date
+                if ($currentHash === $info["sha256"]) {
+                    continue;
                 }
+
+                mkdir(dirname($this->backupDir . "/" . $file), 0755, true);
+                copy($target, $this->backupDir . "/" . $file);
             }
 
             $data = $this->httpGet($manifest["base"] . "/" . $file);
-            file_put_contents($tmp, $data);
 
-            if (hash_file("sha256", $tmp) !== $info["sha256"]) {
-                unlink($tmp);
-                throw new Exception("Hash mismatch for " . $file);
+            // Ensure directory exists for temp file (crucial for new directories)
+            $dir = dirname($tmp);
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+
+            $writeResult = @file_put_contents($tmp, $data);
+            if ($writeResult === false) {
+                throw new Exception("Failed to write temporary file: $tmp");
+            }
+
+            $downloadedHash = hash_file("sha256", $tmp);
+            if ($downloadedHash === false) {
+                throw new Exception("Failed to calculate hash for: $tmp");
+            }
+
+            if ($downloadedHash !== $info["sha256"]) {
+                @unlink($tmp);
+                throw new Exception(
+                    "Hash mismatch for $file. Expected: {$info["sha256"]}, Got: $downloadedHash",
+                );
             }
 
             mkdir(dirname($target), 0755, true);
             rename($tmp, $target);
+        }
+
+        // Update version in config.php
+        $configPath = APP_ROOT . "/includes/config.php";
+        if (file_exists($configPath) && is_writable($configPath)) {
+            $configContent = file_get_contents($configPath);
+            $newVersion = $manifest["version"];
+            // Regex to update SECURE_CMS_VERSION constant
+            $pattern =
+                '/define\s*\(\s*["\']SECURE_CMS_VERSION["\']\s*,\s*["\'][^"\']+["\']\s*\);/';
+            $replacement = "define(\"SECURE_CMS_VERSION\", \"$newVersion\");";
+
+            $newConfigContent = preg_replace(
+                $pattern,
+                $replacement,
+                $configContent,
+            );
+
+            if (
+                $newConfigContent !== null &&
+                $newConfigContent !== $configContent
+            ) {
+                file_put_contents($configPath, $newConfigContent);
+            }
         }
 
         file_put_contents(

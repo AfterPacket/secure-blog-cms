@@ -1,5 +1,5 @@
 {
-    "version": "1.1.7",
+    "version": "1.1.8",
     "released": "2026-01-20",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
     "files": {
@@ -58,6 +58,10 @@
         "admin.php": {
             "sha256": "4b882d6bda175ac36eea04a5589a1e15cd016bf2e60b960a8ce1283b4b4b0bda",
             "size": 339
+        },
+        "debug_hash.php": {
+            "sha256": "df3e666700866d5fba085b7ffcaf742973e5f270dedbfd7bc00c095116739829",
+            "size": 2926
         },
         "Docs/FEATURES.md": {
             "sha256": "660ce2716db4a783ddcd566f45f910330c6c0faf18c795a34fb7f20bcf5e5146",
@@ -128,8 +132,8 @@
             "size": 26285
         },
         "includes/Updater.php": {
-            "sha256": "d9cd13f891ff76fd3a1cc92882a7681ce70ae94210dc2a109eb70bcb1aaf2f95",
-            "size": 2781
+            "sha256": "023bd5dfde156e004ecc6ca4665f7897b4f0bff3a71b72183575f68cad436bee",
+            "size": 4413
         },
         "includes/Upgrader.php": {
             "sha256": "8b6a0281f7501f9118b25519d18b85107771559b4ad8c4bd605556f0b9b1483c",
