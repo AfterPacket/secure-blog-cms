@@ -376,7 +376,7 @@ If you discover a security vulnerability, please:
 
 ---
 
-**Version**: 1.2.1  
+**Version**: 1.2.2  
 **Last Updated**: 2026-01-20  
 **Security Level**: High 🔒
 

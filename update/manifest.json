@@ -1,8 +1,8 @@
 {
-    "version": "1.2.1",
+    "version": "1.2.2",
     "released": "2026-01-21",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Major security and stability update. Improved update reliability and protected configuration from being overwritten.",
+    "description": "Introduces fully functional automatic background updates, critical bug fixes including configuration protection during upgrades, and enhanced update reliability.",
     "critical": true,
     "files": {
         "admin/admin.php": {
@@ -15,22 +15,23 @@
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "c5b2ec509ae192ebfc241c15e6986f1ab3194461441f45b98c116241c69ec04f"
+            "sha256": "12420479001f9116dd280d252a7c0fd382fa306675584ca7126f98443627ee4b"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "5986021234d395ebad5f2051a0117505ac4e4f87834aa47a590f6a13ca10d8dd"
+            "sha256": "13dd350b332f7aa08b7f16c2fe8e13257efd68a49c7b7a48d7ebca93107bdadb"
         },
         "README.md": {
             "path": "README.md",
-            "sha256": "15dccb40b4d7116cf97768d56c0c4c9ed935d706938eb6ce23a49a2c7b92e902"
+            "sha256": "50ac50deae0e64b2fe86ddd54c6c9e4a9d6a7e85f0b72bfb2fb5a708c79762b8"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "fc10bffd324d6209b99bfd8a38dbeb00b547d66e7e156fdadd8582493c34abdb"
+            "sha256": "a143e56fa443a69ec9956f16a4204092389c35b4ed2ccaa7cee90421f7ae6849"
         }
     },
     "changes": [
+        "Implemented fully functional automatic background updates when enabled.",
         "IMPORTANT: Fixed issue where config.php was overwritten during updates; your credentials and site settings are now preserved.",
         "Added automatic update check notification to the admin dashboard.",
         "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL).",

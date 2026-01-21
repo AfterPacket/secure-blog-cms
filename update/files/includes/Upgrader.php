@@ -79,7 +79,7 @@ class Upgrader
 
         $currentVersion = defined("SECURE_CMS_VERSION")
             ? SECURE_CMS_VERSION
-            : "1.1.8";
+            : "1.2.1";
         $remoteVersion = $manifest["version"];
 
         $isUpdateAvailable = version_compare(
@@ -124,6 +124,30 @@ class Upgrader
             ]),
         );
 
+        // Handle Automatic Upgrade if enabled
+        // We only trigger this if it's not a forced manual refresh
+        if ($isUpdateAvailable && !$forceRefresh) {
+            $settings_file = SETTINGS_DIR . "/site.json";
+            if (file_exists($settings_file)) {
+                $settings = json_decode(
+                    file_get_contents($settings_file),
+                    true,
+                );
+                if ($settings["auto_upgrade_enabled"] ?? false) {
+                    $this->performUpgrade(
+                        $result["updates"][0]["version"],
+                        $result["updates"][0]["download_url"],
+                        $result["updates"][0]["checksum"],
+                    );
+
+                    // Update result to reflect that we are now up to date
+                    $result["up_to_date"] = true;
+                    $result["updates_available"] = 0;
+                    $result["updates"] = [];
+                }
+            }
+        }
+
         return $result;
     }
 
@@ -131,7 +155,7 @@ class Upgrader
     {
         $oldVersion = defined("SECURE_CMS_VERSION")
             ? SECURE_CMS_VERSION
-            : "1.1.9";
+            : "1.2.1";
 
         try {
             // 1. Fetch the manifest to get file list
@@ -311,7 +335,7 @@ class Upgrader
         return [
             "current_version" => defined("SECURE_CMS_VERSION")
                 ? SECURE_CMS_VERSION
-                : "1.1.8",
+                : "1.2.1",
             "php_version" => phpversion(),
             "total_upgrades" => count($history),
             "disk_space" => @disk_free_space(__DIR__) ?: 0,
