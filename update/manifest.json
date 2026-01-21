@@ -2,7 +2,7 @@
     "version": "1.2.4",
     "released": "2026-01-21",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Critical reliability update: Fixes automatic background updates using CURL and improves layout compatibility for images.",
+    "description": "Final reliability release: Implements robust CURL-based updates to solve 'not pulling' issues and adds detailed error reporting.",
     "critical": true,
     "files": {
         "admin/admin.php": {
@@ -47,11 +47,11 @@
         }
     },
     "changes": [
-        "Fixed Automatic Updates: Switched to CURL for all remote requests to bypass restrictive PHP environments (allow_url_fopen=0).",
-        "Improved Update Reliability: Redesigned the update check logic to provide detailed error messaging and better background processing.",
-        "Responsive Image Layout: Added CSS to ensure large images scale appropriately within posts and the admin editor.",
-        "WYSIWYG Enhancements: TinyMCE editor now utilizes the same responsive styling as the public blog posts for better accuracy.",
-        "Config Protection: The Upgrader now utilizes safe regular expressions to update version numbers without overwriting custom settings.",
-        "OPcache Management: Integrated automatic OPcache clearing to ensure updated files are active immediately upon successful upgrade."
+        "Fixed Update Pulling: Switched to CURL for all remote requests to bypass server restrictions (allow_url_fopen=0).",
+        "Enhanced Error Reporting: The Upgrade page now shows exact CURL/HTTP errors if an update check fails.",
+        "Improved Layout: Finalized responsive image styling for blog posts and the admin TinyMCE editor.",
+        "Config Safety: The Upgrader now utilizes safe regular expressions to update version numbers without overwriting custom settings.",
+        "OPcache Management: Added automatic OPcache clearing after successful upgrades to ensure new files load immediately.",
+        "Stability: Refined background update triggering to be more robust across different environments."
     ]
 }
