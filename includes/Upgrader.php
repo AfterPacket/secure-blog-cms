@@ -11,6 +11,7 @@ if (!defined("SECURE_CMS_INIT")) {
 class Upgrader
 {
     private $update_server_url = "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/manifest.json";
+    private $last_error = "";
 
     public function __construct()
     {
@@ -22,7 +23,9 @@ class Upgrader
      */
     private function fetchRemoteContent($url)
     {
+        $this->last_error = "";
         if (!function_exists("curl_init")) {
+            $this->last_error = "CURL extension is not enabled on this server.";
             return false;
         }
 
@@ -35,10 +38,21 @@ class Upgrader
             CURLOPT_USERAGENT => "SecureBlogCMS-Upgrader",
         ]);
         $data = curl_exec($ch);
+        $error = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        return $httpCode === 200 ? $data : false;
+        if ($data === false) {
+            $this->last_error = "CURL Error: " . $error;
+            return false;
+        }
+
+        if ($httpCode !== 200) {
+            $this->last_error = "HTTP Error " . $httpCode . " fetching " . $url;
+            return false;
+        }
+
+        return $data;
     }
 
     /**
@@ -72,8 +86,8 @@ class Upgrader
         if ($result === null) {
             $manifest = $this->fetchRemoteManifest();
 
-            if (!$manifest) {
-                // Fallback to local manifest if remote check fails
+            if (!$manifest && !$forceRefresh) {
+                // Fallback to local manifest only if NOT a forced refresh
                 $manifestPath = __DIR__ . "/../update/manifest.json";
                 if (file_exists($manifestPath)) {
                     $manifest = json_decode(
@@ -86,13 +100,15 @@ class Upgrader
             if (!$manifest) {
                 return [
                     "success" => false,
-                    "error" => "Could not retrieve update manifest.",
+                    "error" =>
+                        "Could not retrieve update manifest. " .
+                        $this->last_error,
                 ];
             }
 
             $currentVersion = defined("SECURE_CMS_VERSION")
                 ? SECURE_CMS_VERSION
-                : "1.2.1";
+                : "1.2.4";
             $remoteVersion = $manifest["version"];
             $isUpdateAvailable = version_compare(
                 $currentVersion,
@@ -174,7 +190,7 @@ class Upgrader
     {
         $oldVersion = defined("SECURE_CMS_VERSION")
             ? SECURE_CMS_VERSION
-            : "1.2.1";
+            : "1.2.4";
 
         try {
             // 1. Fetch the manifest to get file list
@@ -354,7 +370,7 @@ class Upgrader
         return [
             "current_version" => defined("SECURE_CMS_VERSION")
                 ? SECURE_CMS_VERSION
-                : "1.2.1",
+                : "1.2.4",
             "php_version" => phpversion(),
             "total_upgrades" => count($history),
             "disk_space" => @disk_free_space(__DIR__) ?: 0,

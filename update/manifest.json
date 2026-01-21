@@ -2,7 +2,7 @@
     "version": "1.2.4",
     "released": "2026-01-21",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Critical reliability update: Fixes automatic background updates and improves layout compatibility for large images.",
+    "description": "Critical reliability update: Fixes automatic background updates using CURL and improves layout compatibility for images.",
     "critical": true,
     "files": {
         "admin/admin.php": {
@@ -27,7 +27,7 @@
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "d987c044295153212420da05432b862aa676ac9894cd604b4222597cf283245a"
+            "sha256": "1f27d19b74abd52535353628fc3524d2e91918baac4064abfeb7f8a965e29182"
         },
         "post.php": {
             "path": "post.php",
@@ -47,11 +47,11 @@
         }
     },
     "changes": [
-        "Fixed Automatic Updates: Now uses CURL for all remote requests to bypass servers where allow_url_fopen is disabled.",
-        "Improved Update Reliability: Redesigned the auto-upgrade trigger to be more robust across different environments.",
-        "Responsive Image Layout: Added CSS to ensure large images fit within the post container and editor.",
-        "WYSIWYG Enhancements: TinyMCE now reflects the same image styling as the public blog posts.",
-        "Config Protection: Upgrader now uses regex to update versions, ensuring your custom settings/credentials are never overwritten.",
-        "OPcache Management: Added automatic cache clearing after upgrades to ensure new code is used immediately."
+        "Fixed Automatic Updates: Switched to CURL for all remote requests to bypass restrictive PHP environments (allow_url_fopen=0).",
+        "Improved Update Reliability: Redesigned the update check logic to provide detailed error messaging and better background processing.",
+        "Responsive Image Layout: Added CSS to ensure large images scale appropriately within posts and the admin editor.",
+        "WYSIWYG Enhancements: TinyMCE editor now utilizes the same responsive styling as the public blog posts for better accuracy.",
+        "Config Protection: The Upgrader now utilizes safe regular expressions to update version numbers without overwriting custom settings.",
+        "OPcache Management: Integrated automatic OPcache clearing to ensure updated files are active immediately upon successful upgrade."
     ]
 }
