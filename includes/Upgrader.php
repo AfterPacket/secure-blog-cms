@@ -153,7 +153,11 @@ class Upgrader
             // 3. Update files
             foreach ($manifestData["files"] as $fileRelativePath => $info) {
                 // Skip sensitive files that shouldn't be overwritten blindly
-                if ($fileRelativePath === "data/settings/site.json") {
+                // config.php is handled separately to preserve user settings
+                if (
+                    $fileRelativePath === "data/settings/site.json" ||
+                    $fileRelativePath === "includes/config.php"
+                ) {
                     continue;
                 }
 
@@ -201,7 +205,28 @@ class Upgrader
                 json_encode(["version" => $version], JSON_PRETTY_PRINT),
             );
 
-            // 5. Log history
+            // 5. Update version in config.php using regex to preserve other settings
+            $configPath = APP_ROOT . "/includes/config.php";
+            if (file_exists($configPath) && is_writable($configPath)) {
+                $configContent = file_get_contents($configPath);
+                $pattern =
+                    '/define\s*\(\s*["\']SECURE_CMS_VERSION["\']\s*,\s*["\'][^"\']+["\']\s*\);/';
+                $replacement = "define(\"SECURE_CMS_VERSION\", \"$version\");";
+                $newConfigContent = preg_replace(
+                    $pattern,
+                    $replacement,
+                    $configContent,
+                );
+
+                if (
+                    $newConfigContent !== null &&
+                    $newConfigContent !== $configContent
+                ) {
+                    file_put_contents($configPath, $newConfigContent);
+                }
+            }
+
+            // 6. Log history
             $history_file = LOGS_DIR . "/upgrade_history.log";
             if (!is_dir(dirname($history_file))) {
                 @mkdir(dirname($history_file), 0755, true);

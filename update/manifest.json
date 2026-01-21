@@ -1,8 +1,8 @@
 {
-    "version": "1.2.0",
-    "released": "2026-01-20",
+    "version": "1.2.1",
+    "released": "2026-01-21",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Fixed 500 error in upgrade manager, added automatic update checking to dashboard, and improved system stability.",
+    "description": "Major security and stability update. Improved update reliability and protected configuration from being overwritten.",
     "critical": true,
     "files": {
         "admin/admin.php": {
@@ -15,28 +15,28 @@
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "cf1114f1d143afa80a6c6bb26f2afb9662a3c5ead3d778d336d3705d58364c41"
+            "sha256": "c5b2ec509ae192ebfc241c15e6986f1ab3194461441f45b98c116241c69ec04f"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "28375bc2d7d88211bff4e97be4fabcefe1f3bcf68da185c42da3123c4bfc6f5c"
+            "sha256": "5986021234d395ebad5f2051a0117505ac4e4f87834aa47a590f6a13ca10d8dd"
         },
         "README.md": {
             "path": "README.md",
-            "sha256": "2f551c26eb94496bde0c4f34fd80bd8f5cd81e6114e561adf45c689dd3a67bdd"
+            "sha256": "15dccb40b4d7116cf97768d56c0c4c9ed935d706938eb6ce23a49a2c7b92e902"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "cd29f2832dcc3f710b9eaf449f74fa6af3a3ece4dc38d8473e5f4f1f46a7266a"
+            "sha256": "fc10bffd324d6209b99bfd8a38dbeb00b547d66e7e156fdadd8582493c34abdb"
         }
     },
     "changes": [
-        "Added automatic update check notification to the admin dashboard",
-        "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL)",
-        "Fixed incorrect include path in admin/upgrade.php causing 500 error",
-        "Improved security escaping in admin management pages",
-        "Updated system version to 1.2.0 in configuration and data files",
-        "Fixed persistence of automatic update toggle setting",
-        "Added manual cache bypass when checking for updates"
+        "IMPORTANT: Fixed issue where config.php was overwritten during updates; your credentials and site settings are now preserved.",
+        "Added automatic update check notification to the admin dashboard.",
+        "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL).",
+        "Implemented regex-based version updates for config.php to protect custom settings.",
+        "Fixed 500 error in upgrade manager and improved security escaping.",
+        "Added automatic OPcache reset after successful upgrades to ensure new files load immediately.",
+        "Fixed persistence of automatic update toggle setting."
     ]
 }

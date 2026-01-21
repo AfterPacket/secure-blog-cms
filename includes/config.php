@@ -10,7 +10,7 @@ if (!defined("SECURE_CMS_INIT")) {
 }
 
 // Security Configuration
-define("SECURE_CMS_VERSION", "1.2.0");
+define("SECURE_CMS_VERSION", "1.2.1");
 define("SESSION_NAME", "SECURE_CMS_SESSION");
 define("SESSION_LIFETIME", 172800); // 48 hours
 define("CSRF_TOKEN_LENGTH", 32);
