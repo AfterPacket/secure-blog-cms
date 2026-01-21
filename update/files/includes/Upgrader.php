@@ -18,37 +18,45 @@ class Upgrader
     }
 
     /**
-     * Fetch remote manifest via CURL
+     * Fetch remote content via CURL (bypasses allow_url_fopen=0)
      */
-    private function fetchRemoteManifest()
+    private function fetchRemoteContent($url)
     {
         if (!function_exists("curl_init")) {
-            return null;
+            return false;
         }
 
-        $ch = curl_init($this->update_server_url);
+        $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_USERAGENT => "SecureBlogCMS-Upgrader",
         ]);
         $data = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($data === false) {
-            return null;
-        }
+        return $httpCode === 200 ? $data : false;
+    }
 
-        return json_decode($data, true);
+    /**
+     * Fetch remote manifest via CURL
+     */
+    private function fetchRemoteManifest()
+    {
+        $data = $this->fetchRemoteContent($this->update_server_url);
+        return $data ? json_decode($data, true) : null;
     }
 
     public function checkForUpdates($forceRefresh = false)
     {
         $cacheFile = SETTINGS_DIR . "/update_check.json";
         $cacheTime = 3600; // 1 hour cache
+        $result = null;
 
+        // Try to get from cache first
         if (!$forceRefresh && file_exists($cacheFile)) {
             $cache = json_decode(file_get_contents($cacheFile), true);
             if (
@@ -56,77 +64,81 @@ class Upgrader
                 isset($cache["last_check"]) &&
                 time() - $cache["last_check"] < $cacheTime
             ) {
-                return $cache["result"];
+                $result = $cache["result"];
             }
         }
 
-        $manifest = $this->fetchRemoteManifest();
+        // Fetch fresh manifest if not in cache or forced refresh
+        if ($result === null) {
+            $manifest = $this->fetchRemoteManifest();
 
-        if (!$manifest) {
-            // Fallback to local manifest if remote check fails
-            $manifestPath = __DIR__ . "/../update/manifest.json";
-            if (file_exists($manifestPath)) {
-                $manifest = json_decode(file_get_contents($manifestPath), true);
+            if (!$manifest) {
+                // Fallback to local manifest if remote check fails
+                $manifestPath = __DIR__ . "/../update/manifest.json";
+                if (file_exists($manifestPath)) {
+                    $manifest = json_decode(
+                        file_get_contents($manifestPath),
+                        true,
+                    );
+                }
             }
-        }
 
-        if (!$manifest) {
-            return [
-                "success" => false,
-                "error" => "Could not retrieve update manifest.",
-            ];
-        }
+            if (!$manifest) {
+                return [
+                    "success" => false,
+                    "error" => "Could not retrieve update manifest.",
+                ];
+            }
 
-        $currentVersion = defined("SECURE_CMS_VERSION")
-            ? SECURE_CMS_VERSION
-            : "1.2.1";
-        $remoteVersion = $manifest["version"];
+            $currentVersion = defined("SECURE_CMS_VERSION")
+                ? SECURE_CMS_VERSION
+                : "1.2.1";
+            $remoteVersion = $manifest["version"];
+            $isUpdateAvailable = version_compare(
+                $currentVersion,
+                $remoteVersion,
+                "<",
+            );
 
-        $isUpdateAvailable = version_compare(
-            $currentVersion,
-            $remoteVersion,
-            "<",
-        );
-
-        $result = [
-            "success" => true,
-            "up_to_date" => !$isUpdateAvailable,
-            "updates_available" => $isUpdateAvailable ? 1 : 0,
-            "updates" => $isUpdateAvailable
-                ? [
-                    [
-                        "version" => $manifest["version"],
-                        "release_date" =>
-                            $manifest["released"] ?? date("Y-m-d"),
-                        "description" =>
-                            $manifest["description"] ??
-                            "Security and stability updates.",
-                        "critical" => $manifest["critical"] ?? false,
-                        "changes" => $manifest["changes"] ?? [
-                            "System improvements",
+            $result = [
+                "success" => true,
+                "up_to_date" => !$isUpdateAvailable,
+                "updates_available" => $isUpdateAvailable ? 1 : 0,
+                "updates" => $isUpdateAvailable
+                    ? [
+                        [
+                            "version" => $manifest["version"],
+                            "release_date" =>
+                                $manifest["released"] ?? date("Y-m-d"),
+                            "description" =>
+                                $manifest["description"] ??
+                                "Security and stability updates.",
+                            "critical" => $manifest["critical"] ?? false,
+                            "changes" => $manifest["changes"] ?? [
+                                "System improvements",
+                            ],
+                            "download_url" => $manifest["base"] ?? "",
+                            "checksum" => "",
                         ],
-                        "download_url" => $manifest["base"] ?? "",
-                        "checksum" => "",
-                    ],
-                ]
-                : [],
-        ];
+                    ]
+                    : [],
+            ];
 
-        // Cache the result
-        if (!is_dir(dirname($cacheFile))) {
-            @mkdir(dirname($cacheFile), 0755, true);
+            // Cache the result
+            if (!is_dir(dirname($cacheFile))) {
+                @mkdir(dirname($cacheFile), 0755, true);
+            }
+            file_put_contents(
+                $cacheFile,
+                json_encode([
+                    "last_check" => time(),
+                    "result" => $result,
+                ]),
+            );
         }
-        file_put_contents(
-            $cacheFile,
-            json_encode([
-                "last_check" => time(),
-                "result" => $result,
-            ]),
-        );
 
-        // Handle Automatic Upgrade if enabled
-        // We only trigger this if it's not a forced manual refresh
-        if ($isUpdateAvailable && !$forceRefresh) {
+        // Handle Automatic Upgrade if enabled (even if result was cached)
+        if ($result["success"] && !$result["up_to_date"] && !$forceRefresh) {
             $settings_file = SETTINGS_DIR . "/site.json";
             if (file_exists($settings_file)) {
                 $settings = json_decode(
@@ -134,16 +146,23 @@ class Upgrader
                     true,
                 );
                 if ($settings["auto_upgrade_enabled"] ?? false) {
-                    $this->performUpgrade(
+                    $upgradeResult = $this->performUpgrade(
                         $result["updates"][0]["version"],
                         $result["updates"][0]["download_url"],
                         $result["updates"][0]["checksum"],
                     );
 
-                    // Update result to reflect that we are now up to date
-                    $result["up_to_date"] = true;
-                    $result["updates_available"] = 0;
-                    $result["updates"] = [];
+                    if ($upgradeResult["success"]) {
+                        // Mark as up to date if successful
+                        $result["up_to_date"] = true;
+                        $result["updates_available"] = 0;
+                        $result["updates"] = [];
+
+                        // Clear cache since we just upgraded
+                        if (file_exists($cacheFile)) {
+                            @unlink($cacheFile);
+                        }
+                    }
                 }
             }
         }
@@ -201,7 +220,7 @@ class Upgrader
 
                 // Download new content
                 $fileUrl = $baseUpdateUrl . "/" . $fileRelativePath;
-                $newContent = @file_get_contents($fileUrl);
+                $newContent = $this->fetchRemoteContent($fileUrl);
 
                 if ($newContent === false) {
                     throw new Exception(

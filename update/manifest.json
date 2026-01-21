@@ -1,9 +1,9 @@
 {
-    "version": "1.2.3",
+    "version": "1.2.4",
     "released": "2026-01-21",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Improved post layout with responsive images and enhanced styling across the blog and admin editor.",
-    "critical": false,
+    "description": "Critical reliability update: Fixes automatic background updates and improves layout compatibility for large images.",
+    "critical": true,
     "files": {
         "admin/admin.php": {
             "path": "admin/admin.php",
@@ -23,11 +23,11 @@
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "aca922927a94f84de7fa8700d5197e83b48516d93cbe44beefb6aa7769bc139d"
+            "sha256": "5bee717d07ea4bac14025a15b8d1fc5c88219f74a47582f9e11dbe8681fc3a9b"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "13dd350b332f7aa08b7f16c2fe8e13257efd68a49c7b7a48d7ebca93107bdadb"
+            "sha256": "d987c044295153212420da05432b862aa676ac9894cd604b4222597cf283245a"
         },
         "post.php": {
             "path": "post.php",
@@ -39,22 +39,19 @@
         },
         "README.md": {
             "path": "README.md",
-            "sha256": "6eda714a9104912ac12be7e263d084af5f3d1bd0cafba282db526cbb53c3917a"
+            "sha256": "dfe1d2580ee6976eabb1ade29e29a2cf1b26c248f3b3a78719a0ff64fb9bd739"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "8d6778a460d6595ce3393f24f99ecdce35278ab289aee13dcf3007653251e832"
+            "sha256": "372335e533407f0009b082361510057de1a2e407483e777015183305cb913e7f"
         }
     },
     "changes": [
-        "Improved post layout: Added responsive image styling to prevent large images from overflowing content areas.",
-        "Enhanced TinyMCE Editor: Applied consistent image styling within the admin editor for a better 'What You See Is What You Get' experience.",
-        "Fixed word-wrapping issues for long strings in post content and excerpts.",
-        "Implemented fully functional automatic background updates when enabled.",
-        "IMPORTANT: Fixed issue where config.php was overwritten during updates; your credentials and site settings are now preserved.",
-        "Added automatic update check notification to the admin dashboard.",
-        "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL).",
-        "Implemented regex-based version updates for config.php to protect custom settings.",
-        "Added automatic OPcache reset after successful upgrades to ensure new files load immediately."
+        "Fixed Automatic Updates: Now uses CURL for all remote requests to bypass servers where allow_url_fopen is disabled.",
+        "Improved Update Reliability: Redesigned the auto-upgrade trigger to be more robust across different environments.",
+        "Responsive Image Layout: Added CSS to ensure large images fit within the post container and editor.",
+        "WYSIWYG Enhancements: TinyMCE now reflects the same image styling as the public blog posts.",
+        "Config Protection: Upgrader now uses regex to update versions, ensuring your custom settings/credentials are never overwritten.",
+        "OPcache Management: Added automatic cache clearing after upgrades to ensure new code is used immediately."
     ]
 }
