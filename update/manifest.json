@@ -1,9 +1,9 @@
 {
-    "version": "1.2.2",
+    "version": "1.2.3",
     "released": "2026-01-21",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Introduces fully functional automatic background updates, critical bug fixes including configuration protection during upgrades, and enhanced update reliability.",
-    "critical": true,
+    "description": "Improved post layout with responsive images and enhanced styling across the blog and admin editor.",
+    "critical": false,
     "files": {
         "admin/admin.php": {
             "path": "admin/admin.php",
@@ -13,31 +13,48 @@
             "path": "admin/upgrade.php",
             "sha256": "01c41d87b978be35ae9c8f5bf2462d6f85ea7215b3d2133526cadfefa7c4bed3"
         },
+        "admin/edit-post.php": {
+            "path": "admin/edit-post.php",
+            "sha256": "3b3f8cdc248a13878076e71a87272a78e532f8e5a494b36ea626f7533684dc0e"
+        },
+        "admin/create-post.php": {
+            "path": "admin/create-post.php",
+            "sha256": "e48c0465fce5ae39fdd1d1418ca4d3e40b928b08e166d29f610931322edae857"
+        },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "12420479001f9116dd280d252a7c0fd382fa306675584ca7126f98443627ee4b"
+            "sha256": "aca922927a94f84de7fa8700d5197e83b48516d93cbe44beefb6aa7769bc139d"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
             "sha256": "13dd350b332f7aa08b7f16c2fe8e13257efd68a49c7b7a48d7ebca93107bdadb"
         },
+        "post.php": {
+            "path": "post.php",
+            "sha256": "7f4cf2c4fa3202cdff2381629fe42f79765fe83bca68691009a6e76046c0c1e1"
+        },
+        "index.php": {
+            "path": "index.php",
+            "sha256": "ba68b69aa87223ad015a0e200e23e3dc7671edb5df71c039f484c8617b620f7a"
+        },
         "README.md": {
             "path": "README.md",
-            "sha256": "50ac50deae0e64b2fe86ddd54c6c9e4a9d6a7e85f0b72bfb2fb5a708c79762b8"
+            "sha256": "6eda714a9104912ac12be7e263d084af5f3d1bd0cafba282db526cbb53c3917a"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "a143e56fa443a69ec9956f16a4204092389c35b4ed2ccaa7cee90421f7ae6849"
+            "sha256": "8d6778a460d6595ce3393f24f99ecdce35278ab289aee13dcf3007653251e832"
         }
     },
     "changes": [
+        "Improved post layout: Added responsive image styling to prevent large images from overflowing content areas.",
+        "Enhanced TinyMCE Editor: Applied consistent image styling within the admin editor for a better 'What You See Is What You Get' experience.",
+        "Fixed word-wrapping issues for long strings in post content and excerpts.",
         "Implemented fully functional automatic background updates when enabled.",
         "IMPORTANT: Fixed issue where config.php was overwritten during updates; your credentials and site settings are now preserved.",
         "Added automatic update check notification to the admin dashboard.",
         "Enhanced Upgrader class with remote manifest fetching and caching (1-hour TTL).",
         "Implemented regex-based version updates for config.php to protect custom settings.",
-        "Fixed 500 error in upgrade manager and improved security escaping.",
-        "Added automatic OPcache reset after successful upgrades to ensure new files load immediately.",
-        "Fixed persistence of automatic update toggle setting."
+        "Added automatic OPcache reset after successful upgrades to ensure new files load immediately."
     ]
 }
