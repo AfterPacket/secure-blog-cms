@@ -131,7 +131,7 @@ class Upgrader
     {
         $oldVersion = defined("SECURE_CMS_VERSION")
             ? SECURE_CMS_VERSION
-            : "1.1.8";
+            : "1.1.9";
 
         try {
             // 1. Fetch the manifest to get file list
@@ -224,6 +224,11 @@ class Upgrader
             $cacheFile = SETTINGS_DIR . "/update_check.json";
             if (file_exists($cacheFile)) {
                 unlink($cacheFile);
+            }
+
+            // Reset OPcache to ensure new files are loaded immediately
+            if (function_exists("opcache_reset")) {
+                @opcache_reset();
             }
 
             return [
