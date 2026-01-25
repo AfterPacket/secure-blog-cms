@@ -1,9 +1,9 @@
 {
-    "version": "1.3.1",
+    "version": "1.3.2",
     "released": "2026-01-25",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Stability Update: Finalizes Resilience Center fixes and ensures directory safety with integrity bypass logic.",
-    "cache_bust": "20260125-1530-FINAL",
+    "description": "Hotfix: Restores Storage::getSettings to fix Resilience static generation failures.",
+    "cache_bust": "20260125-1716-HOTFIX",
     "critical": true,
     "files": {
         "admin/admin.php": {
@@ -28,7 +28,7 @@
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "523fa7f0eefc64eddea8b1909e150565c4810dd363159965ee6e7371dc4e061a"
+            "sha256": "7f89652960d314bb43c8990a0a7ec7f58d96dee337ef5944657ee4870bb33805"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
@@ -60,13 +60,15 @@
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "ef9f88b996a6c4318b3a8e4108cfcbce2f772ddcba7c10e9de25c02ab49cb883"
+            "sha256": "29764caef912b43afe4318beb48565f846b30bc4e74af9427904728ede6aea16"
+        },
+        "includes/Storage.php": {
+            "path": "includes/Storage.php",
+            "sha256": "89bb46f03e68269ad21ae9b21472211079e747711abef3eb3cf65f240bbc6462"
         }
     },
     "changes": [
-        "Resilience Center Fix: Implemented defensive method checks to prevent 500 errors on old class caches.",
-        "Bypass Logic: Enabled 'auto' integrity mode to resolve persistent line-ending mismatch issues.",
-        "Directory Safety: Added recursive directory creation checks for static site exports.",
-        "Cache Busting: Integrated unique download strings to force fresh file retrieval from GitHub."
+        "Hotfix: Restore Storage::getSettings to fix Resilience static generation failures.",
+        "Update package now includes includes/Storage.php."
     ]
 }
