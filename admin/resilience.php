@@ -21,7 +21,11 @@ if (!$security->isAuthenticated()) {
     exit();
 }
 
-$isAdmin = $security->isAdmin();
+// Defensive check: handle cases where Security class might be cached without isAdmin() method
+$isAdmin = method_exists($security, "isAdmin")
+    ? $security->isAdmin()
+    : isset($_SESSION["role"]) && $_SESSION["role"] === "admin";
+
 if (!$isAdmin) {
     die("Access denied. Admin privileges required.");
 }

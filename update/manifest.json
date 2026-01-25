@@ -1,74 +1,74 @@
 {
-  "version": "1.2.7",
-  "released": "2026-01-25",
-  "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-  "description": "Resilience Update: Adds anti-takedown toolkit with static site generation for IPFS, Tor, and decentralized hosting compatibility.",
-  "cache_bust": "20260125-1430",
-  "critical": true,
-  "files": {
-    "admin/admin.php": {
-      "path": "admin/admin.php",
-      "sha256": "auto"
+    "version": "1.2.7",
+    "released": "2026-01-25",
+    "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
+    "description": "Resilience Update: Adds anti-takedown toolkit with static site generation for IPFS, Tor, and decentralized hosting compatibility.",
+    "cache_bust": "20260125-1430",
+    "critical": true,
+    "files": {
+        "admin/admin.php": {
+            "path": "admin/admin.php",
+            "sha256": "4df89624d13d61d27c74df22f8bb7bbe1165dd3dfddc256c2098d88160f1814c"
+        },
+        "admin/upgrade.php": {
+            "path": "admin/upgrade.php",
+            "sha256": "01c41d87b978be35ae9c8f5bf2462d6f85ea7215b3d2133526cadfefa7c4bed3"
+        },
+        "admin/edit-post.php": {
+            "path": "admin/edit-post.php",
+            "sha256": "3b3f8cdc248a13878076e71a87272a78e532f8e5a494b36ea626f7533684dc0e"
+        },
+        "admin/create-post.php": {
+            "path": "admin/create-post.php",
+            "sha256": "e48c0465fce5ae39fdd1d1418ca4d3e40b928b08e166d29f610931322edae857"
+        },
+        "admin/resilience.php": {
+            "path": "admin/resilience.php",
+            "sha256": "07597c3ee33fd5cb6dd1e6be4bbba68be86d7a47c15858a8e59f0e7a38a22d83"
+        },
+        "includes/config.php": {
+            "path": "includes/config.php",
+            "sha256": "8ba2c5fe6186ed4eeca5b0ea15f8c1c8c6fea03d18be921d2a417b7b065e18ed"
+        },
+        "includes/Upgrader.php": {
+            "path": "includes/Upgrader.php",
+            "sha256": "10f4ad2dcfdec0d5596739cb80763bad66747ef196c12080b2e28c38641f1a44"
+        },
+        "includes/Resilience.php": {
+            "path": "includes/Resilience.php",
+            "sha256": "cb6c61471c140cab1103743c6997961491d4f206dcbc97aed1040a7d043e3feb"
+        },
+        "templates/index_template.php": {
+            "path": "templates/index_template.php",
+            "sha256": "c7d6ecef8983ce1885d58d464c78df58bdc7dc407a4bdaf87aac1bc99377695b"
+        },
+        "templates/post_template.php": {
+            "path": "templates/post_template.php",
+            "sha256": "6728a6be802e7976b54792a35d6dccf4826ecbd3d2d6fff44fd7724661635ac7"
+        },
+        "post.php": {
+            "path": "post.php",
+            "sha256": "7f4cf2c4fa3202cdff2381629fe42f79765fe83bca68691009a6e76046c0c1e1"
+        },
+        "index.php": {
+            "path": "index.php",
+            "sha256": "ba68b69aa87223ad015a0e200e23e3dc7671edb5df71c039f484c8617b620f7a"
+        },
+        "README.md": {
+            "path": "README.md",
+            "sha256": "593458b712ced720eb8007c5bd36fd5be6869fc48d688f3e895904a3761c1aea"
+        },
+        "data/version.json": {
+            "path": "data/version.json",
+            "sha256": "9acc87a01ba365fb2946e392149b03d751ee2698faff6ab82c6aebbff1b7ddbd"
+        }
     },
-    "admin/upgrade.php": {
-      "path": "admin/upgrade.php",
-      "sha256": "auto"
-    },
-    "admin/edit-post.php": {
-      "path": "admin/edit-post.php",
-      "sha256": "auto"
-    },
-    "admin/create-post.php": {
-      "path": "admin/create-post.php",
-      "sha256": "auto"
-    },
-    "admin/resilience.php": {
-      "path": "admin/resilience.php",
-      "sha256": "auto"
-    },
-    "includes/config.php": {
-      "path": "includes/config.php",
-      "sha256": "auto"
-    },
-    "includes/Upgrader.php": {
-      "path": "includes/Upgrader.php",
-      "sha256": "auto"
-    },
-    "includes/Resilience.php": {
-      "path": "includes/Resilience.php",
-      "sha256": "auto"
-    },
-    "templates/index_template.php": {
-      "path": "templates/index_template.php",
-      "sha256": "auto"
-    },
-    "templates/post_template.php": {
-      "path": "templates/post_template.php",
-      "sha256": "auto"
-    },
-    "post.php": {
-      "path": "post.php",
-      "sha256": "auto"
-    },
-    "index.php": {
-      "path": "index.php",
-      "sha256": "auto"
-    },
-    "README.md": {
-      "path": "README.md",
-      "sha256": "auto"
-    },
-    "data/version.json": {
-      "path": "data/version.json",
-      "sha256": "auto"
-    }
-  },
-  "changes": [
-    "Anti-Takedown Toolkit: Introduced a new 'Resilience Center' in the admin dashboard.",
-    "Static Site Generation: Ability to export your entire blog as a collection of static HTML files.",
-    "Decentralized Compatibility: Static exports are optimized for hosting on IPFS, Tor, and other SQL-free environments.",
-    "ZIP Export: One-click download of your entire site bundle for easy mirror creation.",
-    "New Templates: Dedicated static-friendly templates for index and post pages.",
-    "Admin Navigation: Integration of the Resilience Center into the main dashboard and settings pages."
-  ]
+    "changes": [
+        "Anti-Takedown Toolkit: Introduced a new 'Resilience Center' in the admin dashboard.",
+        "Static Site Generation: Ability to export your entire blog as a collection of static HTML files.",
+        "Decentralized Compatibility: Static exports are optimized for hosting on IPFS, Tor, and other SQL-free environments.",
+        "ZIP Export: One-click download of your entire site bundle for easy mirror creation.",
+        "New Templates: Dedicated static-friendly templates for index and post pages.",
+        "Admin Navigation: Integration of the Resilience Center into the main dashboard and settings pages."
+    ]
 }

@@ -43,13 +43,21 @@ class Resilience
     {
         $exportDir = DATA_DIR . "/exports";
         if (!is_dir($exportDir)) {
-            mkdir($exportDir, 0700, true);
+            @mkdir($exportDir, 0700, true);
+        }
+
+        if (!is_dir($exportDir) || !is_writable($exportDir)) {
+            return [
+                "success" => false,
+                "message" =>
+                    "Exports directory is missing or not writable. Check data folder permissions.",
+            ];
         }
 
         $timestamp = date("Y-m-d_H-i-s");
         $this->export_path = $exportDir . "/static_" . $timestamp;
 
-        if (!mkdir($this->export_path, 0700)) {
+        if (!is_dir($this->export_path) && !@mkdir($this->export_path, 0700)) {
             return [
                 "success" => false,
                 "message" => "Failed to create export directory",
@@ -130,7 +138,7 @@ class Resilience
 
         $postExportDir = $this->export_path . "/post";
         if (!is_dir($postExportDir)) {
-            mkdir($postExportDir, 0700);
+            @mkdir($postExportDir, 0700, true);
         }
 
         foreach ($posts as $post) {
@@ -179,7 +187,9 @@ class Resilience
             return;
         }
         $dir = opendir($src);
-        @mkdir($dst, 0700, true);
+        if (!is_dir($dst)) {
+            @mkdir($dst, 0700, true);
+        }
         while (false !== ($file = readdir($dir))) {
             if ($file != "." && $file != ".." && $file != ".htaccess") {
                 if (is_dir($src . "/" . $file)) {
