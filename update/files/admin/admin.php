@@ -494,6 +494,7 @@ $backups = $storage->getBackups();
                     <a href="upgrade.php">🆙 Upgrade<?php if (
                         $updateAvailable
                     ): ?><span class="nav-badge" style="background: #e74c3c;">!</span><?php endif; ?></a>
+                    <a href="resilience.php">🛡️ Resilience</a>
                     <a href="settings.php">⚙️ Settings</a>
                 <?php endif; ?>
                 <a href="logout.php">🚪 Logout</a>

@@ -1,13 +1,13 @@
 {
-    "version": "1.2.4",
-    "released": "2026-01-21",
+    "version": "1.2.5",
+    "released": "2026-01-25",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Final reliability release: Implements robust CURL-based updates to solve 'not pulling' issues and adds detailed error reporting.",
+    "description": "Resilience Update: Adds anti-takedown toolkit with static site generation for IPFS, Tor, and decentralized hosting compatibility.",
     "critical": true,
     "files": {
         "admin/admin.php": {
             "path": "admin/admin.php",
-            "sha256": "da07477a47328e89e06f114be561537dd528c3f4e45e4b8346a3b00c4335ade4"
+            "sha256": "4df89624d13d61d27c74df22f8bb7bbe1165dd3dfddc256c2098d88160f1814c"
         },
         "admin/upgrade.php": {
             "path": "admin/upgrade.php",
@@ -21,13 +21,29 @@
             "path": "admin/create-post.php",
             "sha256": "e48c0465fce5ae39fdd1d1418ca4d3e40b928b08e166d29f610931322edae857"
         },
+        "admin/resilience.php": {
+            "path": "admin/resilience.php",
+            "sha256": "ee19e0c642dc736ac129418c74f0347db9005cc58f2af0b1a7357b835358d85a"
+        },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "5bee717d07ea4bac14025a15b8d1fc5c88219f74a47582f9e11dbe8681fc3a9b"
+            "sha256": "a5e4bebadf3260ae494e8dc12f5c603e68bec09c602fa49f4f3f83c53bf2d9ef"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
             "sha256": "1f27d19b74abd52535353628fc3524d2e91918baac4064abfeb7f8a965e29182"
+        },
+        "includes/Resilience.php": {
+            "path": "includes/Resilience.php",
+            "sha256": "2749b5aa8de99e77cba5c7c3864fb03ab2c684d3503421e0624637553e5cd9c7"
+        },
+        "templates/index_template.php": {
+            "path": "templates/index_template.php",
+            "sha256": "c7d6ecef8983ce1885d58d464c78df58bdc7dc407a4bdaf87aac1bc99377695b"
+        },
+        "templates/post_template.php": {
+            "path": "templates/post_template.php",
+            "sha256": "6728a6be802e7976b54792a35d6dccf4826ecbd3d2d6fff44fd7724661635ac7"
         },
         "post.php": {
             "path": "post.php",
@@ -43,15 +59,15 @@
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "372335e533407f0009b082361510057de1a2e407483e777015183305cb913e7f"
+            "sha256": "3e174ab4fded11d95d4c2d2f66f06dc1a9768245a38a7e3c4c1e92141af64192"
         }
     },
     "changes": [
-        "Fixed Update Pulling: Switched to CURL for all remote requests to bypass server restrictions (allow_url_fopen=0).",
-        "Enhanced Error Reporting: The Upgrade page now shows exact CURL/HTTP errors if an update check fails.",
-        "Improved Layout: Finalized responsive image styling for blog posts and the admin TinyMCE editor.",
-        "Config Safety: The Upgrader now utilizes safe regular expressions to update version numbers without overwriting custom settings.",
-        "OPcache Management: Added automatic OPcache clearing after successful upgrades to ensure new files load immediately.",
-        "Stability: Refined background update triggering to be more robust across different environments."
+        "Anti-Takedown Toolkit: Introduced a new 'Resilience Center' in the admin dashboard.",
+        "Static Site Generation: Ability to export your entire blog as a collection of static HTML files.",
+        "Decentralized Compatibility: Static exports are optimized for hosting on IPFS, Tor, and other SQL-free environments.",
+        "ZIP Export: One-click download of your entire site bundle for easy mirror creation.",
+        "New Templates: Dedicated static-friendly templates for index and post pages.",
+        "Admin Navigation: Integration of the Resilience Center into the main dashboard and settings pages."
     ]
 }
