@@ -234,13 +234,13 @@ class Upgrader
                     copy($targetPath, $backupPath);
                 }
 
-                // Download new content (append version to bust cache)
+                // Download new content (append random string for aggressive cache-busting)
                 $fileUrl =
                     $baseUpdateUrl .
                     "/" .
                     $fileRelativePath .
-                    "?v=" .
-                    urlencode($version);
+                    "?r=" .
+                    bin2hex(random_bytes(4));
                 $newContent = $this->fetchRemoteContent($fileUrl);
 
                 if ($newContent === false) {
