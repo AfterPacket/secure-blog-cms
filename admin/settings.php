@@ -67,7 +67,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $messageType = "error";
         $security->logSecurityEvent(
             "CSRF validation failed on settings update",
-            $_SESSION["user"]);
+            $_SESSION["user"],
+        );
     } else {
         // Get and sanitize form data
         $newSettings = [
@@ -75,28 +76,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             "site_description" => $security->getPostData(
                 "site_description",
                 "string",
-                ""),
+                "",
+            ),
             "site_url" => $security->getPostData("site_url", "url", ""),
             "posts_per_page" => $security->getPostData(
                 "posts_per_page",
                 "int",
-                10),
+                10,
+            ),
             "allow_search" => isset($_POST["allow_search"]),
             "allow_private_posts" => isset($_POST["allow_private_posts"]),
             "allow_password_protected" => isset(
-                $_POST["allow_password_protected"]),
+                $_POST["allow_password_protected"],
+            ),
             "enable_url_shortener" => isset($_POST["enable_url_shortener"]),
             "require_login_for_posts" => isset(
-                $_POST["require_login_for_posts"]),
+                $_POST["require_login_for_posts"],
+            ),
             "timezone" => $security->getPostData("timezone", "string", "UTC"),
             "date_format" => $security->getPostData(
                 "date_format",
                 "string",
-                "F j, Y"),
+                "F j, Y",
+            ),
             "time_format" => $security->getPostData(
                 "time_format",
                 "string",
-                "g:i a"),
+                "g:i a",
+            ),
             "updated_at" => time(),
             "updated_by" => $_SESSION["user"],
         ];
@@ -129,7 +136,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // Save settings
             $jsonData = json_encode(
                 $newSettings,
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE,
+            );
 
             if (
                 file_put_contents($settingsFile, $jsonData, LOCK_EX) !== false
@@ -140,7 +148,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 $security->logSecurityEvent(
                     "Settings updated",
-                    $_SESSION["user"]);
+                    $_SESSION["user"],
+                );
 
                 // Create backup
                 if (AUTO_BACKUP) {
@@ -431,9 +440,12 @@ $timezones = [
             <h1>⚙️ Settings <span class="security-badge">SECURED</span></h1>
             <div class="admin-nav">
                 <a href="admin.php">← Back to Dashboard</a>
-                <a href="<?php echo cms_path('index.php'); ?>" target="_blank">👁️ View Blog</a>
+                <a href="<?php echo cms_path(
+                    "index.php",
+                ); ?>" target="_blank">👁️ View Blog</a>
                 <?php if (($_SESSION["role"] ?? "") === "admin"): ?>
                     <a href="comments.php">💬 Comments</a>
+                    <a href="resilience.php">🛡️ Resilience</a>
                 <?php endif; ?>
                 <a href="logout.php">🚪 Logout</a>
             </div>
@@ -443,14 +455,16 @@ $timezones = [
     <div class="container">
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $security->escapeHTML(
-                $messageType); ?>">
+                $messageType,
+            ); ?>">
                 <?php echo $security->escapeHTML($message); ?>
             </div>
         <?php endif; ?>
 
         <form method="post" action="settings.php" id="settingsForm">
             <input type="hidden" name="csrf_token" value="<?php echo $security->escapeHTML(
-                $csrfToken); ?>">
+                $csrfToken,
+            ); ?>">
 
             <!-- General Settings -->
             <div class="card">
@@ -460,14 +474,16 @@ $timezones = [
                     <label for="site_name">Site Name *</label>
                     <input type="text" id="site_name" name="site_name" required maxlength="100"
                            value="<?php echo $security->escapeHTML(
-                               $settings["site_name"]); ?>">
+                               $settings["site_name"],
+                           ); ?>">
                     <div class="form-help">The name of your blog</div>
                 </div>
 
                 <div class="form-group">
                     <label for="site_description">Site Description</label>
                     <textarea id="site_description" name="site_description" maxlength="500"><?php echo $security->escapeHTML(
-                        $settings["site_description"]); ?></textarea>
+                        $settings["site_description"],
+                    ); ?></textarea>
                     <div class="form-help">Brief description of your blog (used in meta tags)</div>
                 </div>
 
@@ -475,7 +491,8 @@ $timezones = [
                     <label for="site_url">Site URL</label>
                     <input type="url" id="site_url" name="site_url" placeholder="https://yourdomain.com"
                            value="<?php echo $security->escapeHTML(
-                               $settings["site_url"]); ?>">
+                               $settings["site_url"],
+                           ); ?>">
                     <div class="form-help">Full URL including https://</div>
                 </div>
             </div>
@@ -488,7 +505,8 @@ $timezones = [
                     <label for="posts_per_page">Posts Per Page</label>
                     <input type="number" id="posts_per_page" name="posts_per_page" min="1" max="100"
                            value="<?php echo $security->escapeHTML(
-                               $settings["posts_per_page"]); ?>">
+                               $settings["posts_per_page"],
+                           ); ?>">
                     <div class="form-help">Number of posts to display per page (1-100)</div>
                 </div>
 
@@ -541,7 +559,8 @@ $timezones = [
                     <select id="timezone" name="timezone">
                         <?php foreach ($timezones as $value => $label): ?>
                             <option value="<?php echo $security->escapeHTML(
-                                $value); ?>"
+                                $value,
+                            ); ?>"
                                     <?php echo $settings["timezone"] === $value
                                         ? "selected"
                                         : ""; ?>>
@@ -657,6 +676,6 @@ $timezones = [
             formChanged = false;
         });
     </script>
-<?php include APP_ROOT . '/templates/footer.php'; ?>
+<?php include APP_ROOT . "/templates/footer.php"; ?>
 </body>
 </html>
