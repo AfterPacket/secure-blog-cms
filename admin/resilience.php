@@ -15,6 +15,12 @@ $security = Security::getInstance();
 $storage = Storage::getInstance();
 $resilience = Resilience::getInstance();
 
+$settings = $storage->getSettings();
+$pinataConfigured =
+    !empty($settings["pinata_jwt"]) ||
+    (!empty($settings["pinata_api_key"]) &&
+        !empty($settings["pinata_api_secret"]));
+
 // Check authentication
 if (!$security->isAuthenticated()) {
     header("Location: login.php");
@@ -171,6 +177,17 @@ $csrf_token = $security->generateCSRFToken();
                 <p style="margin-top:10px; font-size: 0.9em; color: #666;"><strong>Note:</strong> Static versions do not support dynamic features like comments, search, or private post passwords.</p>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <strong>Pinata IPFS Status:</strong>
+                <?php if ($pinataConfigured): ?>
+                    <span class="status-badge active">CONNECTED</span>
+                    <span style="font-size: 0.85em; color: #27ae60; margin-left: 10px;">New exports will be automatically pinned to IPFS.</span>
+                <?php else: ?>
+                    <span class="status-badge">NOT CONFIGURED</span>
+                    <span style="font-size: 0.85em; color: #7f8c8d; margin-left: 10px;">Configure keys in <a href="settings.php">Settings</a> to enable auto-pinning.</span>
+                <?php endif; ?>
+            </div>
+
             <form method="POST" onsubmit="return confirm('Generate a new static bundle? This may take a few seconds.')">
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <button type="submit" name="generate_static" class="btn btn-primary">🚀 Generate Static Site Bundle</button>
@@ -231,7 +248,7 @@ $csrf_token = $security->generateCSRFToken();
         <div class="card guide-section">
             <h2>Decentralization Guide</h2>
             <h3>1. IPFS (InterPlanetary File System)</h3>
-            <p>Upload your static bundle to an IPFS pinning service (like Pinata). This gives your blog a unique CID (Content Identifier) that cannot be "taken down" in the traditional sense as long as at least one node is pinning it.</p>
+            <p>Your blog now supports automatic pinning to <strong>Pinata</strong>. Once configured in settings, every time you generate a static bundle, it will be uploaded to IPFS and you'll receive a unique CID (Content Identifier). Your content will remain accessible as long as it's pinned.</p>
 
             <h3>2. Tor Hidden Service (.onion)</h3>
             <p>Because this CMS is SQL-free, you can host the dynamic version directly on a Tor hidden service with minimal configuration. This hides your server's physical location.</p>

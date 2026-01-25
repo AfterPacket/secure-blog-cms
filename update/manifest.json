@@ -65,7 +65,7 @@
   },
   "changes": [
     "Resilience Center Fix: Implemented defensive method checks to prevent 500 errors on old class caches.",
-    "Bypass Logic: Enabled 'auto' integrity mode to resolve persistent line-ending mismatch issues.",
+    "Bypass Logic: Enabled \'auto\' integrity mode to resolve persistent line-ending mismatch issues.",
     "Directory Safety: Added recursive directory creation checks for static site exports.",
     "Cache Busting: Integrated unique download strings to force fresh file retrieval from GitHub."
   ]

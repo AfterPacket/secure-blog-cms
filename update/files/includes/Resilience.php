@@ -79,13 +79,36 @@ class Resilience
         // 5. Create a ZIP archive for easy distribution
         $zipFile = $this->createZipArchive();
 
-        return [
+        $result = [
             "success" => true,
             "message" => "Static site generated successfully",
             "path" => $this->export_path,
             "zip" => $zipFile,
             "timestamp" => $timestamp,
         ];
+
+        // 6. Pin to Pinata if configured
+        $settings = $this->storage->getSettings();
+        if (
+            !empty($settings["pinata_jwt"]) ||
+            (!empty($settings["pinata_api_key"]) &&
+                !empty($settings["pinata_api_secret"]))
+        ) {
+            $pinResult = $this->pinToPinata(
+                $this->export_path . ".zip",
+                $timestamp,
+            );
+            if ($pinResult["success"]) {
+                $result["ipfs_cid"] = $pinResult["cid"];
+                $result["message"] .=
+                    " and pinned to IPFS (CID: " . $pinResult["cid"] . ")";
+            } else {
+                $result["message"] .=
+                    " but failed to pin to IPFS: " . $pinResult["error"];
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -237,5 +260,97 @@ class Resilience
             return basename($zipPath);
         }
         return null;
+    }
+
+    /**
+     * Pin the generated ZIP to Pinata IPFS
+     */
+    private function pinToPinata($filePath, $timestamp)
+    {
+        $settings = $this->storage->getSettings();
+        $jwt = $settings["pinata_jwt"] ?? "";
+        $apiKey = $settings["pinata_api_key"] ?? "";
+        $apiSecret = $settings["pinata_api_secret"] ?? "";
+
+        if (empty($jwt) && (empty($apiKey) || empty($apiSecret))) {
+            return ["success" => false, "error" => "API keys missing"];
+        }
+
+        if (!file_exists($filePath)) {
+            return ["success" => false, "error" => "File not found"];
+        }
+
+        if (!function_exists("curl_init")) {
+            return [
+                "success" => false,
+                "error" => "CURL extension not enabled",
+            ];
+        }
+
+        $url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
+
+        // Create CURLFile
+        $cfile = new CURLFile(
+            $filePath,
+            "application/zip",
+            basename($filePath),
+        );
+
+        $postData = [
+            "file" => $cfile,
+            "pinataMetadata" => json_encode([
+                "name" => SITE_NAME . "_Export_" . $timestamp,
+                "keyvalues" => [
+                    "version" => SECURE_CMS_VERSION,
+                    "timestamp" => $timestamp,
+                ],
+            ]),
+            "pinataOptions" => json_encode([
+                "cidVersion" => 1,
+            ]),
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300); // 5 minutes timeout for large ZIPs
+
+        $headers = [];
+        if (!empty($jwt)) {
+            $headers[] = "Authorization: Bearer " . $jwt;
+        } else {
+            $headers[] = "pinata_api_key: " . $apiKey;
+            $headers[] = "pinata_secret_api_key: " . $apiSecret;
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            return ["success" => false, "error" => "CURL Error: " . $error];
+        }
+
+        if ($httpCode !== 200) {
+            return [
+                "success" => false,
+                "error" =>
+                    "Pinata API returned code " . $httpCode . ": " . $response,
+            ];
+        }
+
+        $result = json_decode($response, true);
+        if (isset($result["IpfsHash"])) {
+            return ["success" => true, "cid" => $result["IpfsHash"]];
+        }
+
+        return [
+            "success" => false,
+            "error" => "No CID in response: " . $response,
+        ];
     }
 }

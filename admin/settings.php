@@ -51,6 +51,9 @@ $defaultSettings = [
     "allow_password_protected" => true,
     "enable_url_shortener" => true,
     "require_login_for_posts" => false,
+    "pinata_api_key" => "",
+    "pinata_api_secret" => "",
+    "pinata_jwt" => "",
     "timezone" => "UTC",
     "date_format" => "F j, Y",
     "time_format" => "g:i a",
@@ -104,6 +107,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "string",
                 "g:i a",
             ),
+            "pinata_api_key" => $security->getPostData(
+                "pinata_api_key",
+                "string",
+                "",
+            ),
+            "pinata_api_secret" => $security->getPostData(
+                "pinata_api_secret",
+                "string",
+                "",
+            ),
+            "pinata_jwt" => $security->getPostData("pinata_jwt", "string", ""),
             "updated_at" => time(),
             "updated_by" => $_SESSION["user"],
         ];
@@ -633,7 +647,40 @@ $timezones = [
                 </div>
             </div>
 
-            <!-- Form Actions -->
+            <!-- Decentralization Settings -->
+            <div class="card">
+                <h2 class="section-title">Decentralization (Pinata IPFS)</h2>
+                <div class="form-group">
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                        Configure your Pinata API keys to enable automatic pinning of static site exports to IPFS.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="pinata_api_key">Pinata API Key</label>
+                    <input type="text" id="pinata_api_key" name="pinata_api_key"
+                           value="<?php echo $security->escapeHTML(
+                               $settings["pinata_api_key"],
+                           ); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="pinata_api_secret">Pinata API Secret</label>
+                    <input type="text" id="pinata_api_secret" name="pinata_api_secret"
+                           value="<?php echo $security->escapeHTML(
+                               $settings["pinata_api_secret"],
+                           ); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="pinata_jwt">Pinata JWT</label>
+                    <textarea id="pinata_jwt" name="pinata_jwt" rows="3"><?php echo $security->escapeHTML(
+                        $settings["pinata_jwt"],
+                    ); ?></textarea>
+                    <div class="form-help">Preferred for modern Pinata integration.</div>
+                </div>
+            </div>
+
             <div class="form-actions">
                 <button type="submit" class="btn">💾 Save Settings</button>
                 <a href="admin.php" class="btn btn-secondary">❌ Cancel</a>

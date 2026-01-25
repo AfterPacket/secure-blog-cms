@@ -73,7 +73,8 @@ class Storage
                 file_put_contents(
                     $indexFile,
                     "<?php\nheader('HTTP/1.0 403 Forbidden');\ndie('Access denied');\n",
-                    LOCK_EX);
+                    LOCK_EX,
+                );
             }
         }
     }
@@ -105,16 +106,20 @@ class Storage
                 "id" => $this->generateID(),
                 "title" => $this->security->sanitizeInput(
                     $data["title"],
-                    "string"),
+                    "string",
+                ),
                 "content" => $this->security->sanitizeInput(
                     $data["content"],
-                    "html"),
+                    "html",
+                ),
                 "excerpt" => $this->security->sanitizeInput(
                     $data["excerpt"] ?? "",
-                    "string"),
+                    "string",
+                ),
                 "slug" => $this->security->sanitizeInput(
                     $data["slug"] ?? "",
-                    "slug"),
+                    "slug",
+                ),
                 "author" => $_SESSION["user"] ?? "admin",
                 "status" => in_array($data["status"] ?? "draft", [
                     "draft",
@@ -127,10 +132,12 @@ class Storage
                 "views" => 0,
                 "meta_description" => $this->security->sanitizeInput(
                     $data["meta_description"] ?? "",
-                    "string"),
+                    "string",
+                ),
                 "meta_keywords" => $this->security->sanitizeInput(
                     $data["meta_keywords"] ?? "",
-                    "string"),
+                    "string",
+                ),
                 "visibility" => in_array($data["visibility"] ?? "public", [
                     "public",
                     "private",
@@ -165,7 +172,8 @@ class Storage
                 }
                 $post["post_password"] = password_hash(
                     $data["post_password"],
-                    PASSWORD_DEFAULT);
+                    PASSWORD_DEFAULT,
+                );
             }
 
             // Validate lengths
@@ -194,7 +202,8 @@ class Storage
             $filename = POSTS_DIR . "/" . $post["id"] . ".json";
             $jsonData = json_encode(
                 $post,
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE,
+            );
 
             if ($jsonData === false) {
                 return [
@@ -228,7 +237,8 @@ class Storage
         } catch (Exception $e) {
             $this->security->logSecurityEvent(
                 "Error creating post",
-                $e->getMessage());
+                $e->getMessage(),
+            );
             return ["success" => false, "message" => "An error occurred"];
         }
     }
@@ -253,20 +263,25 @@ class Storage
                 "id" => $id,
                 "title" => $this->security->sanitizeInput(
                     $data["title"] ?? $existingPost["title"],
-                    "string"),
+                    "string",
+                ),
                 "content" => $this->security->sanitizeInput(
                     $data["content"] ?? $existingPost["content"],
-                    "html"),
+                    "html",
+                ),
                 "excerpt" => $this->security->sanitizeInput(
                     $data["excerpt"] ?? $existingPost["excerpt"],
-                    "string"),
+                    "string",
+                ),
                 "slug" => $this->security->sanitizeInput(
                     $data["slug"] ?? $existingPost["slug"],
-                    "slug"),
+                    "slug",
+                ),
                 "author" => $existingPost["author"],
                 "status" => in_array(
                     $data["status"] ?? $existingPost["status"],
-                    ["draft", "published"])
+                    ["draft", "published"],
+                )
                     ? $data["status"] ?? $existingPost["status"]
                     : "draft",
                 "created_at" => $existingPost["created_at"],
@@ -275,15 +290,18 @@ class Storage
                 "meta_description" => $this->security->sanitizeInput(
                     $data["meta_description"] ??
                         ($existingPost["meta_description"] ?? ""),
-                    "string"),
+                    "string",
+                ),
                 "meta_keywords" => $this->security->sanitizeInput(
                     $data["meta_keywords"] ??
                         ($existingPost["meta_keywords"] ?? ""),
-                    "string"),
+                    "string",
+                ),
                 "visibility" => in_array(
                     $data["visibility"] ??
                         ($existingPost["visibility"] ?? "public"),
-                    ["public", "private"])
+                    ["public", "private"],
+                )
                     ? $data["visibility"] ??
                         ($existingPost["visibility"] ?? "public")
                     : "public",
@@ -312,7 +330,8 @@ class Storage
                 if (!empty($data["post_password"])) {
                     $post["post_password"] = password_hash(
                         $data["post_password"],
-                        PASSWORD_DEFAULT);
+                        PASSWORD_DEFAULT,
+                    );
                 }
             } else {
                 // Remove password if protection is disabled
@@ -337,7 +356,8 @@ class Storage
             $filename = POSTS_DIR . "/" . $id . ".json";
             $jsonData = json_encode(
                 $post,
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE,
+            );
 
             if ($jsonData === false) {
                 return [
@@ -370,7 +390,8 @@ class Storage
         } catch (Exception $e) {
             $this->security->logSecurityEvent(
                 "Error updating post",
-                $e->getMessage());
+                $e->getMessage(),
+            );
             return ["success" => false, "message" => "An error occurred"];
         }
     }
@@ -414,7 +435,8 @@ class Storage
         } catch (Exception $e) {
             $this->security->logSecurityEvent(
                 "Error deleting post",
-                $e->getMessage());
+                $e->getMessage(),
+            );
             return ["success" => false, "message" => "An error occurred"];
         }
     }
@@ -447,7 +469,8 @@ class Storage
             file_put_contents(
                 $filename,
                 json_encode($post, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-                LOCK_EX);
+                LOCK_EX,
+            );
         }
 
         return $post;
@@ -486,7 +509,8 @@ class Storage
             file_put_contents(
                 $filename,
                 json_encode($post, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-                LOCK_EX);
+                LOCK_EX,
+            );
         }
     }
 
@@ -496,12 +520,16 @@ class Storage
     public function getAllPosts(
         $status = "all",
         $orderBy = "created_at",
-        $order = "DESC") {
-        
-        if (defined("REQUIRE_LOGIN_FOR_POSTS") && REQUIRE_LOGIN_FOR_POSTS && !$this->security->isAuthenticated()) {
+        $order = "DESC",
+    ) {
+        if (
+            defined("REQUIRE_LOGIN_FOR_POSTS") &&
+            REQUIRE_LOGIN_FOR_POSTS &&
+            !$this->security->isAuthenticated()
+        ) {
             return [];
         }
-$posts = [];
+        $posts = [];
         $files = glob(POSTS_DIR . "/*.json");
 
         if ($files === false) {
@@ -547,7 +575,8 @@ $posts = [];
     public function getPaginatedPosts(
         $page = 1,
         $perPage = POSTS_PER_PAGE,
-        $status = "published") {
+        $status = "published",
+    ) {
         $allPosts = $this->getAllPosts($status);
         $totalPosts = count($allPosts);
         $totalPages = ceil($totalPosts / $perPage);
@@ -589,7 +618,8 @@ $posts = [];
                     " " .
                     $post["excerpt"] .
                     " " .
-                    ($post["meta_keywords"] ?? ""));
+                    ($post["meta_keywords"] ?? ""),
+            );
 
             if (strpos($searchableText, $query) !== false) {
                 $results[] = $post;
@@ -644,7 +674,8 @@ $posts = [];
      */
     private function generateExcerpt(
         $content,
-        $length = MAX_POST_EXCERPT_LENGTH) {
+        $length = MAX_POST_EXCERPT_LENGTH,
+    ) {
         $text = strip_tags($content);
         $text = preg_replace("/\s+/", " ", $text);
         $text = trim($text);
@@ -686,7 +717,8 @@ $posts = [];
         file_put_contents(
             $indexFile,
             json_encode($index, JSON_PRETTY_PRINT),
-            LOCK_EX);
+            LOCK_EX,
+        );
     }
 
     /**
@@ -712,7 +744,8 @@ $posts = [];
 
             $jsonData = json_encode(
                 $backupData,
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE,
+            );
             file_put_contents($backupFile, $jsonData, LOCK_EX);
             chmod($backupFile, 0600);
 
@@ -723,7 +756,8 @@ $posts = [];
         } catch (Exception $e) {
             $this->security->logSecurityEvent(
                 "Backup failed",
-                $e->getMessage());
+                $e->getMessage(),
+            );
             return false;
         }
     }
@@ -755,7 +789,8 @@ $posts = [];
         try {
             $backupFile = $this->security->sanitizeInput(
                 $backupFile,
-                "filename");
+                "filename",
+            );
             $fullPath = BACKUP_DIR . "/" . $backupFile;
 
             if (!file_exists($fullPath)) {
@@ -785,8 +820,10 @@ $posts = [];
                     $filename,
                     json_encode(
                         $post,
-                        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-                    LOCK_EX);
+                        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE,
+                    ),
+                    LOCK_EX,
+                );
                 chmod($filename, 0600);
             }
 
@@ -802,11 +839,28 @@ $posts = [];
         } catch (Exception $e) {
             $this->security->logSecurityEvent(
                 "Restore failed",
-                $e->getMessage());
+                $e->getMessage(),
+            );
             return [
                 "success" => false,
                 "message" => "Failed to restore backup",
             ];
+        }
+
+        /**
+         * Get site settings
+         */
+        public function getSettings()
+        {
+            $settingsFile = SITE_SETTINGS_FILE;
+            if (!file_exists($settingsFile)) {
+                return [];
+            }
+            $content = @file_get_contents($settingsFile);
+            if ($content === false) {
+                return [];
+            }
+            return json_decode($content, true) ?? [];
         }
     }
 
