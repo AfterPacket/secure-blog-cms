@@ -244,8 +244,7 @@ class Upgrader
                     );
                 }
 
-                // Verify hash if provided (TEMPORARILY DISABLED FOR TROUBLESHOOTING)
-                /*
+                // Verify hash if provided
                 if (isset($info["sha256"]) && $info["sha256"] !== "auto") {
                     if (hash("sha256", $newContent) !== $info["sha256"]) {
                         throw new Exception(
@@ -253,7 +252,6 @@ class Upgrader
                         );
                     }
                 }
-                */
 
                 file_put_contents($targetPath, $newContent);
                 $updatedCount++;
