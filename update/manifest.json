@@ -2,7 +2,8 @@
   "version": "1.2.7",
   "released": "2026-01-25",
   "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-  "description": "Resilience Update: Adds anti-takedown toolkit with static site generation for IPFS, Tor, and decentralized hosting compatibility. (Cache Refresh)",
+  "description": "Resilience Update: Adds anti-takedown toolkit with static site generation for IPFS, Tor, and decentralized hosting compatibility.",
+  "cache_bust": "20260125-1415",
   "critical": true,
   "files": {
     "admin/admin.php": {
