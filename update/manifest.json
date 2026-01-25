@@ -1,5 +1,5 @@
 {
-    "version": "1.2.5",
+    "version": "1.2.6",
     "released": "2026-01-25",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
     "description": "Resilience Update: Adds anti-takedown toolkit with static site generation for IPFS, Tor, and decentralized hosting compatibility.",
@@ -27,7 +27,7 @@
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "a5e4bebadf3260ae494e8dc12f5c603e68bec09c602fa49f4f3f83c53bf2d9ef"
+            "sha256": "17f88a13e40d7dc7c8f137a5326cfd8b6d08b3ad27d68606bdc32c2ccfc4219a"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
@@ -59,7 +59,7 @@
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "3e174ab4fded11d95d4c2d2f66f06dc1a9768245a38a7e3c4c1e92141af64192"
+            "sha256": "ffd5a36acacb428a73ee55272c9fc9018482038c5fe0163fe504330ca597955d"
         }
     },
     "changes": [
