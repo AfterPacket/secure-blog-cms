@@ -40,11 +40,11 @@
         },
         "templates/index_template.php": {
             "path": "templates/index_template.php",
-            "sha256": "c7d6ecef8983ce1885d58d464c78df58bdc7dc407a4bdaf87aac1bc99377695b"
+            "sha256": "ad4b5966838648f3aef0d9dc5d808fdf2a9d0ebbb3ada3a0c7a0e7bc2d0f8b8b"
         },
         "templates/post_template.php": {
             "path": "templates/post_template.php",
-            "sha256": "6728a6be802e7976b54792a35d6dccf4826ecbd3d2d6fff44fd7724661635ac7"
+            "sha256": "9296295f4db1f255f61244657bc46011b8a25919687084eb5ae807562bf9cfe5"
         },
         "post.php": {
             "path": "post.php",
