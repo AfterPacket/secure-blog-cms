@@ -31,7 +31,7 @@
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "1f27d19b74abd52535353628fc3524d2e91918baac4064abfeb7f8a965e29182"
+            "sha256": "3e8d92d8a68cbc568e749cb25fb45f73553033d8348653c74409f34806502150"
         },
         "includes/Resilience.php": {
             "path": "includes/Resilience.php",
