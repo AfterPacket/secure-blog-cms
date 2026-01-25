@@ -2,6 +2,7 @@
 /**
  * Resilience & Anti-Takedown Admin Page
  * Provides tools for static site generation and decentralization management.
+ * @version 1.2.6.1 - Cache Reset
  */
 
 define("SECURE_CMS_INIT", true);
@@ -29,35 +30,39 @@ $success = "";
 $error = "";
 
 // Handle static site generation
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_static'])) {
-    if (!$security->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["generate_static"])) {
+    if (!$security->validateCSRFToken($_POST["csrf_token"] ?? "")) {
         $error = "Security token validation failed. Please try again.";
     } else {
         $result = $resilience->generateStaticSite();
-        if ($result['success']) {
-            $success = $result['message'];
+        if ($result["success"]) {
+            $success = $result["message"];
         } else {
-            $error = $result['message'];
+            $error = $result["message"];
         }
     }
 }
 
 // Handle delete export
-if (isset($_GET['delete']) && !empty($_GET['delete'])) {
-    if (!$security->validateCSRFToken($_GET['csrf_token'] ?? '')) {
+if (isset($_GET["delete"]) && !empty($_GET["delete"])) {
+    if (!$security->validateCSRFToken($_GET["csrf_token"] ?? "")) {
         $error = "Security token validation failed.";
     } else {
-        $exportName = basename($_GET['delete']);
+        $exportName = basename($_GET["delete"]);
         $exportDir = DATA_DIR . "/exports/" . $exportName;
         $zipFile = DATA_DIR . "/exports/" . $exportName . ".zip";
 
         if (is_dir($exportDir)) {
             // Helper to delete dir recursively
-            $deleteDirFunc = function($dirPath) use (&$deleteDirFunc) {
-                if (!is_dir($dirPath)) return;
-                $files = array_diff(scandir($dirPath), array('.', '..'));
+            $deleteDirFunc = function ($dirPath) use (&$deleteDirFunc) {
+                if (!is_dir($dirPath)) {
+                    return;
+                }
+                $files = array_diff(scandir($dirPath), [".", ".."]);
                 foreach ($files as $file) {
-                    (is_dir("$dirPath/$file")) ? $deleteDirFunc("$dirPath/$file") : unlink("$dirPath/$file");
+                    is_dir("$dirPath/$file")
+                        ? $deleteDirFunc("$dirPath/$file")
+                        : unlink("$dirPath/$file");
                 }
                 return rmdir($dirPath);
             };
@@ -74,24 +79,24 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
 $exports = [];
 $exportBaseDir = DATA_DIR . "/exports";
 if (is_dir($exportBaseDir)) {
-    $dirs = array_filter(glob($exportBaseDir . '/*'), 'is_dir');
+    $dirs = array_filter(glob($exportBaseDir . "/*"), "is_dir");
     foreach ($dirs as $dir) {
         $name = basename($dir);
         $zipName = $name . ".zip";
         $hasZip = is_file($exportBaseDir . "/" . $zipName);
-        $timestamp = str_replace('static_', '', $name);
+        $timestamp = str_replace("static_", "", $name);
 
         $exports[] = [
-            'name' => $name,
-            'timestamp' => $timestamp,
-            'has_zip' => $hasZip,
-            'zip_name' => $zipName
+            "name" => $name,
+            "timestamp" => $timestamp,
+            "has_zip" => $hasZip,
+            "zip_name" => $zipName,
         ];
     }
 }
 // Sort by newest first
-usort($exports, function($a, $b) {
-    return strcmp($b['timestamp'], $a['timestamp']);
+usort($exports, function ($a, $b) {
+    return strcmp($b["timestamp"], $a["timestamp"]);
 });
 
 $csrf_token = $security->generateCSRFToken();
@@ -145,10 +150,14 @@ $csrf_token = $security->generateCSRFToken();
 
     <div class="container">
         <?php if ($success): ?>
-            <div class="alert alert-success"><?php echo $security->escapeHTML($success); ?></div>
+            <div class="alert alert-success"><?php echo $security->escapeHTML(
+                $success,
+            ); ?></div>
         <?php endif; ?>
         <?php if ($error): ?>
-            <div class="alert alert-error"><?php echo $security->escapeHTML($error); ?></div>
+            <div class="alert alert-error"><?php echo $security->escapeHTML(
+                $error,
+            ); ?></div>
         <?php endif; ?>
 
         <div class="card">
@@ -181,17 +190,29 @@ $csrf_token = $security->generateCSRFToken();
                         <tbody>
                             <?php foreach ($exports as $export): ?>
                                 <tr>
-                                    <td><strong><?php echo $security->escapeHTML($export['timestamp']); ?></strong></td>
+                                    <td><strong><?php echo $security->escapeHTML(
+                                        $export["timestamp"],
+                                    ); ?></strong></td>
                                     <td>
-                                        <span class="status-badge <?php echo $export['has_zip'] ? 'active' : ''; ?>">
-                                            <?php echo $export['has_zip'] ? 'ZIP ARCHIVE' : 'DIRECTORY'; ?>
+                                        <span class="status-badge <?php echo $export[
+                                            "has_zip"
+                                        ]
+                                            ? "active"
+                                            : ""; ?>">
+                                            <?php echo $export["has_zip"]
+                                                ? "ZIP ARCHIVE"
+                                                : "DIRECTORY"; ?>
                                         </span>
                                     </td>
                                     <td>
-                                        <?php if ($export['has_zip']): ?>
-                                            <a href="../data/exports/<?php echo urlencode($export['zip_name']); ?>" class="btn btn-primary btn-small" download>⬇️ Download ZIP</a>
+                                        <?php if ($export["has_zip"]): ?>
+                                            <a href="../data/exports/<?php echo urlencode(
+                                                $export["zip_name"],
+                                            ); ?>" class="btn btn-primary btn-small" download>⬇️ Download ZIP</a>
                                         <?php endif; ?>
-                                        <a href="?delete=<?php echo urlencode($export['name']); ?>&csrf_token=<?php echo $csrf_token; ?>"
+                                        <a href="?delete=<?php echo urlencode(
+                                            $export["name"],
+                                        ); ?>&csrf_token=<?php echo $csrf_token; ?>"
                                            class="btn btn-danger btn-small"
                                            onclick="return confirm('Permanently delete this bundle and its ZIP?')">🗑️ Delete</a>
                                     </td>
