@@ -234,9 +234,13 @@ class Upgrader
                     copy($targetPath, $backupPath);
                 }
 
-                // Download new content (append timestamp for aggressive cache-busting)
+                // Download new content (append random string for aggressive cache-busting)
                 $fileUrl =
-                    $baseUpdateUrl . "/" . $fileRelativePath . "?t=" . time();
+                    $baseUpdateUrl .
+                    "/" .
+                    $fileRelativePath .
+                    "?r=" .
+                    bin2hex(random_bytes(4));
                 $newContent = $this->fetchRemoteContent($fileUrl);
 
                 if ($newContent === false) {
