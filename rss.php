@@ -4,7 +4,9 @@
  */
 
 // Initialize security constant
-define("SECURE_CMS_INIT", true);
+if (!defined("SECURE_CMS_INIT")) {
+    define("SECURE_CMS_INIT", true);
+}
 
 // Load configuration
 require_once __DIR__ . "/includes/config.php";
@@ -21,7 +23,8 @@ $storage = Storage::getInstance();
 $posts = array_slice(
     $storage->getAllPosts("published", "created_at", "DESC"),
     0,
-    15);
+    15,
+);
 
 // Set the content type header to let the browser know it's an XML file
 header("Content-Type: application/rss+xml; charset=utf-8");
@@ -34,28 +37,36 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
     <title><?php echo $security->escapeHTML(SITE_NAME); ?></title>
     <link><?php echo $security->escapeHTML(SITE_URL); ?></link>
     <description><?php echo $security->escapeHTML(
-        SITE_DESCRIPTION); ?></description>
+        SITE_DESCRIPTION,
+    ); ?></description>
     <language>en-us</language>
     <lastBuildDate><?php echo date(DATE_RSS, time()); ?></lastBuildDate>
     <atom:link href="<?php echo $security->escapeHTML(
-        SITE_URL . "/rss.php"); ?>" rel="self" type="application/rss+xml" />
+        SITE_URL . "/rss.php",
+    ); ?>" rel="self" type="application/rss+xml" />
 
     <?php if (!empty($posts)): ?>
         <?php foreach ($posts as $post): ?>
             <item>
                 <title><?php echo $security->escapeHTML(
-                    $post["title"]); ?></title>
+                    $post["title"],
+                ); ?></title>
                 <link><?php echo $security->escapeHTML(
-                    SITE_URL . "/post.php?slug=" . $post["slug"]); ?></link>
+                    SITE_URL . "/post.php?slug=" . $post["slug"],
+                ); ?></link>
                 <description><![CDATA[<?php echo $security->escapeHTML(
-                    $post["excerpt"]); ?>]]></description>
+                    $post["excerpt"],
+                ); ?>]]></description>
                 <pubDate><?php echo date(
                     DATE_RSS,
-                    $post["created_at"]); ?></pubDate>
+                    $post["created_at"],
+                ); ?></pubDate>
                 <guid isPermaLink="true"><?php echo $security->escapeHTML(
-                    SITE_URL . "/post.php?slug=" . $post["slug"]); ?></guid>
+                    SITE_URL . "/post.php?slug=" . $post["slug"],
+                ); ?></guid>
                 <author><?php echo $security->escapeHTML(
-                    $post["author"]); ?></author>
+                    $post["author"],
+                ); ?></author>
             </item>
         <?php endforeach; ?>
     <?php endif; ?>

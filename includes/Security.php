@@ -653,6 +653,15 @@ class Security
     }
 
     /**
+     * Check if authenticated user is an admin
+     */
+    public function isAdmin()
+    {
+        return $this->isAuthenticated() &&
+            ($_SESSION["role"] ?? "") === "admin";
+    }
+
+    /**
      * Authenticate user
      */
     public function authenticate($username, $password)
