@@ -11,6 +11,8 @@ A highly secure, SQL-free blog content management system built with PHP, featuri
 - 📄 **Pagination** - Efficient page navigation
 - 📊 **Statistics Dashboard** - Track posts, views, and engagement
 - 💾 **Backup & Restore** - Automatic and manual backup system
+- 🛡️ **Resilience Center** - Anti-takedown and decentralization toolkit
+- 🚀 **Static Site Generation** - Export blog to HTML for IPFS/Tor hosting
 - 📱 **Responsive Design** - Mobile-friendly interface
 
 ### Security Features
