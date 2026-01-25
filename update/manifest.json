@@ -1,72 +1,72 @@
 {
-  "version": "1.2.9",
-  "released": "2026-01-25",
-  "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-  "description": "Stability Update: Finalizes Resilience Center fixes and ensures directory safety with integrity bypass logic.",
-  "cache_bust": "20260125-1530-FINAL",
-  "critical": true,
-  "files": {
-    "admin/admin.php": {
-      "path": "admin/admin.php",
-      "sha256": "auto"
+    "version": "1.3.0",
+    "released": "2026-01-25",
+    "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
+    "description": "Stability Update: Finalizes Resilience Center fixes and ensures directory safety with integrity bypass logic.",
+    "cache_bust": "20260125-1530-FINAL",
+    "critical": true,
+    "files": {
+        "admin/admin.php": {
+            "path": "admin/admin.php",
+            "sha256": "4df89624d13d61d27c74df22f8bb7bbe1165dd3dfddc256c2098d88160f1814c"
+        },
+        "admin/upgrade.php": {
+            "path": "admin/upgrade.php",
+            "sha256": "01c41d87b978be35ae9c8f5bf2462d6f85ea7215b3d2133526cadfefa7c4bed3"
+        },
+        "admin/edit-post.php": {
+            "path": "admin/edit-post.php",
+            "sha256": "3b3f8cdc248a13878076e71a87272a78e532f8e5a494b36ea626f7533684dc0e"
+        },
+        "admin/create-post.php": {
+            "path": "admin/create-post.php",
+            "sha256": "e48c0465fce5ae39fdd1d1418ca4d3e40b928b08e166d29f610931322edae857"
+        },
+        "admin/resilience.php": {
+            "path": "admin/resilience.php",
+            "sha256": "a62079c10535f393348841a613ba4c4924c220356564d47570342f9a2f25c4d1"
+        },
+        "includes/config.php": {
+            "path": "includes/config.php",
+            "sha256": "7e1e7a689ed8a597128e43e4708d374e3a668ed0982efbafae022f823f47216f"
+        },
+        "includes/Upgrader.php": {
+            "path": "includes/Upgrader.php",
+            "sha256": "5a61bcfbaf48b7cc85b6442072848f330cf222476fda472615e568a1927eb76e"
+        },
+        "includes/Resilience.php": {
+            "path": "includes/Resilience.php",
+            "sha256": "cbc3852ef97c5ae045a357655327a2efdfcf47fa2dd009c1e70b7d0366890a1b"
+        },
+        "templates/index_template.php": {
+            "path": "templates/index_template.php",
+            "sha256": "c7d6ecef8983ce1885d58d464c78df58bdc7dc407a4bdaf87aac1bc99377695b"
+        },
+        "templates/post_template.php": {
+            "path": "templates/post_template.php",
+            "sha256": "6728a6be802e7976b54792a35d6dccf4826ecbd3d2d6fff44fd7724661635ac7"
+        },
+        "post.php": {
+            "path": "post.php",
+            "sha256": "7f4cf2c4fa3202cdff2381629fe42f79765fe83bca68691009a6e76046c0c1e1"
+        },
+        "index.php": {
+            "path": "index.php",
+            "sha256": "ba68b69aa87223ad015a0e200e23e3dc7671edb5df71c039f484c8617b620f7a"
+        },
+        "README.md": {
+            "path": "README.md",
+            "sha256": "593458b712ced720eb8007c5bd36fd5be6869fc48d688f3e895904a3761c1aea"
+        },
+        "data/version.json": {
+            "path": "data/version.json",
+            "sha256": "28096d7ac3beb64d4f6fc4c07196d4725f489e7e9b82109ca7d8b3aed823effb"
+        }
     },
-    "admin/upgrade.php": {
-      "path": "admin/upgrade.php",
-      "sha256": "auto"
-    },
-    "admin/edit-post.php": {
-      "path": "admin/edit-post.php",
-      "sha256": "auto"
-    },
-    "admin/create-post.php": {
-      "path": "admin/create-post.php",
-      "sha256": "auto"
-    },
-    "admin/resilience.php": {
-      "path": "admin/resilience.php",
-      "sha256": "auto"
-    },
-    "includes/config.php": {
-      "path": "includes/config.php",
-      "sha256": "auto"
-    },
-    "includes/Upgrader.php": {
-      "path": "includes/Upgrader.php",
-      "sha256": "auto"
-    },
-    "includes/Resilience.php": {
-      "path": "includes/Resilience.php",
-      "sha256": "auto"
-    },
-    "templates/index_template.php": {
-      "path": "templates/index_template.php",
-      "sha256": "auto"
-    },
-    "templates/post_template.php": {
-      "path": "templates/post_template.php",
-      "sha256": "auto"
-    },
-    "post.php": {
-      "path": "post.php",
-      "sha256": "auto"
-    },
-    "index.php": {
-      "path": "index.php",
-      "sha256": "auto"
-    },
-    "README.md": {
-      "path": "README.md",
-      "sha256": "auto"
-    },
-    "data/version.json": {
-      "path": "data/version.json",
-      "sha256": "auto"
-    }
-  },
-  "changes": [
-    "Resilience Center Fix: Implemented defensive method checks to prevent 500 errors on old class caches.",
-    "Bypass Logic: Enabled 'auto' integrity mode to resolve persistent line-ending mismatch issues.",
-    "Directory Safety: Added recursive directory creation checks for static site exports.",
-    "Cache Busting: Integrated unique download strings to force fresh file retrieval from GitHub."
-  ]
+    "changes": [
+        "Resilience Center Fix: Implemented defensive method checks to prevent 500 errors on old class caches.",
+        "Bypass Logic: Enabled 'auto' integrity mode to resolve persistent line-ending mismatch issues.",
+        "Directory Safety: Added recursive directory creation checks for static site exports.",
+        "Cache Busting: Integrated unique download strings to force fresh file retrieval from GitHub."
+    ]
 }

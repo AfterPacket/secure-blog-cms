@@ -12,10 +12,16 @@ class Upgrader
 {
     private $update_server_url = "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/manifest.json";
     private $last_error = "";
+    private $local_manifest_path;
+    private $local_update_files_dir;
 
     public function __construct()
     {
-        // Constructor
+        if (defined("UPDATE_SERVER_URL") && UPDATE_SERVER_URL) {
+            $this->update_server_url = UPDATE_SERVER_URL;
+        }
+        $this->local_manifest_path = __DIR__ . "/../update/manifest.json";
+        $this->local_update_files_dir = __DIR__ . "/../update/files";
     }
 
     /**
@@ -64,6 +70,59 @@ class Upgrader
         return $data ? json_decode($data, true) : null;
     }
 
+    private function fetchLocalManifest()
+    {
+        if (!is_file($this->local_manifest_path)) {
+            return null;
+        }
+        $data = @file_get_contents($this->local_manifest_path);
+        if ($data === false) {
+            return null;
+        }
+        $decoded = json_decode($data, true);
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    private function fetchUpdateFileContent(
+        $fileRelativePath,
+        $baseUpdateUrl,
+        $preferLocal = false,
+    ) {
+        $localPath = $this->local_update_files_dir . "/" . $fileRelativePath;
+
+        if ($preferLocal && is_file($localPath)) {
+            $data = @file_get_contents($localPath);
+            if ($data !== false) {
+                return $data;
+            }
+        }
+
+        if (
+            is_string($baseUpdateUrl) &&
+            preg_match("#^https?://#i", $baseUpdateUrl)
+        ) {
+            $remoteUrl =
+                rtrim($baseUpdateUrl, "/") .
+                "/" .
+                $fileRelativePath .
+                "?t=" .
+                time();
+            $data = $this->fetchRemoteContent($remoteUrl);
+            if ($data !== false) {
+                return $data;
+            }
+        }
+
+        if (is_file($localPath)) {
+            $data = @file_get_contents($localPath);
+            if ($data !== false) {
+                return $data;
+            }
+        }
+
+        return false;
+    }
+
     public function checkForUpdates($forceRefresh = false)
     {
         $cacheFile = SETTINGS_DIR . "/update_check.json";
@@ -86,14 +145,10 @@ class Upgrader
         if ($result === null) {
             $manifest = $this->fetchRemoteManifest();
 
-            if (!$manifest && !$forceRefresh) {
-                // Fallback to local manifest only if NOT a forced refresh
-                $manifestPath = __DIR__ . "/../update/manifest.json";
-                if (file_exists($manifestPath)) {
-                    $manifest = json_decode(
-                        file_get_contents($manifestPath),
-                        true,
-                    );
+            if (!$manifest) {
+                $localManifest = $this->fetchLocalManifest();
+                if ($localManifest) {
+                    $manifest = $localManifest;
                 }
             }
 
@@ -195,6 +250,11 @@ class Upgrader
         try {
             // 1. Fetch the manifest to get file list
             $manifestData = $this->fetchRemoteManifest();
+            $preferLocalFiles = false;
+            if (!$manifestData || !isset($manifestData["files"])) {
+                $manifestData = $this->fetchLocalManifest();
+                $preferLocalFiles = true;
+            }
             if (!$manifestData || !isset($manifestData["files"])) {
                 throw new Exception("Could not retrieve update manifest.");
             }
@@ -206,7 +266,7 @@ class Upgrader
                 @mkdir($backupDir, 0755, true);
             }
 
-            $baseUpdateUrl = $manifestData["base"];
+            $baseUpdateUrl = $manifestData["base"] ?? "";
             $updatedCount = 0;
 
             // 3. Update files
@@ -234,10 +294,12 @@ class Upgrader
                     copy($targetPath, $backupPath);
                 }
 
-                // Download new content (append timestamp for aggressive cache-busting)
-                $fileUrl =
-                    $baseUpdateUrl . "/" . $fileRelativePath . "?t=" . time();
-                $newContent = $this->fetchRemoteContent($fileUrl);
+                // Download new content (remote first, fallback to local bundle)
+                $newContent = $this->fetchUpdateFileContent(
+                    $fileRelativePath,
+                    $baseUpdateUrl,
+                    $preferLocalFiles,
+                );
 
                 if ($newContent === false) {
                     throw new Exception(
