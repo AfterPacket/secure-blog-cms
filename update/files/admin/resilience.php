@@ -15,7 +15,23 @@ $security = Security::getInstance();
 $storage = Storage::getInstance();
 $resilience = Resilience::getInstance();
 
-$settings = $storage->getSettings();
+$settings = [];
+if (method_exists($storage, "getSettings")) {
+    $settings = $storage->getSettings();
+} else {
+    $settingsFile = defined("SITE_SETTINGS_FILE")
+        ? SITE_SETTINGS_FILE
+        : DATA_DIR . "/settings/site.json";
+    if (is_file($settingsFile)) {
+        $rawSettings = @file_get_contents($settingsFile);
+        if ($rawSettings !== false) {
+            $decodedSettings = json_decode($rawSettings, true);
+            if (is_array($decodedSettings)) {
+                $settings = $decodedSettings;
+            }
+        }
+    }
+}
 $pinataConfigured =
     !empty($settings["pinata_jwt"]) ||
     (!empty($settings["pinata_api_key"]) &&
@@ -44,11 +60,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["generate_static"])) {
     if (!$security->validateCSRFToken($_POST["csrf_token"] ?? "")) {
         $error = "Security token validation failed. Please try again.";
     } else {
-        $result = $resilience->generateStaticSite();
-        if ($result["success"]) {
-            $success = $result["message"];
-        } else {
-            $error = $result["message"];
+        try {
+            $result = $resilience->generateStaticSite();
+            if ($result["success"]) {
+                $success = $result["message"];
+            } else {
+                $error = $result["message"];
+            }
+        } catch (Throwable $e) {
+            $error =
+                "Static generation failed: " . $e->getMessage() . " (see logs)";
         }
     }
 }
@@ -88,20 +109,39 @@ if (isset($_GET["delete"]) && !empty($_GET["delete"])) {
 // Get existing exports
 $exports = [];
 $exportBaseDir = DATA_DIR . "/exports";
+if (!is_dir($exportBaseDir)) {
+    @mkdir($exportBaseDir, 0700, true);
+}
 if (is_dir($exportBaseDir)) {
-    $dirs = array_filter(glob($exportBaseDir . "/*"), "is_dir");
-    foreach ($dirs as $dir) {
-        $name = basename($dir);
-        $zipName = $name . ".zip";
-        $hasZip = is_file($exportBaseDir . "/" . $zipName);
-        $timestamp = str_replace("static_", "", $name);
+    if (!is_readable($exportBaseDir)) {
+        if (!$error) {
+            $error =
+                "Exports directory is not readable. Check data folder permissions.";
+        }
+    } else {
+        $dirList = glob($exportBaseDir . "/*");
+        if ($dirList === false) {
+            $dirList = [];
+            if (!$error) {
+                $error =
+                    "Failed to read exports directory. Check server permissions.";
+            }
+        }
 
-        $exports[] = [
-            "name" => $name,
-            "timestamp" => $timestamp,
-            "has_zip" => $hasZip,
-            "zip_name" => $zipName,
-        ];
+        $dirs = array_filter($dirList, "is_dir");
+        foreach ($dirs as $dir) {
+            $name = basename($dir);
+            $zipName = $name . ".zip";
+            $hasZip = is_file($exportBaseDir . "/" . $zipName);
+            $timestamp = str_replace("static_", "", $name);
+
+            $exports[] = [
+                "name" => $name,
+                "timestamp" => $timestamp,
+                "has_zip" => $hasZip,
+                "zip_name" => $zipName,
+            ];
+        }
     }
 }
 // Sort by newest first

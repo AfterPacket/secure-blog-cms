@@ -1,5 +1,5 @@
 {
-    "version": "1.3.0",
+    "version": "1.3.1",
     "released": "2026-01-25",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
     "description": "Stability Update: Finalizes Resilience Center fixes and ensures directory safety with integrity bypass logic.",
@@ -24,11 +24,11 @@
         },
         "admin/resilience.php": {
             "path": "admin/resilience.php",
-            "sha256": "a62079c10535f393348841a613ba4c4924c220356564d47570342f9a2f25c4d1"
+            "sha256": "2c22d620af40e7d9e597bfdc9d495d1d23d4b7b12fe6929361c4b92ad48f2a8e"
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "7e1e7a689ed8a597128e43e4708d374e3a668ed0982efbafae022f823f47216f"
+            "sha256": "523fa7f0eefc64eddea8b1909e150565c4810dd363159965ee6e7371dc4e061a"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
@@ -36,7 +36,7 @@
         },
         "includes/Resilience.php": {
             "path": "includes/Resilience.php",
-            "sha256": "cbc3852ef97c5ae045a357655327a2efdfcf47fa2dd009c1e70b7d0366890a1b"
+            "sha256": "95b30e5462bc873f48a799201a8a1ad655950a96879fd33266de1d522068e7d1"
         },
         "templates/index_template.php": {
             "path": "templates/index_template.php",
@@ -60,7 +60,7 @@
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "28096d7ac3beb64d4f6fc4c07196d4725f489e7e9b82109ca7d8b3aed823effb"
+            "sha256": "ef9f88b996a6c4318b3a8e4108cfcbce2f772ddcba7c10e9de25c02ab49cb883"
         }
     },
     "changes": [

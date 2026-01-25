@@ -41,74 +41,104 @@ class Resilience
      */
     public function generateStaticSite()
     {
-        $exportDir = DATA_DIR . "/exports";
-        if (!is_dir($exportDir)) {
-            @mkdir($exportDir, 0700, true);
+        if (function_exists("set_time_limit")) {
+            @set_time_limit(0);
         }
 
-        if (!is_dir($exportDir) || !is_writable($exportDir)) {
-            return [
-                "success" => false,
-                "message" =>
-                    "Exports directory is missing or not writable. Check data folder permissions.",
-            ];
-        }
-
-        $timestamp = date("Y-m-d_H-i-s");
-        $this->export_path = $exportDir . "/static_" . $timestamp;
-
-        if (!is_dir($this->export_path) && !@mkdir($this->export_path, 0700)) {
-            return [
-                "success" => false,
-                "message" => "Failed to create export directory",
-            ];
-        }
-
-        // 1. Copy assets and uploads
-        $this->copyAssets();
-
-        // 2. Generate Index Page (static_index.php template needed)
-        $this->generateStaticIndex();
-
-        // 3. Generate Individual Post Pages (static_post.php template needed)
-        $this->generateStaticPosts();
-
-        // 4. Generate RSS Feed
-        $this->generateStaticRSS();
-
-        // 5. Create a ZIP archive for easy distribution
-        $zipFile = $this->createZipArchive();
-
-        $result = [
-            "success" => true,
-            "message" => "Static site generated successfully",
-            "path" => $this->export_path,
-            "zip" => $zipFile,
-            "timestamp" => $timestamp,
-        ];
-
-        // 6. Pin to Pinata if configured
-        $settings = $this->storage->getSettings();
-        if (
-            !empty($settings["pinata_jwt"]) ||
-            (!empty($settings["pinata_api_key"]) &&
-                !empty($settings["pinata_api_secret"]))
-        ) {
-            $pinResult = $this->pinToPinata(
-                $this->export_path . ".zip",
-                $timestamp,
-            );
-            if ($pinResult["success"]) {
-                $result["ipfs_cid"] = $pinResult["cid"];
-                $result["message"] .=
-                    " and pinned to IPFS (CID: " . $pinResult["cid"] . ")";
-            } else {
-                $result["message"] .=
-                    " but failed to pin to IPFS: " . $pinResult["error"];
+        try {
+            $exportDir = DATA_DIR . "/exports";
+            if (!is_dir($exportDir)) {
+                @mkdir($exportDir, 0700, true);
             }
-        }
 
-        return $result;
+            if (!is_dir($exportDir) || !is_writable($exportDir)) {
+                return [
+                    "success" => false,
+                    "message" =>
+                        "Exports directory is missing or not writable. Check data folder permissions.",
+                ];
+            }
+
+            $timestamp = date("Y-m-d_H-i-s");
+            $this->export_path = $exportDir . "/static_" . $timestamp;
+
+            if (
+                !is_dir($this->export_path) &&
+                !@mkdir($this->export_path, 0700)
+            ) {
+                return [
+                    "success" => false,
+                    "message" => "Failed to create export directory",
+                ];
+            }
+
+            // 1. Copy assets and uploads
+            $this->copyAssets();
+
+            // 2. Generate Index Page (static_index.php template needed)
+            $this->generateStaticIndex();
+
+            // 3. Generate Individual Post Pages (static_post.php template needed)
+            $this->generateStaticPosts();
+
+            // 4. Generate RSS Feed
+            $this->generateStaticRSS();
+
+            // 5. Create a ZIP archive for easy distribution
+            $zipFile = $this->createZipArchive();
+
+            $result = [
+                "success" => true,
+                "message" => "Static site generated successfully",
+                "path" => $this->export_path,
+                "zip" => $zipFile,
+                "timestamp" => $timestamp,
+            ];
+
+            // 6. Pin to Pinata if configured
+            $settings = [];
+            if (method_exists($this->storage, "getSettings")) {
+                $settings = $this->storage->getSettings();
+            } elseif (defined("SITE_SETTINGS_FILE")) {
+                $rawSettings = @file_get_contents(SITE_SETTINGS_FILE);
+                if ($rawSettings !== false) {
+                    $decodedSettings = json_decode($rawSettings, true);
+                    if (is_array($decodedSettings)) {
+                        $settings = $decodedSettings;
+                    }
+                }
+            }
+
+            if (
+                !empty($settings["pinata_jwt"]) ||
+                (!empty($settings["pinata_api_key"]) &&
+                    !empty($settings["pinata_api_secret"]))
+            ) {
+                $pinResult = $this->pinToPinata(
+                    $this->export_path . ".zip",
+                    $timestamp,
+                );
+                if ($pinResult["success"]) {
+                    $result["ipfs_cid"] = $pinResult["cid"];
+                    $result["message"] .=
+                        " and pinned to IPFS (CID: " . $pinResult["cid"] . ")";
+                } else {
+                    $result["message"] .=
+                        " but failed to pin to IPFS: " . $pinResult["error"];
+                }
+            }
+
+            return $result;
+        } catch (Throwable $e) {
+            $this->logResilienceError(
+                "Static generation failed",
+                $e->getMessage(),
+            );
+            return [
+                "success" => false,
+                "message" => "Static generation failed: " . $e->getMessage(),
+            ];
+        }
     }
 
     /**
@@ -133,6 +163,9 @@ class Resilience
      */
     private function generateStaticIndex()
     {
+        if (!method_exists($this->storage, "getAllPosts")) {
+            throw new Exception("Storage::getAllPosts is not available.");
+        }
         $postsData = $this->storage->getAllPosts();
 
         // Buffer output using a static-optimized template
@@ -149,7 +182,12 @@ class Resilience
             $content,
         );
 
-        file_put_contents($this->export_path . "/index.html", $content);
+        if (
+            file_put_contents($this->export_path . "/index.html", $content) ===
+            false
+        ) {
+            throw new Exception("Failed to write static index.html");
+        }
     }
 
     /**
@@ -157,6 +195,9 @@ class Resilience
      */
     private function generateStaticPosts()
     {
+        if (!method_exists($this->storage, "getAllPosts")) {
+            throw new Exception("Storage::getAllPosts is not available.");
+        }
         $posts = $this->storage->getAllPosts();
 
         $postExportDir = $this->export_path . "/post";
@@ -183,10 +224,14 @@ class Resilience
             );
             $content = str_replace("index.php", "../index.html", $content);
 
-            file_put_contents(
-                $postExportDir . "/" . $post["slug"] . ".html",
-                $content,
-            );
+            if (
+                file_put_contents(
+                    $postExportDir . "/" . $post["slug"] . ".html",
+                    $content,
+                ) === false
+            ) {
+                throw new Exception("Failed to write post: " . $post["slug"]);
+            }
         }
     }
 
@@ -198,7 +243,12 @@ class Resilience
         ob_start();
         include APP_ROOT . "/rss.php";
         $content = ob_get_clean();
-        file_put_contents($this->export_path . "/rss.xml", $content);
+        if (
+            file_put_contents($this->export_path . "/rss.xml", $content) ===
+            false
+        ) {
+            throw new Exception("Failed to write rss.xml");
+        }
     }
 
     /**
@@ -210,6 +260,9 @@ class Resilience
             return;
         }
         $dir = opendir($src);
+        if ($dir === false) {
+            return;
+        }
         if (!is_dir($dst)) {
             @mkdir($dst, 0700, true);
         }
@@ -234,32 +287,54 @@ class Resilience
             return null;
         }
 
-        $zipPath = $this->export_path . ".zip";
-        $zip = new ZipArchive();
+        try {
+            $zipPath = $this->export_path . ".zip";
+            $zip = new ZipArchive();
 
-        if (
-            $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) ===
-            true
-        ) {
-            $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($this->export_path),
-                RecursiveIteratorIterator::LEAVES_ONLY,
-            );
+            if (
+                $zip->open(
+                    $zipPath,
+                    ZipArchive::CREATE | ZipArchive::OVERWRITE,
+                ) === true
+            ) {
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($this->export_path),
+                    RecursiveIteratorIterator::LEAVES_ONLY,
+                );
 
-            foreach ($files as $name => $file) {
-                if (!$file->isDir()) {
-                    $filePath = $file->getRealPath();
-                    $relativePath = substr(
-                        $filePath,
-                        strlen(realpath($this->export_path)) + 1,
-                    );
-                    $zip->addFile($filePath, $relativePath);
+                foreach ($files as $name => $file) {
+                    if (!$file->isDir()) {
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr(
+                            $filePath,
+                            strlen(realpath($this->export_path)) + 1,
+                        );
+                        $zip->addFile($filePath, $relativePath);
+                    }
                 }
+                $zip->close();
+                return basename($zipPath);
             }
-            $zip->close();
-            return basename($zipPath);
+            return null;
+        } catch (Throwable $e) {
+            $this->logResilienceError("ZIP creation failed", $e->getMessage());
+            return null;
         }
-        return null;
+    }
+
+    private function logResilienceError($message, $details = "")
+    {
+        $full = "[Resilience] " . $message;
+        if ($details !== "") {
+            $full .= " | " . $details;
+        }
+        error_log($full);
+        if (
+            isset($this->security) &&
+            method_exists($this->security, "logSecurityEvent")
+        ) {
+            $this->security->logSecurityEvent("Resilience error", $full);
+        }
     }
 
     /**
