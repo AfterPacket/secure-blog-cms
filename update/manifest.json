@@ -1,5 +1,5 @@
 {
-    "version": "1.2.6",
+    "version": "1.2.7",
     "released": "2026-01-25",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
     "description": "Resilience Update: Adds anti-takedown toolkit with static site generation for IPFS, Tor, and decentralized hosting compatibility.",
@@ -23,15 +23,15 @@
         },
         "admin/resilience.php": {
             "path": "admin/resilience.php",
-            "sha256": "ee19e0c642dc736ac129418c74f0347db9005cc58f2af0b1a7357b835358d85a"
+            "sha256": "b297adb1e49d3c21d81dcca840830775a695f41fbbc4d45e5d7215ccc4f88481"
         },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "17f88a13e40d7dc7c8f137a5326cfd8b6d08b3ad27d68606bdc32c2ccfc4219a"
+            "sha256": "047619b446547fb97605a7239a936dcf1f0e511995b4c357b0123f80a5bc5030"
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "1f27d19b74abd52535353628fc3524d2e91918baac4064abfeb7f8a965e29182"
+            "sha256": "af7538186ad4b4f4b15f654cdf3233d3f1214bffcbb25f28c940d17aa2e1d8e9"
         },
         "includes/Resilience.php": {
             "path": "includes/Resilience.php",
@@ -59,7 +59,7 @@
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "ffd5a36acacb428a73ee55272c9fc9018482038c5fe0163fe504330ca597955d"
+            "sha256": "55d9727e11746690cd37499c2e2b6aa2e67f04c8abe8946cc2eede74818f13f7"
         }
     },
     "changes": [
