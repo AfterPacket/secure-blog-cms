@@ -8,11 +8,19 @@ echo ====================================================
 echo   Secure Blog CMS - Update Automator
 echo ====================================================
 
+:: Preliminary: Configure SSH key to avoid passphrase prompts
+echo [+] Configuring Git to use new SSH key...
+git config core.sshCommand "ssh -i ~/.ssh/id_ed25519_blog_new -o IdentitiesOnly=yes"
+
 :: Preliminary: Ensure current work is committed
 echo [+] Staging and committing current changes...
 git add .
 set /p msg="[?] Enter commit message (leave blank to use default): "
-if "!msg!"=="" set msg="Update: Resilience and Anti-Takedown features"
+if "!msg!"=="" (
+    set msg="Update: Resilience and Anti-Takedown features"
+)
+
+:: Fix for pathspec error: Ensure message is properly quoted in the command
 git commit -m "!msg!"
 
 echo.
@@ -40,7 +48,7 @@ if %ERRORLEVEL% EQU 0 (
 ) else (
     echo.
     echo [X] Error: Operation failed.
-    echo Please check for merge conflicts or repository rules.
+    echo Please check your GitHub SSH key settings or repository rules.
 )
 
 echo.
