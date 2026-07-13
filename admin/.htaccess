@@ -1,0 +1,37 @@
+# Secure Blog CMS - Admin Directory Security
+
+# 1. Basic Configuration
+Options -Indexes
+DirectoryIndex admin.php
+
+# 2. Explicitly allow access
+# Ensures admin panel is accessible even if parent directory limits inheritance
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order Allow,Deny
+    Allow from all
+</IfModule>
+
+# 3. Protect sensitive file extensions
+<FilesMatch "\.(json|log|bak|old|tmp|swp|git|md)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 4. Prevent access to dotfiles (like .htaccess itself)
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

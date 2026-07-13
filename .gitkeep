@@ -1,0 +1,7 @@
+data/.gitkeep
+data/posts/.gitkeep
+data/comments/.gitkeep
+data/users/.gitkeep
+data/logs/.gitkeep
+data/backups/.gitkeep
+data/settings/.gitkeep

@@ -1,0 +1,26 @@
+# Secure Blog CMS - Installer Configuration
+# IMPORTANT: This directory should be locked down after installation.
+
+DirectoryIndex index.php
+
+# If the CMS is already installed, deny all access to this directory
+# This prevents re-running the installer even if the lock file is deleted manually.
+
+# Allow access only when not yet installed (handled by PHP instead of Apache
+# for better portability). In production, you should delete this entire
+# directory after installation is complete.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine Off
+</IfModule>
+
+# Block access to sensitive file types in this directory
+<FilesMatch "\.(json|lock|log|bak|old|tmp)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

@@ -1,0 +1,80 @@
+{
+    "version": "1.4.0",
+    "released": "2026-07-13",
+    "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
+    "description": "Security Hardening Release: Fixes RCE in upgrade system, XSS bypass, CSRF token replay, proxy header spoofing, role validation, Argon2id hashing, and more.",
+    "cache_bust": "20260713-0000-SECURITY",
+    "critical": true,
+    "files": {
+        "includes/config.php": {
+            "path": "includes/config.php",
+            "sha256": "afe58b0ff163b2022b3a8a6851f417f78f2ad8f6bed55055617b39221aaa4167"
+        },
+        "includes/Security.php": {
+            "path": "includes/Security.php",
+            "sha256": "8ee69777d5db3fb92f81b3fcc328311c8448f48504cc875f0af019a2134fe2b3"
+        },
+        "includes/users.php": {
+            "path": "includes/users.php",
+            "sha256": "e746ac4b9bc6dbae0fee360141d28dc830ac7861e5062f64b798a6baaa05876f"
+        },
+        "includes/comments.php": {
+            "path": "includes/comments.php",
+            "sha256": "b2f685ee585159d4ebcf3cc1c9e9e70efcde760ee820571fac9abad94ea70e9d"
+        },
+        "includes/Upgrader.php": {
+            "path": "includes/Upgrader.php",
+            "sha256": "d8a53b23a11e4ed8023913a0e4b688d2c9824c51f15d18fa6aacd15b376c28d8"
+        },
+        "admin/upgrade.php": {
+            "path": "admin/upgrade.php",
+            "sha256": "042b470b3a2223dec25c1ff0a2f9bad18bb23fb336394147c09b723778f5a74a"
+        },
+        "admin/upload-image.php": {
+            "path": "admin/upload-image.php",
+            "sha256": "5d4838a88b74180202ce8c86baaf87ec73b070188b870be80b6a4fa734aa38ce"
+        },
+        "admin/serve-image.php": {
+            "path": "admin/serve-image.php",
+            "sha256": "4672029541e3b3e3aca9f233e2917bc9a7da3920aa5742b21b1929a1619ecd27"
+        },
+        "admin/login.php": {
+            "path": "admin/login.php",
+            "sha256": "d6c5c0122521add48a07a084faaddba7e230b650465d1b8156d105f248902e94"
+        },
+        "index.php": {
+            "path": "index.php",
+            "sha256": "f6b003f48611f3e2be23732e99f79d5ede7a09c282dcdb8977df6dde0b640f55"
+        },
+        "s.php": {
+            "path": "s.php",
+            "sha256": "c296e66bdc93fcb4fe51dca454592df0740c7bc1a3e9916eb36e4371beb2205e"
+        },
+        "data/version.json": {
+            "path": "data/version.json",
+            "sha256": "103b4159ae4d1b3bf5bfffc592098309c5ad9d5aec4503f39d14d5211fdbff17"
+        },
+        "README.md": {
+            "path": "README.md",
+            "sha256": "69e52a551c5bb4a5ec33b6b6ce3e353646db31cc631de236f10d4f94e8880471"
+        },
+        "SECURITY.md": {
+            "path": "SECURITY.md",
+            "sha256": "ba57e0837baf9d8537929fcebe2e37e6fa3ede08e0eabe7707d4a2f98b243a19"
+        }
+    },
+    "changes": [
+        "Fix RCE vulnerability in upgrade system (Upgrader.php)",
+        "Fix XSS bypass in content output sanitization (Security.php)",
+        "Fix CSRF token replay across sessions (Security.php)",
+        "Fix proxy header spoofing (X-Forwarded-For) in login (login.php)",
+        "Add strict role validation in admin endpoints (config.php)",
+        "Migrate password hashing to Argon2id (users.php)",
+        "Harden comment sanitization against stored XSS (comments.php)",
+        "Secure image upload with strict MIME validation (upload-image.php)",
+        "Add secure image serving with path traversal protection (serve-image.php)",
+        "Harden upgrade endpoint with signature verification (upgrade.php)",
+        "Add CSP headers and security response headers (config.php, s.php)",
+        "Update version to 1.4.0 (version.json, config.php)"
+    ]
+}
