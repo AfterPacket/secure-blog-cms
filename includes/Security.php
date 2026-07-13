@@ -55,12 +55,22 @@ class Security
                 $cookieDomain = "";
             }
 
+            // Compute HTTPS status respecting TRUST_PROXY_HEADERS
+            $isSecure = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off")
+                || (isset($_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] === "443");
+            if (defined('TRUST_PROXY_HEADERS') && TRUST_PROXY_HEADERS) {
+                $isSecure = $isSecure
+                    || (isset($_SERVER["HTTP_X_FORWARDED_PROTO"])
+                        && strtolower((string) $_SERVER["HTTP_X_FORWARDED_PROTO"]) === "https")
+                    || (isset($_SERVER["HTTP_CF_VISITOR"])
+                        && strpos((string) $_SERVER["HTTP_CF_VISITOR"], "https") !== false);
+            }
+
             session_set_cookie_params([
                 "lifetime" => 0,
                 "path" => "/",
                 "domain" => $cookieDomain,
-                "secure" =>
-                    isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] === "on",
+                "secure" => $isSecure,
                 "httponly" => true,
                 "samesite" => "Strict",
             ]);

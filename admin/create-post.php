@@ -419,7 +419,7 @@ $csrfToken = $security->generateCSRFToken("create_post_form");
             "image_upload",
         ); ?>';
 
-        console.log('%c CMS Debug: create-post.php loaded (Build v20) ', 'background: #ff0000; color: #ffffff; font-weight: bold; font-size: 16px;');
+
 
         // Initialize TinyMCE WYSIWYG Editor
         document.addEventListener('DOMContentLoaded', function() {
@@ -449,13 +449,12 @@ selector: '#content',
                                'img { max-width: 100%; height: auto !important; display: block; margin: 20px auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }',
 
                 // Security: Restrict allowed content
-                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target|rel],img[src|alt|title|width|height|loading],blockquote,code,pre',
+                valid_elements: 'p,br,strong,em,u,h1,h2,h3,h4,ul,ol,li,a[href|target|rel],img[src|alt|title|width|height|loading|class|style],blockquote,code,pre',
                 invalid_elements: 'script,iframe,object,embed,applet',
 
                 // Image upload handler (TinyMCE 6+ compatible)
                 images_upload_handler: function (blobInfo, progress) {
-                    console.log('CMS Debug: images_upload_handler triggered (Promise-based)');
-                    console.log('File:', blobInfo.filename(), blobInfo.blob().size, 'bytes');
+
                     return new Promise(function (resolve, reject) {
                         const uploadWithToken = function (csrfToken, hasRetried) {
                             const xhr = new XMLHttpRequest();
@@ -470,7 +469,7 @@ selector: '#content',
                             };
 
                             xhr.onload = function () {
-                                console.log('CMS Debug: XHR response:', xhr.status, xhr.responseText);
+
                                 let json = null;
                                 if (xhr.responseText) {
                                     try {
@@ -529,7 +528,7 @@ selector: '#content',
 
 
                 // Paste handling
-                paste_data_images: false,
+                paste_data_images: true,
                 paste_as_text: false,
 
                 // Link settings
@@ -802,9 +801,7 @@ selector: '#content',
                             )
                                 ? "block"
                                 : "none"; ?>; margin-top: 10px;">
-                                <input type="text" name="post_password" placeholder="Enter password..." value="<?php echo $security->escapeHTML(
-                                    $formData["post_password"] ?? "",
-                                ); ?>">
+                                <input type="password" name="post_password" placeholder="Enter password..." autocomplete="new-password">
                             </div>
                         </div>
                     </div>

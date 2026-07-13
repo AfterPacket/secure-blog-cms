@@ -156,6 +156,21 @@ secure-blog-cms/
 
 ## Changelog
 
+### v1.4.1 — Patch Release (2026-07-13)
+
+**Security Fixes:**
+- **[HIGH]** Password input fields for post protection were `type="text"` instead of `type="password"` — passwords were visible on screen and leaked via DOM. Changed to `type="password"` with `autocomplete="new-password"`.
+- **[HIGH]** `ENABLE_UPLOAD_MALWARE_SCAN` was `false` by default, disabling backdoor/malware detection on image uploads. Changed to `true`.
+- **[MEDIUM]** Session cookie `secure` flag only checked `$_SERVER["HTTPS"] === "on"`, ignoring `TRUST_PROXY_HEADERS`. Behind Cloudflare/reverse proxies, cookies were set without the `Secure` flag even on HTTPS connections. Now respects the same proxy header logic as the rest of the app.
+- **[MEDIUM]** Removed debug `console.log` statements from `create-post.php` and `edit-post.php` that were logging CSRF tokens, upload responses, and build version in production.
+
+**Bug Fixes:**
+- **Image URL insertion**: TinyMCE `valid_elements` now allows `class` and `style` attributes on `<img>`, so URL-based images retain custom styling.
+- **Image paste**: Enabled `paste_data_images: true` in TinyMCE so pasted images are properly uploaded.
+- **RSS self-link**: `rss.php` atom:self link now uses `cms_path()` for correct URLs in subfolder installs.
+
+---
+
 ### v1.4.0 — Security Hardening Release (2026-07-13)
 
 **Critical Fixes:**
@@ -186,6 +201,6 @@ secure-blog-cms/
 
 ---
 
-Version: 1.4.0
+Version: 1.4.1
 Last Updated: 2026-07-13
 Security Level: High

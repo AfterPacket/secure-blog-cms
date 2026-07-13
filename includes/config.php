@@ -10,7 +10,7 @@ if (!defined("SECURE_CMS_INIT")) {
 }
 
 // Security Configuration
-define("SECURE_CMS_VERSION", "1.4.0");
+define("SECURE_CMS_VERSION", "1.4.1");
 define("SESSION_NAME", "SECURE_CMS_SESSION");
 define("SESSION_LIFETIME", 172800); // 48 hours
 define("CSRF_TOKEN_LENGTH", 32);
@@ -67,7 +67,7 @@ define(
 );
 
 // Upload security toggles
-define("ENABLE_UPLOAD_MALWARE_SCAN", false);
+define("ENABLE_UPLOAD_MALWARE_SCAN", true);
 // Sanitization settings
 define(
     "ALLOWED_HTML_TAGS",

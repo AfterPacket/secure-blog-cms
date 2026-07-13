@@ -1,121 +1,48 @@
 {
-    "version": "1.4.0",
+    "version": "1.4.1",
     "released": "2026-07-13",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Security Hardening Release: Fixes RCE, XSS bypass, CSRF replay, proxy spoofing, password protection enforcement, pretty URLs, category browsing, and more.",
-    "cache_bust": "20260713-0000-SECURITY",
+    "description": "Patch Release: Fix plaintext password inputs, enable malware scan, fix session secure cookie behind proxies, remove debug logs, fix TinyMCE image URL/paste, fix RSS self-link for subfolders.",
+    "cache_bust": "20260713-0001-PATCH",
     "critical": true,
     "files": {
-        ".htaccess": {
-            "path": ".htaccess",
-            "sha256": "837e3ec6199bd2a33efdfe3b757a8de8830075a2fdfe0780def63890128bffe7"
-        },
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "2f3af41a7ee3c6b0f11ac4b93a6afd6006bc670ae5bfe8bfbcd77f005a91d172"
+            "sha256": "6cedd95e0fb58f4e0505a8961246aa853af3da8dc6d496b59fd7c6f08bb7dd2b"
         },
         "includes/Security.php": {
             "path": "includes/Security.php",
-            "sha256": "8ee69777d5db3fb92f81b3fcc328311c8448f48504cc875f0af019a2134fe2b3"
-        },
-        "includes/users.php": {
-            "path": "includes/users.php",
-            "sha256": "e746ac4b9bc6dbae0fee360141d28dc830ac7861e5062f64b798a6baaa05876f"
-        },
-        "includes/comments.php": {
-            "path": "includes/comments.php",
-            "sha256": "b2f685ee585159d4ebcf3cc1c9e9e70efcde760ee820571fac9abad94ea70e9d"
-        },
-        "includes/Upgrader.php": {
-            "path": "includes/Upgrader.php",
-            "sha256": "d8a53b23a11e4ed8023913a0e4b688d2c9824c51f15d18fa6aacd15b376c28d8"
-        },
-        "includes/Storage.php": {
-            "path": "includes/Storage.php",
-            "sha256": "c179b805312954d86fa5942114b1576cac13d38c59a7c0f307c337cc8e5c442b"
-        },
-        "includes/UrlShortener.php": {
-            "path": "includes/UrlShortener.php",
-            "sha256": "938e2c92409b8c7692e3c4fb2cd423018d9fb4af0a27efc137906dffa1495ffe"
-        },
-        "admin/upgrade.php": {
-            "path": "admin/upgrade.php",
-            "sha256": "042b470b3a2223dec25c1ff0a2f9bad18bb23fb336394147c09b723778f5a74a"
-        },
-        "admin/upload-image.php": {
-            "path": "admin/upload-image.php",
-            "sha256": "2e55b2d767ed63843ac2367b6761dd1e04ed082611aaf88c9d216690e2583d42"
-        },
-        "admin/serve-image.php": {
-            "path": "admin/serve-image.php",
-            "sha256": "4672029541e3b3e3aca9f233e2917bc9a7da3920aa5742b21b1929a1619ecd27"
-        },
-        "admin/login.php": {
-            "path": "admin/login.php",
-            "sha256": "d6c5c0122521add48a07a084faaddba7e230b650465d1b8156d105f248902e94"
+            "sha256": "82b34edee73f7c995c5d83f8a6ba33464e4edc18364c25ce5edfc93f7d7eadee"
         },
         "admin/create-post.php": {
             "path": "admin/create-post.php",
-            "sha256": "fb32e56e78a9847d30a03e154b82f9bb9af7a25c6c1e451129c286d45aaaa2b2"
+            "sha256": "5e2d01a7d741205b4f0c3e02da74beed33763b64f42662a48570b3eff07d0650"
         },
         "admin/edit-post.php": {
             "path": "admin/edit-post.php",
-            "sha256": "8fbb7c4968629def1708b7ce8ad5cb53f680cfffe8989ec03e7308a786b0f776"
-        },
-        "index.php": {
-            "path": "index.php",
-            "sha256": "fc6a073fff9956af444a02dcc6d64c2d495d187a48c2146ddc70fb1e43f0fe96"
-        },
-        "post.php": {
-            "path": "post.php",
-            "sha256": "42e6ffac7178058a5293173bc488820a32ce4c043545cec5a7f734e010b68cf6"
+            "sha256": "c73452f776945a09de9cc49ed8e569325ce96d5752cf26b460b7547619db1970"
         },
         "rss.php": {
             "path": "rss.php",
-            "sha256": "a3583edebc59a3597a259b90f2322c546a644d5559f2e8d58683c1eb313fdd1a"
-        },
-        "s.php": {
-            "path": "s.php",
-            "sha256": "c296e66bdc93fcb4fe51dca454592df0740c7bc1a3e9916eb36e4371beb2205e"
-        },
-        "templates/index_template.php": {
-            "path": "templates/index_template.php",
-            "sha256": "136565fae2c0fddeba3cce1e169deba7580d7ef8d0af1194b6fc68c39e9f22e0"
+            "sha256": "7b96805f34e203f968a2053a1067927fa7b305a791609a97f5cfe5e86879c927"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "103b4159ae4d1b3bf5bfffc592098309c5ad9d5aec4503f39d14d5211fdbff17"
+            "sha256": "1559bf09f1d7ced44572f30f0f7fb32c4cd10085dc3ed82091363c0d34fac55e"
         },
         "README.md": {
             "path": "README.md",
-            "sha256": "7f8f5e3e481a40c75a6f8d75a2428a22b4761a45d5369431cb4f531b5e9e268b"
-        },
-        "SECURITY.md": {
-            "path": "SECURITY.md",
-            "sha256": "ba57e0837baf9d8537929fcebe2e37e6fa3ede08e0eabe7707d4a2f98b243a19"
+            "sha256": "16d1e5ddfd8fc221d73a6af6cda977dbaa0bfb0affa7551a3a058d53a759cd9d"
         }
     },
     "changes": [
-        "Fix RCE vulnerability in upgrade system (Upgrader.php)",
-        "Fix XSS bypass in content output sanitization (Security.php)",
-        "Fix CSRF token replay across sessions (Security.php)",
-        "Fix proxy header spoofing (X-Forwarded-For) in login (login.php)",
-        "Add strict role validation in admin endpoints (config.php)",
-        "Migrate password hashing to Argon2id (users.php)",
-        "Harden comment sanitization against stored XSS (comments.php)",
-        "Secure image upload with strict MIME validation (upload-image.php)",
-        "Add secure image serving with path traversal protection (serve-image.php)",
-        "Harden upgrade endpoint with signature verification (upgrade.php)",
-        "Add CSP headers and security response headers (config.php, s.php)",
-        "Enforce password protection on posts (post.php, index.php, rss.php, Storage.php)",
-        "Filter private posts from non-authenticated users (index.php, Storage.php)",
-        "Add password-protected indicators in listings (index.php, index_template.php)",
-        "Fix image upload CSRF token refresh for multi-image uploads (upload-image.php, create-post.php, edit-post.php)",
-        "Add WordPress-style pretty URLs via .htaccess rewrite rules",
-        "Add category and tag browsing on public pages (index.php)",
-        "Add category/tag display on post pages (post.php)",
-        "Add categories to RSS feed items (rss.php)",
-        "Update short URLs to use pretty URL format (UrlShortener.php, s.php)",
-        "Update version to 1.4.0 (version.json, config.php)"
+        "Fix password input fields from type=text to type=password (create-post.php, edit-post.php)",
+        "Enable upload malware scan by default (config.php)",
+        "Fix session cookie secure flag to respect TRUST_PROXY_HEADERS (Security.php)",
+        "Remove debug console.log statements from production (create-post.php, edit-post.php)",
+        "Fix TinyMCE image URL insertion stripping class/style attributes (create-post.php, edit-post.php)",
+        "Enable paste_data_images in TinyMCE for image paste support (create-post.php, edit-post.php)",
+        "Fix RSS self-link for subfolder installs using cms_path() (rss.php)",
+        "Update version to 1.4.1 (version.json, config.php)"
     ]
 }

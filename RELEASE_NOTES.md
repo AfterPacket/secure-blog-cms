@@ -1,3 +1,96 @@
+# Secure Blog CMS v1.4.1 — Release Notes
+
+**Release Date:** 2026-07-13  
+**Severity:** Patch Release (Security + Bug Fixes)  
+**GitHub:** https://github.com/AfterPacket/secure-blog-cms
+
+---
+
+## Summary
+
+This patch release fixes security issues missed in the v1.4.0 audit: plaintext password inputs, disabled malware scanning on uploads, session cookie security behind proxies, and debug logging in production. It also fixes TinyMCE image URL insertion and RSS self-link for subfolder installs.
+
+All users on v1.4.0 should upgrade.
+
+---
+
+## Security Fixes
+
+### 🔴 Password Inputs Were Plaintext (`type="text"`)
+Post password inputs in both `create-post.php` and `edit-post.php` used `type="text"` instead of `type="password"`. Passwords were visible on screen and leaked via the DOM's `value` attribute. Changed to `type="password"` with `autocomplete="new-password"`.
+
+**Files changed:** `admin/create-post.php`, `admin/edit-post.php`
+
+---
+
+### 🔴 Malware Scan Disabled by Default
+`ENABLE_UPLOAD_MALWARE_SCAN` was set to `false` in `config.php`, meaning the backdoor detection in `ImageUpload.php` was completely bypassed. Changed to `true`.
+
+**Files changed:** `includes/config.php`
+
+---
+
+### 🟠 Session `Secure` Cookie Flag Ignored Proxy Headers
+The session cookie `secure` flag only checked `$_SERVER["HTTPS"] === "on"`. Behind Cloudflare or reverse proxies with `TRUST_PROXY_HEADERS` enabled, cookies were set without the `Secure` flag even on HTTPS connections, allowing session cookies to be sent over plain HTTP.
+
+**Fix:** The `secure` flag now respects the same `TRUST_PROXY_HEADERS` logic used elsewhere in the app, checking `X-Forwarded-Proto` and `CF-Visitor` headers.
+
+**Files changed:** `includes/Security.php`
+
+---
+
+### 🟡 Debug Logging in Production
+`console.log` statements in `create-post.php` and `edit-post.php` were logging CSRF tokens, upload responses, and build version to the browser console in production.
+
+**Files changed:** `admin/create-post.php`, `admin/edit-post.php`
+
+---
+
+## Bug Fixes
+
+### 🟡 TinyMCE Image URL Insertion Stripped Attributes
+The `valid_elements` config restricted `<img>` to `src|alt|title|width|height|loading`, stripping `class` and `style` from URL-based images. Added `class` and `style` to allowed attributes.
+
+**Files changed:** `admin/create-post.php`, `admin/edit-post.php`
+
+---
+
+### 🟡 Image Paste Disabled
+`paste_data_images` was set to `false`, preventing pasted images from being uploaded. Changed to `true`.
+
+**Files changed:** `admin/create-post.php`, `admin/edit-post.php`
+
+---
+
+### 🟡 RSS Self-Link Wrong for Subfolder Installs
+The `<atom:link rel="self">` in `rss.php` used `SITE_URL . "/rss.php"` instead of `SITE_URL . cms_path("rss.php")`, producing incorrect self-links when the CMS is installed in a subfolder.
+
+**Files changed:** `rss.php`
+
+---
+
+## Upgrade Instructions
+
+1. **Backup your `data/` directory and `includes/config.php`**
+2. Replace all application files with the v1.4.1 release
+3. If you use Cloudflare or a reverse proxy, ensure `define('TRUST_PROXY_HEADERS', true);` is set in `includes/config.php`
+4. Verify your site works correctly
+5. **Delete the `install/` directory** for best security practice
+
+## File Changes
+
+| File | Change |
+|------|--------|
+| `includes/config.php` | Version → 1.4.1, `ENABLE_UPLOAD_MALWARE_SCAN` → `true` |
+| `includes/Security.php` | Session `secure` flag now respects `TRUST_PROXY_HEADERS` |
+| `admin/create-post.php` | Password field → `type="password"`, removed debug logs, TinyMCE img attrs fix, paste enabled |
+| `admin/edit-post.php` | Password field → `type="password"`, removed debug logs, TinyMCE img attrs fix, paste enabled |
+| `rss.php` | Self-link uses `cms_path()` for subfolder installs |
+| `data/version.json` | Version → 1.4.1 |
+| `data/settings/version.json` | Version → 1.4.1 |
+
+---
+
 # Secure Blog CMS v1.4.0 — Release Notes
 
 **Release Date:** 2026-07-13  
