@@ -529,6 +529,11 @@ selector: '#content',
                                     return;
                                 }
 
+                                // Refresh token for next upload (single-use tokens)
+                                if (json.new_token) {
+                                    imageCsrfToken = json.new_token;
+                                }
+
                                 resolve(json.location);
                             };
 

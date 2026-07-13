@@ -165,7 +165,7 @@ secure-blog-cms/
 **High Fixes:**
 - **[HIGH]** Replaced regex-based XSS sanitizer with DOM-based HTML purification using `DOMDocument` + XPath. Removes all `on*` event handlers, `formaction`, `javascript:`/`data:` URIs, and dangerous tags (`<svg>`, `<math>`, `<iframe>`, `<object>`, `<embed>`, etc.). Regex fallback preserved for servers without `dom` extension.
 - **[HIGH]** CSP headers now enabled by default (`ENABLE_CSP_HEADERS = true`).
-- **[HIGH]** CSRF tokens are now single-use for all forms — removed `image_upload`/`edit_post_form` reuse exception that allowed replay attacks within the 48-hour token lifetime.
+- **[HIGH]** CSRF tokens are now single-use for all forms — removed `image_upload`/`edit_post_form` reuse exception that allowed replay attacks within the 48-hour token lifetime. Upload handler now returns a fresh token on success for seamless multi-image uploads.
 - **[HIGH]** Session fingerprint no longer blindly trusts `HTTP_CF_CONNECTING_IP` or `HTTP_X_FORWARDED_FOR` headers. New `TRUST_PROXY_HEADERS` config constant (default: `false`) must be explicitly enabled for Cloudflare/reverse proxy deployments. HTTPS detection via `X-Forwarded-Proto`/`CF_Visitor` similarly gated.
 - **[HIGH]** Removed version disclosure header (`X-SecureBlogCMS-Version`) — now only sent if `SHOW_VERSION_HEADER` is explicitly defined and `true`.
 - **[HIGH]** Password protection is now enforced on public pages. Password-protected posts require a password to view content (session-based unlock with 1-hour TTL). Private posts are hidden from non-authenticated users in listings, search, and RSS.

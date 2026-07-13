@@ -157,6 +157,17 @@ Password-protected posts could be viewed without a password. The `password_prote
 
 ---
 
+## Medium Fixes (Additional)
+
+### 🟡 Image Upload CSRF Token Breaks Multi-Image Uploads
+After v1.4.0 made CSRF tokens single-use, the TinyMCE image upload handler would consume the token on the first upload. Every subsequent upload would fail with 403, requiring a round-trip to get a new token before retrying. This caused poor UX where every other image upload failed.
+
+**Fix:** The upload endpoint now returns a `new_token` in the success response. The TinyMCE handlers in `create-post.php` and `edit-post.php` refresh their CSRF token from the success response, eliminating the failed round-trip.
+
+**Files changed:** `admin/upload-image.php`, `admin/create-post.php`, `admin/edit-post.php`
+
+---
+
 ## Low Fixes
 
 ### 🔵 Consistent IP Source for Rate Limiting
@@ -187,7 +198,7 @@ Rate limiting across login, comments, uploads, and short URLs used inconsistent 
 | `includes/Storage.php` | Filter private posts from listings, limit search on password-protected posts |
 | `includes/Upgrader.php` | RCE fix: manifest-only upgrades, mandatory checksums, disabled auto-upgrade |
 | `admin/upgrade.php` | Removed download_url from POST, uses performUpgradeFromManifest() |
-| `admin/upload-image.php` | CORS fix, debug logging removed, consistent IP |
+| `admin/upload-image.php` | CORS fix, debug logging reduced, consistent IP, return fresh CSRF token on success |
 | `admin/serve-image.php` | CORS fix |
 | `admin/login.php` | Consistent IP for rate limiting |
 | `s.php` | Consistent IP for rate limiting |
@@ -195,7 +206,8 @@ Rate limiting across login, comments, uploads, and short URLs used inconsistent 
 | `post.php` | Password gate with session-based unlock, CSRF-protected password form |
 | `rss.php` | Hide content of password-protected posts |
 | `templates/index_template.php` | Show 🔒 on password-protected posts |
-| `install/.htaccess` | Hardened file type restrictions |
+| `admin/create-post.php` | Refresh CSRF token from upload response for multi-image uploads |
+| `admin/edit-post.php` | Refresh CSRF token from upload response for multi-image uploads |
 | `README.md` | Updated with v1.4.0 changelog, proxy config docs |
 | `SECURITY.md` | Updated version table, security architecture docs |
 | `data/version.json` | Version → 1.4.0 |

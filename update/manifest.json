@@ -2,7 +2,7 @@
     "version": "1.4.0",
     "released": "2026-07-13",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Security Hardening Release: Fixes RCE in upgrade system, XSS bypass, CSRF token replay, proxy header spoofing, role validation, Argon2id hashing, password protection enforcement, and more.",
+    "description": "Security Hardening Release: Fixes RCE in upgrade system, XSS bypass, CSRF token replay, proxy header spoofing, role validation, Argon2id hashing, password protection enforcement, image upload CSRF fix, and more.",
     "cache_bust": "20260713-0000-SECURITY",
     "critical": true,
     "files": {
@@ -36,7 +36,7 @@
         },
         "admin/upload-image.php": {
             "path": "admin/upload-image.php",
-            "sha256": "5d4838a88b74180202ce8c86baaf87ec73b070188b870be80b6a4fa734aa38ce"
+            "sha256": "2e55b2d767ed63843ac2367b6761dd1e04ed082611aaf88c9d216690e2583d42"
         },
         "admin/serve-image.php": {
             "path": "admin/serve-image.php",
@@ -45,6 +45,14 @@
         "admin/login.php": {
             "path": "admin/login.php",
             "sha256": "d6c5c0122521add48a07a084faaddba7e230b650465d1b8156d105f248902e94"
+        },
+        "admin/create-post.php": {
+            "path": "admin/create-post.php",
+            "sha256": "fb32e56e78a9847d30a03e154b82f9bb9af7a25c6c1e451129c286d45aaaa2b2"
+        },
+        "admin/edit-post.php": {
+            "path": "admin/edit-post.php",
+            "sha256": "8fbb7c4968629def1708b7ce8ad5cb53f680cfffe8989ec03e7308a786b0f776"
         },
         "index.php": {
             "path": "index.php",
@@ -72,7 +80,7 @@
         },
         "README.md": {
             "path": "README.md",
-            "sha256": "69e52a551c5bb4a5ec33b6b6ce3e353646db31cc631de236f10d4f94e8880471"
+            "sha256": "58d43d956c11c9c2082b6505ce332383f883b74836ae0faa0f76c851c28a792b"
         },
         "SECURITY.md": {
             "path": "SECURITY.md",
@@ -93,7 +101,8 @@
         "Add CSP headers and security response headers (config.php, s.php)",
         "Enforce password protection on posts (post.php, index.php, rss.php, Storage.php)",
         "Filter private posts from non-authenticated users (index.php, Storage.php)",
-        "Add password-protected indicators in listing pages (index.php, index_template.php)",
+        "Add password-protected indicators in listings (index.php, index_template.php)",
+        "Fix image upload CSRF token refresh for multi-image uploads (upload-image.php, create-post.php, edit-post.php)",
         "Update version to 1.4.0 (version.json, config.php)"
     ]
 }

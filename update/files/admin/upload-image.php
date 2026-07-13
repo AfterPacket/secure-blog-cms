@@ -155,6 +155,9 @@ try {
         // Add additional info for TinyMCE
         $result["location"] = $result["url"]; // TinyMCE uses 'location' key
 
+        // Provide a fresh CSRF token for subsequent uploads (single-use tokens)
+        $result["new_token"] = $security->generateCSRFToken("image_upload");
+
         // Log successful upload
         $security->logSecurityEvent(
             "Image uploaded successfully",
