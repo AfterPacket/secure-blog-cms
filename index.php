@@ -466,7 +466,7 @@ $pagination = $postsData["pagination"];
                                             </div>
                                         <?php endif; ?>
 
-                                        <?php if (!empty($tagSlug) && $currentTag):
+                                        <?php if (!empty($tagSlug) && $currentTag): ?>
                     <div style="margin-bottom: 20px; padding: 15px; background: #fef9e7; border-radius: 8px; border-left: 4px solid #f39c12;">
                         <strong>🔖 Tag:</strong> <?php echo $security->escapeHTML($currentTag["name"]); ?>
                         (<?php echo count($posts); ?> post<?php echo count($posts) !== 1 ? "s" : ""; ?>)
