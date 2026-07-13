@@ -8,7 +8,7 @@
 
 ## Summary
 
-This is a **critical security hardening release** that addresses a remote code execution vulnerability in the auto-upgrade system, fixes multiple XSS bypass vectors, eliminates CSRF token replay attacks, hardens proxy header handling, and adds defense-in-depth across the entire application.
+This is a **critical security hardening release** that addresses a remote code execution vulnerability in the auto-upgrade system, fixes multiple XSS bypass vectors, eliminates CSRF token replay attacks, hardens proxy header handling, enforces password protection on posts, and adds defense-in-depth across the entire application.
 
 All users should upgrade immediately.
 
@@ -146,6 +146,17 @@ The upload endpoint logged `$_POST` keys, `$_FILES` keys, and file metadata on e
 
 ---
 
+## High Fixes (Additional)
+
+### 🟠 Password Protection Not Enforced
+Password-protected posts could be viewed without a password. The `password_protected` and `post_password` fields were saved to disk but never checked on the public-facing pages. Any visitor could read the full content of any password-protected post, and the content also appeared in search results and RSS feeds.
+
+**Fix:** Added password gate in `post.php` with session-based unlock (TTL-based, 1-hour expiry via `POST_PASSWORD_TTL`). Private posts (visibility=private) are now hidden from non-authenticated users in listings, search, and RSS. Password-protected posts show a 🔒 indicator in listings and hide content behind a password form. Search and RSS exclude content of password-protected posts for non-authenticated users.
+
+**Files changed:** `post.php`, `index.php`, `rss.php`, `includes/Storage.php`, `templates/index_template.php`, `includes/config.php`
+
+---
+
 ## Low Fixes
 
 ### 🔵 Consistent IP Source for Rate Limiting
@@ -169,17 +180,21 @@ Rate limiting across login, comments, uploads, and short URLs used inconsistent 
 
 | File | Change |
 |------|--------|
-| `includes/config.php` | CSP enabled, error reporting hardened, proxy toggle, credential check |
+| `includes/config.php` | CSP enabled, error reporting hardened, proxy toggle, credential check, `ALLOW_PRIVATE_POSTS`/`ALLOW_PASSWORD_PROTECTED` constants |
 | `includes/Security.php` | DOM-based XSS sanitizer, single-use CSRF tokens, IP method, version header toggle |
 | `includes/users.php` | Role validation whitelist, Argon2id hashing |
 | `includes/comments.php` | Rate limiting on submissions |
+| `includes/Storage.php` | Filter private posts from listings, limit search on password-protected posts |
 | `includes/Upgrader.php` | RCE fix: manifest-only upgrades, mandatory checksums, disabled auto-upgrade |
 | `admin/upgrade.php` | Removed download_url from POST, uses performUpgradeFromManifest() |
 | `admin/upload-image.php` | CORS fix, debug logging removed, consistent IP |
 | `admin/serve-image.php` | CORS fix |
 | `admin/login.php` | Consistent IP for rate limiting |
 | `s.php` | Consistent IP for rate limiting |
-| `index.php` | Improved install redirect logic |
+| `index.php` | Hide private posts, show 🔒 on password-protected posts |
+| `post.php` | Password gate with session-based unlock, CSRF-protected password form |
+| `rss.php` | Hide content of password-protected posts |
+| `templates/index_template.php` | Show 🔒 on password-protected posts |
 | `install/.htaccess` | Hardened file type restrictions |
 | `README.md` | Updated with v1.4.0 changelog, proxy config docs |
 | `SECURITY.md` | Updated version table, security architecture docs |

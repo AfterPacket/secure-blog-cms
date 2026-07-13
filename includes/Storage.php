@@ -552,6 +552,11 @@ class Storage
                 continue;
             }
 
+            // Hide private posts from non-authenticated users
+            if (isset($post["visibility"]) && $post["visibility"] === "private" && !$this->security->isAuthenticated()) {
+                continue;
+            }
+
             $posts[] = $post;
         }
 
@@ -611,15 +616,24 @@ class Storage
         $results = [];
 
         foreach ($allPosts as $post) {
-            $searchableText = strtolower(
-                $post["title"] .
-                    " " .
-                    $post["content"] .
-                    " " .
-                    $post["excerpt"] .
-                    " " .
-                    ($post["meta_keywords"] ?? ""),
-            );
+            // For password-protected posts, only search title and excerpt for non-authenticated users
+            if (!empty($post["password_protected"]) && !$this->security->isAuthenticated()) {
+                $searchableText = strtolower(
+                    $post["title"] .
+                        " " .
+                        $post["excerpt"]
+                );
+            } else {
+                $searchableText = strtolower(
+                    $post["title"] .
+                        " " .
+                        $post["content"] .
+                        " " .
+                        $post["excerpt"] .
+                        " " .
+                        ($post["meta_keywords"] ?? ""),
+                );
+            }
 
             if (strpos($searchableText, $query) !== false) {
                 $results[] = $post;

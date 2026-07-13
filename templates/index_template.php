@@ -63,7 +63,7 @@ $site_description = defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : '';
                 <article class="post">
                     <h2 class="post-title">
                         <a href="post.php?slug=<?php echo $security->escapeURL($post['slug']); ?>">
-                            <?php echo $security->escapeHTML($post['title']); ?>
+                            <?php echo $security->escapeHTML($post['title']); ?><?php if (!empty($post['password_protected']) && !$security->isAuthenticated()): ?> 🔒<?php endif; ?>
                         </a>
                     </h2>
                     <div class="post-meta">
@@ -72,7 +72,11 @@ $site_description = defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : '';
                         <span>👁️ <?php echo number_format($post['views']); ?> views</span>
                     </div>
                     <div class="post-excerpt">
-                        <?php echo $security->escapeHTML($post['excerpt']); ?>
+                        <?php if (!empty($post['password_protected']) && !$security->isAuthenticated()): ?>
+                            <em>This post is password protected.</em>
+                        <?php else: ?>
+                            <?php echo $security->escapeHTML($post['excerpt']); ?>
+                        <?php endif; ?>
                     </div>
                     <a href="post.php?slug=<?php echo $security->escapeURL($post['slug']); ?>" class="read-more">Read More →</a>
                 </article>

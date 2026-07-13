@@ -225,6 +225,8 @@ define(
     "REQUIRE_LOGIN_FOR_POSTS",
     (bool) ($__site_settings["require_login_for_posts"] ?? false),
 );
+define("ALLOW_PRIVATE_POSTS", (bool) ($__site_settings["allow_private_posts"] ?? true));
+define("ALLOW_PASSWORD_PROTECTED", (bool) ($__site_settings["allow_password_protected"] ?? true));
 define("POST_PASSWORD_TTL", 3600); // seconds
 define(
     "APP_VERSION",

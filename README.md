@@ -168,6 +168,7 @@ secure-blog-cms/
 - **[HIGH]** CSRF tokens are now single-use for all forms — removed `image_upload`/`edit_post_form` reuse exception that allowed replay attacks within the 48-hour token lifetime.
 - **[HIGH]** Session fingerprint no longer blindly trusts `HTTP_CF_CONNECTING_IP` or `HTTP_X_FORWARDED_FOR` headers. New `TRUST_PROXY_HEADERS` config constant (default: `false`) must be explicitly enabled for Cloudflare/reverse proxy deployments. HTTPS detection via `X-Forwarded-Proto`/`CF_Visitor` similarly gated.
 - **[HIGH]** Removed version disclosure header (`X-SecureBlogCMS-Version`) — now only sent if `SHOW_VERSION_HEADER` is explicitly defined and `true`.
+- **[HIGH]** Password protection is now enforced on public pages. Password-protected posts require a password to view content (session-based unlock with 1-hour TTL). Private posts are hidden from non-authenticated users in listings, search, and RSS.
 
 **Medium Fixes:**
 - **[MEDIUM]** Role validation added — `addUser()` and `updateUser()` now enforce whitelist (`admin`, `editor`, `author`). Arbitrary roles are rejected.
@@ -181,6 +182,7 @@ secure-blog-cms/
 **Low Fixes:**
 - **[LOW]** Consistent IP source across all rate limiting (login, comments, uploads, short URLs) via new `Security::getClientIPPublic()` method.
 - **[LOW]** Index page redirect logic improved to not redirect to installer when CMS is already installed.
+- **[LOW]** Password-protected posts show 🔒 indicator in listings and RSS feed; content is hidden until password is entered.
 
 ---
 

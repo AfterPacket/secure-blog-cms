@@ -2,13 +2,13 @@
     "version": "1.4.0",
     "released": "2026-07-13",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Security Hardening Release: Fixes RCE in upgrade system, XSS bypass, CSRF token replay, proxy header spoofing, role validation, Argon2id hashing, and more.",
+    "description": "Security Hardening Release: Fixes RCE in upgrade system, XSS bypass, CSRF token replay, proxy header spoofing, role validation, Argon2id hashing, password protection enforcement, and more.",
     "cache_bust": "20260713-0000-SECURITY",
     "critical": true,
     "files": {
         "includes/config.php": {
             "path": "includes/config.php",
-            "sha256": "afe58b0ff163b2022b3a8a6851f417f78f2ad8f6bed55055617b39221aaa4167"
+            "sha256": "2f3af41a7ee3c6b0f11ac4b93a6afd6006bc670ae5bfe8bfbcd77f005a91d172"
         },
         "includes/Security.php": {
             "path": "includes/Security.php",
@@ -25,6 +25,10 @@
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
             "sha256": "d8a53b23a11e4ed8023913a0e4b688d2c9824c51f15d18fa6aacd15b376c28d8"
+        },
+        "includes/Storage.php": {
+            "path": "includes/Storage.php",
+            "sha256": "c179b805312954d86fa5942114b1576cac13d38c59a7c0f307c337cc8e5c442b"
         },
         "admin/upgrade.php": {
             "path": "admin/upgrade.php",
@@ -44,11 +48,23 @@
         },
         "index.php": {
             "path": "index.php",
-            "sha256": "f6b003f48611f3e2be23732e99f79d5ede7a09c282dcdb8977df6dde0b640f55"
+            "sha256": "f59c0c03ea23f21a25af70ada3427d567f4991c76c4f25bdf96f496ee5347dd2"
+        },
+        "post.php": {
+            "path": "post.php",
+            "sha256": "ee51d095b6b9ae6d01bcb618d461bf064c248b7acff42fc65bd5e170ec1df351"
+        },
+        "rss.php": {
+            "path": "rss.php",
+            "sha256": "2d3918a8fc15c982ec246a6a6b1a9f222aac29f348196e77650bbe1844868a6b"
         },
         "s.php": {
             "path": "s.php",
             "sha256": "c296e66bdc93fcb4fe51dca454592df0740c7bc1a3e9916eb36e4371beb2205e"
+        },
+        "templates/index_template.php": {
+            "path": "templates/index_template.php",
+            "sha256": "9bac1483d28b16c3da799c1b0e8194d9a65159c8faf032831d9f9feecc0dc3fc"
         },
         "data/version.json": {
             "path": "data/version.json",
@@ -75,6 +91,9 @@
         "Add secure image serving with path traversal protection (serve-image.php)",
         "Harden upgrade endpoint with signature verification (upgrade.php)",
         "Add CSP headers and security response headers (config.php, s.php)",
+        "Enforce password protection on posts (post.php, index.php, rss.php, Storage.php)",
+        "Filter private posts from non-authenticated users (index.php, Storage.php)",
+        "Add password-protected indicators in listing pages (index.php, index_template.php)",
         "Update version to 1.4.0 (version.json, config.php)"
     ]
 }

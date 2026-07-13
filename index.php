@@ -403,12 +403,18 @@ $pagination = $postsData["pagination"];
             </div>
         <?php else: ?>
             <?php foreach ($posts as $post): ?>
+                <?php
+                // Hide private posts from non-authenticated users
+                if (isset($post["visibility"]) && $post["visibility"] === "private" && !$security->isAuthenticated()) {
+                    continue;
+                }
+                ?>
                 <article class="post">
                     <h2 class="post-title">
                         <a href="post.php?slug=<?php echo $security->escapeURL(
                             $post["slug"],
                         ); ?>">
-                            <?php echo $security->escapeHTML($post["title"]); ?>
+                            <?php echo $security->escapeHTML($post["title"]); ?><?php if (!empty($post["password_protected"]) && !$security->isAuthenticated()): ?> 🔒<?php endif; ?>
                         </a>
                     </h2>
 
@@ -426,7 +432,11 @@ $pagination = $postsData["pagination"];
                     </div>
 
                     <div class="post-excerpt">
-                        <?php echo $security->escapeHTML($post["excerpt"]); ?>
+                        <?php if (!empty($post["password_protected"]) && !$security->isAuthenticated()): ?>
+                            <em>This post is password protected.</em>
+                        <?php else: ?>
+                            <?php echo $security->escapeHTML($post["excerpt"]); ?>
+                        <?php endif; ?>
                     </div>
 
                     <a href="post.php?slug=<?php echo $security->escapeURL(

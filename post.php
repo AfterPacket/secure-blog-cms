@@ -56,6 +56,51 @@ if (empty($slug)) {
 $commentMessage = "";
 $commentMessageType = "";
 
+// Password protection check
+$passwordRequired = false;
+$passwordMessage = "";
+$passwordMessageType = "";
+
+if ($post && !empty($post["password_protected"]) && !$security->isAuthenticated()) {
+    // Check if user has already unlocked this post in this session
+    $unlockKey = "post_unlocked_" . $post["id"];
+    $unlocked = false;
+    if (isset($_SESSION[$unlockKey]) && is_array($_SESSION[$unlockKey])) {
+        $unlockTime = $_SESSION[$unlockKey]["time"] ?? 0;
+        if ((time() - $unlockTime) < POST_PASSWORD_TTL) {
+            $unlocked = true;
+        } else {
+            unset($_SESSION[$unlockKey]);
+        }
+    }
+
+    if (!$unlocked) {
+        // Handle password submission
+        if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["post_password_submit"])) {
+            $csrfToken = $_POST["csrf_token"] ?? "";
+            if (!$security->validateCSRFToken($csrfToken, "post_password_" . $post["id"])) {
+                $passwordMessage = "Invalid security token. Please try again.";
+                $passwordMessageType = "error";
+            } else {
+                $submittedPassword = $_POST["post_password_input"] ?? "";
+                if (password_verify($submittedPassword, $post["post_password"])) {
+                    $_SESSION[$unlockKey] = ["time" => time()];
+                    $unlocked = true;
+                } else {
+                    $passwordMessage = "Incorrect password. Please try again.";
+                    $passwordMessageType = "error";
+                    $security->logSecurityEvent("Post password failed", $post["id"]);
+                }
+            }
+        }
+
+        if (!$unlocked) {
+            $passwordRequired = true;
+            $passwordCsrfToken = $security->generateCSRFToken("post_password_" . $post["id"]);
+        }
+    }
+}
+
 // Handle comment form submission
 if (
     $post &&
@@ -387,6 +432,64 @@ if ($post) {
             margin-top: 40px;
             padding-top: 30px;
             border-top: 2px solid #ecf0f1;
+        }
+
+        .password-gate {
+            background: #f8f9fa;
+            border: 2px solid #2c3e50;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .password-gate .lock-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .password-gate h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .password-gate p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .password-gate input[type="password"] {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        .password-gate input[type="password"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .password-gate .btn {
+            display: inline-block;
+            background: #2c3e50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .password-gate .btn:hover {
+            background: #3498db;
+        }
+        .password-alert {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .password-alert.error {
+            background: #fde8e8;
+            color: #a63d3d;
+            border: 1px solid #f5c6c6;
         }
 
         .post-footer-meta {
@@ -751,6 +854,9 @@ if ($post) {
                         <span>👁️ <?php echo number_format(
                             $post["views"],
                         ); ?> views</span>
+                        <?php if (!empty($post["password_protected"]) && !$security->isAuthenticated()): ?>
+                            <span>🔒 Password Protected</span>
+                        <?php endif; ?>
                         <?php if ($security->isAuthenticated()): ?>
                             <span class="post-status <?php echo $security->escapeHTML(
                                 $post["status"],
@@ -763,37 +869,59 @@ if ($post) {
                     </div>
                 </div>
 
-                <div class="post-content">
-                    <?php // Output sanitized HTML content
+                <?php if ($passwordRequired): ?>
+                    <div class="password-gate">
+                        <div class="lock-icon">🔒</div>
+                        <h2>This post is password protected</h2>
+                        <p>Enter the password to view this content.</p>
+                        <?php if ($passwordMessage): ?>
+                            <div class="password-alert <?php echo $security->escapeHTML($passwordMessageType); ?>">
+                                <?php echo $security->escapeHTML($passwordMessage); ?>
+                            </div>
+                        <?php endif; ?>
+                        <form method="post" action="post.php?slug=<?php echo $security->escapeURL($post["slug"]); ?>">
+                            <input type="hidden" name="csrf_token" value="<?php echo $passwordCsrfToken; ?>">
+                            <input type="hidden" name="post_password_submit" value="1">
+                            <div>
+                                <input type="password" name="post_password_input" placeholder="Enter password..." required autofocus>
+                            </div>
+                            <button type="submit" class="btn">🔓 Unlock Post</button>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <div class="post-content">
+                        <?php // Output sanitized HTML content
 
-            // Content is already sanitized during storage, but we double-check
-                    echo $post["content"]; ?>
-                </div>
-
-                <div class="post-footer">
-                    <div class="post-footer-meta">
-                        <div>
-                            <strong>Post ID:</strong> <?php echo $security->escapeHTML(
-                                $post["id"],
-                            ); ?>
-                        </div>
-                        <div>
-                            <strong>Slug:</strong> <?php echo $security->escapeHTML(
-                                $post["slug"],
-                            ); ?>
-                        </div>
+                // Content is already sanitized during storage, but we double-check
+                        echo $post["content"]; ?>
                     </div>
 
-                    <?php if ($security->isAuthenticated()): ?>
-                        <a href="admin/edit-post.php?id=<?php echo $security->escapeURL(
-                            $post["id"],
-                        ); ?>" class="edit-link">
-                            ✏️ Edit This Post
-                        </a>
-                    <?php endif; ?>
-                </div>
+                    <div class="post-footer">
+                        <div class="post-footer-meta">
+                            <div>
+                                <strong>Post ID:</strong> <?php echo $security->escapeHTML(
+                                    $post["id"],
+                                ); ?>
+                            </div>
+                            <div>
+                                <strong>Slug:</strong> <?php echo $security->escapeHTML(
+                                    $post["slug"],
+                                ); ?>
+                            </div>
+                        </div>
+
+                        <?php if ($security->isAuthenticated()): ?>
+                            <a href="admin/edit-post.php?id=<?php echo $security->escapeURL(
+                                $post["id"],
+                            ); ?>" class="edit-link">
+                                ✏️ Edit This Post
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </article>
 
+            <?php if (!$passwordRequired): ?>
             <!-- Comments Section -->
             <section class="comments-section">
                 <h2>Comments (<?php echo count($comments); ?>)</h2>
@@ -861,6 +989,7 @@ if ($post) {
                     </form>
                 </div>
             </section>
+            <?php endif; ?>
         <?php else: ?>
             <div class="not-found">
                 <h1>404</h1>
