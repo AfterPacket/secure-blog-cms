@@ -33,9 +33,6 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 // Initialize security
 $security = Security::getInstance();
 
-// Debug: Log the incoming request for troubleshooting
-error_log("Image upload endpoint accessed");
-
 // Check 1: Only authenticated admins can upload
 if (!$security->isAuthenticated()) {
     http_response_code(403);
@@ -50,14 +47,11 @@ if (!$security->isAuthenticated()) {
     exit();
 }
 
-// Check 2: Validate CSRF token (from POST, header, or GET)
+// Check 2: Validate CSRF token (from POST body or header only — never from URL)
 $csrfToken = $_POST["csrf_token"] ?? "";
 if (empty($csrfToken)) {
     $csrfToken =
         $_SERVER["HTTP_X_CSRF_TOKEN"] ?? ($_SERVER["HTTP_X_XSRF_TOKEN"] ?? "");
-}
-if (empty($csrfToken)) {
-    $csrfToken = $_GET["csrf_token"] ?? "";
 }
 
 if (
@@ -65,10 +59,6 @@ if (
     !$security->validateCSRFToken($csrfToken, "image_upload")
 ) {
     $newToken = $security->generateCSRFToken("image_upload");
-    error_log(
-        "Image upload CSRF failure. Token received: " .
-            ($csrfToken ? "yes" : "no"),
-    );
     http_response_code(403);
     echo json_encode([
         "success" => false,

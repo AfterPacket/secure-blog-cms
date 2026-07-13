@@ -484,7 +484,7 @@ selector: '#content',
                             xhr.withCredentials = true;
                             xhr.open('POST', '<?php echo cms_path(
                                 "admin/upload-image.php",
-                            ); ?>?csrf_token=' + encodeURIComponent(csrfToken) + '&v=' + new Date().getTime());
+                            ); ?>');
                             xhr.setRequestHeader('X-CSRF-Token', csrfToken);
 
                             xhr.upload.onprogress = function (e) {

@@ -130,12 +130,9 @@ header("Content-Type: " . $mimeType);
 header("Content-Length: " . $fileSize);
 
 // Set content disposition (inline display)
-header('Content-Disposition: inline; filename="' . addslashes($filename) . '"');
+header('Content-Disposition: inline; filename="' . basename($filename) . '"');
 
 // Security headers
-header("X-Content-Type-Options: nosniff");
-
-// Disable script execution in case of browser bugs
 header("X-Content-Type-Options: nosniff");
 if (defined("ENABLE_CSP_HEADERS") && ENABLE_CSP_HEADERS) {
     header(

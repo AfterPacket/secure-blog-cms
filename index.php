@@ -423,7 +423,7 @@ $pagination = $postsData["pagination"];
             ); ?> <span class="security-badge">🔒 SECURED</span></h1>
             <p><?php echo $security->escapeHTML(SITE_DESCRIPTION); ?></p>
             <?php if ($security->isAuthenticated()): ?>
-                <a href="admin/admin.php" class="admin-link">🔑 Admin Panel</a>
+                <a href="<?php echo cms_path('admin/admin.php'); ?>" class="admin-link">🔑 Admin Panel</a>
             <?php endif; ?>
         </div>
     </header>
@@ -431,7 +431,7 @@ $pagination = $postsData["pagination"];
     <div class="container">
         <!-- Search Form -->
         <?php if (defined("ALLOW_SEARCH") ? ALLOW_SEARCH : true): ?>
-<form method="get" action="index.php" class="search-form">
+<form method="get" action="<?php echo cms_path(); ?>" class="search-form">
             <input type="text" name="q" placeholder="Search posts..." value="<?php echo $security->escapeHTML(
                 $searchQuery,
             ); ?>">
@@ -560,9 +560,8 @@ $pagination = $postsData["pagination"];
             <?php if ($pagination["total_pages"] > 1 && empty($searchQuery)): ?>
                 <div class="pagination">
                     <?php if ($pagination["has_previous"]): ?>
-                        <a href="?page=1">« First</a>
-                        <a href="?page=<?php echo $pagination["current_page"] -
-                            1; ?>">‹ Previous</a>
+                        <a href="<?php echo cms_path() . '?page=1'; ?>">« First</a>
+                        <a href="<?php echo cms_path() . '?page=' . ($pagination["current_page"] - 1); ?>">‹ Previous</a>
                     <?php endif; ?>
 
                     <?php
@@ -576,17 +575,14 @@ $pagination = $postsData["pagination"];
                         if ($i == $pagination["current_page"]): ?>
                         <span class="current"><?php echo $i; ?></span>
                     <?php else: ?>
-                        <a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                        <a href="<?php echo cms_path() . '?page=' . $i; ?>"><?php echo $i; ?></a>
                     <?php endif;
                     endfor;
                     ?>
 
                     <?php if ($pagination["has_next"]): ?>
-                        <a href="?page=<?php echo $pagination["current_page"] +
-                            1; ?>">Next ›</a>
-                        <a href="?page=<?php echo $pagination[
-                            "total_pages"
-                        ]; ?>">Last »</a>
+                        <a href="<?php echo cms_path() . '?page=' . ($pagination["current_page"] + 1); ?>">Next ›</a>
+                        <a href="<?php echo cms_path() . '?page=' . $pagination["total_pages"]; ?>">Last »</a>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
@@ -595,7 +591,7 @@ $pagination = $postsData["pagination"];
 
     <footer>
         <p>
-            <a href="rss.php" class="rss-link">📡 RSS Feed</a> |
+            <a href="<?php echo cms_path('rss.php'); ?>" class="rss-link">📡 RSS Feed</a> |
             &copy; <?php echo date("Y"); ?> <?php echo $security->escapeHTML(
      SITE_NAME,
  ); ?> |

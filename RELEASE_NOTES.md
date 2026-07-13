@@ -1,3 +1,135 @@
+# Secure Blog CMS v1.5.0 — Release Notes
+
+**Release Date:** 2026-07-13  
+**Severity:** Important Security + Subfolder Install Fix  
+**GitHub:** https://github.com/AfterPacket/secure-blog-cms
+
+---
+
+## Summary
+
+This release fixes critical broken links in subfolder installs (e.g. `/blog/`), removes the CSRF token from upload URL query strings (which was leaking into server logs), upgrades HSTS detection for proxy deployments, and adds post validation to short URL redirects.
+
+All users should upgrade, especially those running the CMS in a subfolder.
+
+---
+
+## Security Fixes
+
+### 🔴 CSRF Token Leaked in Server Logs via Image Upload URL
+The TinyMCE image upload handler appended the CSRF token to the URL query string (`?csrf_token=...&v=...`). This meant tokens appeared in nginx access logs, browser history, and `Referer` headers. The token is now sent exclusively via the `X-CSRF-Token` header and POST body.
+
+**Files changed:** `admin/create-post.php`, `admin/edit-post.php`, `admin/upload-image.php`
+
+---
+
+### 🟠 `data:` URIs Removed from Public CSP `img-src`
+The public-facing Content Security Policy included `data:` in `img-src`, which could allow SVG-with-JavaScript XSS via `data:image/svg+xml` URIs. Removed from the public CSP. The admin CSP retains `data:` for TinyMCE paste compatibility.
+
+**Files changed:** `includes/config.php`
+
+---
+
+### 🟠 HSTS Header Not Sent Behind Cloudflare/Varnish
+The HSTS header only checked `$_SERVER["HTTPS"] === "on"`, which is empty when behind a reverse proxy. Now uses the same `TRUST_PROXY_HEADERS` logic as the rest of the app.
+
+**Files changed:** `includes/Security.php`
+
+---
+
+### 🟡 Short URL Redirect — 301 Changed to 302
+`s.php` used `301 Moved Permanently`, which browsers cache permanently. Changed to `302 Found` to prevent cache poisoning if a short URL target changes.
+
+**Files changed:** `s.php`
+
+---
+
+### 🟡 Short URL Redirect — Post Existence Validation Added
+`s.php` now validates that the resolved slug corresponds to an actual published post before redirecting. Previously, a manipulated `short-urls.json` could redirect to an arbitrary path.
+
+**Files changed:** `s.php`
+
+---
+
+### 🟡 Post Password Hashing Upgraded to Argon2id
+Post passwords were hashed with `PASSWORD_DEFAULT` (bcrypt). Now uses `PASSWORD_ARGON2ID` with a bcrypt fallback for consistency with user account hashing.
+
+**Files changed:** `includes/Storage.php`
+
+---
+
+### 🟡 `allow_url_fopen`/`allow_url_include` Runtime Override Removed
+These are `PHP_INI_SYSTEM` directives and cannot be changed via `ini_set()`. The calls were silently failing. Replaced with comments explaining they must be set in `php.ini` or `php-fpm.conf`.
+
+**Files changed:** `includes/config.php`
+
+---
+
+## Bug Fixes
+
+### 🔴 All Internal Links Now Use `cms_path()` — Subfolder Installs Fixed
+Multiple links throughout `index.php`, `post.php`, `s.php`, and `rss.php` used hardcoded relative paths (`admin/admin.php`, `?page=2`, `rss.php`) that broke when the CMS was installed in a subfolder like `/blog/`. All internal links now use `cms_path()` for correct URL generation.
+
+**Files changed:** `index.php`, `post.php`, `s.php`
+
+---
+
+### 🔴 `index.php` Line 469 Parse Error Fixed
+A missing `?>` closing tag on `<?php if (!empty($tagSlug) && $currentTag):` caused a PHP 8.x parse error (500 status). This was the root cause of the front-end 500 error on lassiter.eu.
+
+**Files changed:** `index.php` (fixed in v1.4.1, included here for completeness)
+
+---
+
+### 🟡 Debug Logging Removed from Production
+`error_log("DEBUG: ...")` statements in `ImageUpload.php` and `upload-image.php` were logging upload step details and CSRF token presence in production.
+
+**Files changed:** `includes/ImageUpload.php`, `admin/upload-image.php`
+
+---
+
+### 🟡 Duplicate `X-Content-Type-Options` Header Removed
+`serve-image.php` sent `X-Content-Type-Options: nosniff` twice. Deduplicated.
+
+**Files changed:** `admin/serve-image.php`
+
+---
+
+### 🟡 `Content-Disposition` Escaping Fixed
+`serve-image.php` used `addslashes()` for the filename in the `Content-Disposition` header. `addslashes()` is not the correct HTTP header escaping function. Replaced with `basename()`.
+
+**Files changed:** `admin/serve-image.php`
+
+---
+
+## Upgrade Instructions
+
+1. **Backup your `data/` directory and `includes/config.php`**
+2. Replace all application files with the v1.5.0 release
+3. If you use Cloudflare or a reverse proxy, ensure `define('TRUST_PROXY_HEADERS', true);` is set in `includes/config.php`
+4. Verify your site works correctly
+5. **Delete the `install/` directory** for best security practice
+
+## File Changes
+
+| File | Change |
+|------|--------|
+| `includes/config.php` | Version → 1.5.0, removed `data:` from public CSP `img-src`, removed ineffective `ini_set` calls, added `ALLOW_URL_IMAGES` constant |
+| `includes/Security.php` | HSTS respects `TRUST_PROXY_HEADERS` |
+| `includes/Storage.php` | Post password hashing → `PASSWORD_ARGON2ID` with fallback |
+| `includes/ImageUpload.php` | Removed debug logging statements |
+| `admin/upload-image.php` | Removed CSRF token from URL query string, removed debug logging |
+| `admin/serve-image.php` | Removed duplicate header, fixed `Content-Disposition` escaping |
+| `admin/create-post.php` | Removed CSRF token from upload URL query string |
+| `admin/edit-post.php` | Removed CSRF token from upload URL query string |
+| `index.php` | All links use `cms_path()`, search form action fixed, pagination links fixed, RSS link fixed, admin link fixed |
+| `post.php` | All links use `cms_path()`, edit link fixed, comment form action fixed, password form action fixed |
+| `s.php` | Added post existence validation, 301→302 redirect, all links use `cms_path()`, added Storage dependency |
+| `data/version.json` | Version → 1.5.0 |
+| `nginx.conf` | Added `install` to deny rules, updated comments |
+
+---
+
 # Secure Blog CMS v1.4.1 — Release Notes
 
 **Release Date:** 2026-07-13  

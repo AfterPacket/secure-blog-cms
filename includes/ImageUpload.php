@@ -86,33 +86,20 @@ class ImageUpload
     public function handleUpload($file)
     {
         // Step 1: Validate upload
-        error_log(
-            "DEBUG: ImageUpload step 1: Validating upload for " .
-                ($file["name"] ?? "unknown"),
-        );
         $validation = $this->validateUpload($file);
         if (!$validation["valid"]) {
-            error_log(
-                "DEBUG: ImageUpload step 1 failed: " .
-                    ($validation["error"] ?? "unknown"),
-            );
             return [
                 "success" => false,
                 "error" => $validation["error"],
             ];
         }
 
-        // Step 2: Security checks
-        error_log("DEBUG: ImageUpload step 2: Performing security checks");
+        // Security checks
         $securityCheck = $this->performSecurityChecks(
             $file["tmp_name"],
             $file["name"],
         );
         if (!$securityCheck["safe"]) {
-            error_log(
-                "DEBUG: ImageUpload step 2 failed: " .
-                    ($securityCheck["reason"] ?? "unknown security reason"),
-            );
             $this->security->logSecurityEvent(
                 "Malicious file upload blocked",
                 $file["name"],
@@ -129,17 +116,9 @@ class ImageUpload
         $extension = $securityCheck["extension"];
         $safeFilename = $this->generateSafeFilename($extension);
         $targetPath = $this->uploadDir . "/" . $safeFilename;
-        error_log("DEBUG: ImageUpload step 3: Target path " . $targetPath);
 
         // Step 4: Move uploaded file
-        error_log(
-            "DEBUG: ImageUpload step 4: Moving file from " . $file["tmp_name"],
-        );
         if (!move_uploaded_file($file["tmp_name"], $targetPath)) {
-            error_log(
-                "DEBUG: ImageUpload step 4 failed: move_uploaded_file failed. Destination exists? " .
-                    (file_exists($targetPath) ? "yes" : "no"),
-            );
             return [
                 "success" => false,
                 "error" => "Failed to save uploaded file",

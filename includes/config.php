@@ -10,7 +10,7 @@ if (!defined("SECURE_CMS_INIT")) {
 }
 
 // Security Configuration
-define("SECURE_CMS_VERSION", "1.4.1");
+define("SECURE_CMS_VERSION", "1.5.0");
 define("SESSION_NAME", "SECURE_CMS_SESSION");
 define("SESSION_LIFETIME", 172800); // 48 hours
 define("CSRF_TOKEN_LENGTH", 32);
@@ -35,10 +35,10 @@ define("ENABLE_CSP_HEADERS", true);
 // Public pages stay strict; admin pages need inline scripts and TinyMCE CDN.
 define(
     "CSP_POLICY",
-    "default-src 'self' https: data: blob:; " .
+    "default-src 'self' https: blob:; " .
         "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; " .
-        "style-src 'self' 'unsafe-inline' https:; " .
-        "img-src 'self' data: blob: https:; " .
+            "style-src 'self' 'unsafe-inline' https:; " .
+            "img-src 'self' blob: https:; " .
         "font-src 'self' data: https:; " .
         "connect-src 'self' https:; " .
         "frame-src https:; " .
@@ -55,12 +55,12 @@ define(
         "object-src 'none'; " .
         "frame-ancestors 'self' https:; " .
         "form-action 'self' https:; " .
-        "img-src 'self' data: blob: https:; " .
-        "style-src 'self' 'unsafe-inline' https:; " .
-        "style-src-elem 'self' 'unsafe-inline' https:; " .
-        "font-src 'self' data: https:; " .
-        "connect-src 'self' https:; " .
-        "frame-src 'self' https:; " .
+        "img-src 'self' blob: https:; " .
+            "style-src 'self' 'unsafe-inline' https:; " .
+            "style-src-elem 'self' 'unsafe-inline' https:; " .
+            "font-src 'self' data: https:; " .
+            "connect-src 'self' https:; " .
+            "frame-src 'self' https:; " .
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; " .
         "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https:; " .
         "script-src-attr 'self' 'unsafe-inline';",
@@ -68,6 +68,7 @@ define(
 
 // Upload security toggles
 define("ENABLE_UPLOAD_MALWARE_SCAN", true);
+define("ALLOW_URL_IMAGES", true);
 // Sanitization settings
 define(
     "ALLOWED_HTML_TAGS",
@@ -153,8 +154,9 @@ ini_set("session.use_strict_mode", "1");
 ini_set("session.use_only_cookies", "1");
 ini_set("session.cookie_lifetime", "0");
 ini_set("session.gc_maxlifetime", SESSION_LIFETIME);
-ini_set("allow_url_fopen", "0");
-ini_set("allow_url_include", "0");
+// Note: allow_url_fopen and allow_url_include are PHP_INI_SYSTEM directives
+// and cannot be changed at runtime via ini_set(). Set these in php.ini or
+// php-fpm conf: allow_url_fopen = Off, allow_url_include = Off
 
 // Admin credentials (CHANGE THESE!)
 // Password should be hashed with password_hash()

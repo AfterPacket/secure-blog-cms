@@ -190,8 +190,17 @@ class Security
         // Permissions Policy (formerly Feature Policy)
         header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
 
-        // HSTS (if using HTTPS)
-        if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] === "on") {
+        // HSTS (if using HTTPS, respecting proxy headers when configured)
+        $__isHttpsForHsts = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off")
+            || (isset($_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] === "443");
+        if (defined('TRUST_PROXY_HEADERS') && TRUST_PROXY_HEADERS) {
+            $__isHttpsForHsts = $__isHttpsForHsts
+                || (isset($_SERVER["HTTP_X_FORWARDED_PROTO"])
+                    && strtolower((string) $_SERVER["HTTP_X_FORWARDED_PROTO"]) === "https")
+                || (isset($_SERVER["HTTP_CF_VISITOR"])
+                    && strpos((string) $_SERVER["HTTP_CF_VISITOR"], "https") !== false);
+        }
+        if ($__isHttpsForHsts) {
             header(
                 "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload",
             );

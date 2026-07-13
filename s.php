@@ -13,10 +13,12 @@ require_once __DIR__ . "/includes/config.php";
 // Load required classes
 require_once __DIR__ . "/includes/Security.php";
 require_once __DIR__ . "/includes/UrlShortener.php";
+require_once __DIR__ . "/includes/Storage.php";
 
-// Initialize security and URL shortener
+// Initialize security, URL shortener, and storage
 $security = Security::getInstance();
 $urlShortener = new UrlShortener();
+$storage = Storage::getInstance();
 
 // Get short code from URL parameter
 $code = $_GET["code"] ?? "";
@@ -46,7 +48,7 @@ if (empty($code)) {
     <div class="error">
         <h1>⚠️ Invalid Short URL</h1>
         <p>The short URL you requested is invalid or malformed.</p>
-        <a href="index.php">← Return to Blog Home</a>
+        <a href="' . cms_path() . '">← Return to Blog Home</a>
     </div>
 </body>
 </html>');
@@ -111,7 +113,38 @@ if ($postSlug === null) {
             <li>The post was deleted</li>
             <li>The short URL expired</li>
         </ul>
-        <a href="index.php">← Return to Blog Home</a>
+        <a href="' . cms_path() . '">← Return to Blog Home</a>
+    </div>
+</body>
+</html>');
+}
+
+// Validate that the resolved slug corresponds to an actual published post
+$actualPost = $storage->getPostBySlug($postSlug, false);
+if ($actualPost === null || (isset($actualPost["status"]) && $actualPost["status"] !== "published" && !$security->isAuthenticated())) {
+    http_response_code(404);
+    $security->logSecurityEvent("Short URL target not found or not published", $code);
+    die('<!DOCTYPE html>
+<html>
+<head>
+    <title>Short URL Not Found</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+        .error { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
+        h1 { color: #e74c3c; font-size: 72px; margin-bottom: 20px; }
+        h2 { color: #2c3e50; margin-bottom: 15px; }
+        p { color: #7f8c8d; margin-bottom: 20px; line-height: 1.6; }
+        a { display: inline-block; background: #3498db; color: white; padding: 12px 30px; border-radius: 4px; text-decoration: none; font-weight: 600; transition: background 0.3s; }
+        a:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+    <div class="error">
+        <h1>404</h1>
+        <h2>Short URL Not Found</h2>
+        <p>The short URL you requested does not exist or has been removed.</p>
+        <a href="' . cms_path() . '">← Return to Blog Home</a>
     </div>
 </body>
 </html>');
@@ -120,11 +153,11 @@ if ($postSlug === null) {
 // Success - redirect to the actual post
 $redirectUrl = cms_path("post/" . urlencode($postSlug));
 
-// Log successful redirect (optional - can be disabled if too verbose)
-// $security->logSecurityEvent('Short URL redirect', $code . ' -> ' . $postSlug);
+// Log successful redirect
+$security->logSecurityEvent("Short URL redirect", $code . " -> " . $postSlug);
 
-// Set 301 Moved Permanently header for SEO
-header("HTTP/1.1 301 Moved Permanently");
+// Use 302 Found (temporary) so browsers don't cache permanently
+header("HTTP/1.1 302 Found");
 header("Location: " . $redirectUrl);
 
 // Exit to ensure no additional output

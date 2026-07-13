@@ -156,6 +156,28 @@ secure-blog-cms/
 
 ## Changelog
 
+### v1.5.0 — Security + Subfolder Install Fix (2026-07-13)
+
+**Security Fixes:**
+- **[HIGH]** Removed CSRF token from image upload URL query string — tokens were being logged in server access logs and browser history. Now sent only via `X-CSRF-Token` header and POST body.
+- **[HIGH]** Removed `data:` from public CSP `img-src` — prevents SVG-based XSS through `data:image/svg+xml` URIs. Admin CSP still allows `data:` for TinyMCE paste compatibility.
+- **[HIGH]** HSTS header now respects `TRUST_PROXY_HEADERS` — previously only checked `$_SERVER["HTTPS"]`, which is empty behind Cloudflare/Varnish. Sites behind proxies now correctly send HSTS.
+- **[MEDIUM]** Short URL redirect (`s.php`) changed from 301 (permanent) to 302 (temporary) — prevents browser cache poisoning if a short URL target changes.
+- **[MEDIUM]** Short URL redirect now validates that the resolved slug corresponds to an actual published post — prevents open redirect via manipulated `short-urls.json`.
+- **[MEDIUM]** Post password hashing upgraded from `PASSWORD_DEFAULT` (bcrypt) to `PASSWORD_ARGON2ID` with fallback — consistent with user password hashing.
+- **[MEDIUM]** Removed `ini_set()` calls for `allow_url_fopen` and `allow_url_include` — these are `PHP_INI_SYSTEM` directives and cannot be changed at runtime. Added comments explaining they must be set in `php.ini`.
+- **[LOW]** Removed debug `error_log()` statements from `ImageUpload.php` — were logging upload step details and CSRF token info in production.
+- **[LOW]** Removed duplicate `X-Content-Type-Options: nosniff` header in `serve-image.php`.
+- **[LOW]** Fixed `Content-Disposition` filename escaping in `serve-image.php` — `addslashes()` replaced with `basename()`.
+
+**Bug Fixes:**
+- **[CRITICAL]** All internal links now use `cms_path()` — fixes broken pagination, search forms, admin links, RSS links, edit links, and comment forms in subfolder installs (e.g. `/blog/`). Previously these used hardcoded relative paths like `?page=2` or `admin/admin.php` which broke when the CMS was installed in a subfolder.
+- **[CRITICAL]** Fixed `index.php` line 469 — missing `?>` closing tag on a PHP short-echo block caused a 500 parse error on PHP 8.x. This was the root cause of the front-end 500 error reported on lassiter.eu.
+- **[MEDIUM]** TinyMCE image upload URL no longer includes CSRF token in query string — prevents token leakage in logs.
+- **[LOW]** `s.php` error page links now use `cms_path()` instead of hardcoded `index.php`.
+
+---
+
 ### v1.4.1 — Patch Release (2026-07-13)
 
 **Security Fixes:**
@@ -201,6 +223,6 @@ secure-blog-cms/
 
 ---
 
-Version: 1.4.1
+Version: 1.5.0
 Last Updated: 2026-07-13
 Security Level: High
