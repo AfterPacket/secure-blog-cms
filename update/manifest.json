@@ -2,10 +2,14 @@
     "version": "1.4.0",
     "released": "2026-07-13",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Security Hardening Release: Fixes RCE in upgrade system, XSS bypass, CSRF token replay, proxy header spoofing, role validation, Argon2id hashing, password protection enforcement, image upload CSRF fix, and more.",
+    "description": "Security Hardening Release: Fixes RCE, XSS bypass, CSRF replay, proxy spoofing, password protection enforcement, pretty URLs, category browsing, and more.",
     "cache_bust": "20260713-0000-SECURITY",
     "critical": true,
     "files": {
+        ".htaccess": {
+            "path": ".htaccess",
+            "sha256": "837e3ec6199bd2a33efdfe3b757a8de8830075a2fdfe0780def63890128bffe7"
+        },
         "includes/config.php": {
             "path": "includes/config.php",
             "sha256": "2f3af41a7ee3c6b0f11ac4b93a6afd6006bc670ae5bfe8bfbcd77f005a91d172"
@@ -29,6 +33,10 @@
         "includes/Storage.php": {
             "path": "includes/Storage.php",
             "sha256": "c179b805312954d86fa5942114b1576cac13d38c59a7c0f307c337cc8e5c442b"
+        },
+        "includes/UrlShortener.php": {
+            "path": "includes/UrlShortener.php",
+            "sha256": "938e2c92409b8c7692e3c4fb2cd423018d9fb4af0a27efc137906dffa1495ffe"
         },
         "admin/upgrade.php": {
             "path": "admin/upgrade.php",
@@ -56,15 +64,15 @@
         },
         "index.php": {
             "path": "index.php",
-            "sha256": "f59c0c03ea23f21a25af70ada3427d567f4991c76c4f25bdf96f496ee5347dd2"
+            "sha256": "fc6a073fff9956af444a02dcc6d64c2d495d187a48c2146ddc70fb1e43f0fe96"
         },
         "post.php": {
             "path": "post.php",
-            "sha256": "ee51d095b6b9ae6d01bcb618d461bf064c248b7acff42fc65bd5e170ec1df351"
+            "sha256": "42e6ffac7178058a5293173bc488820a32ce4c043545cec5a7f734e010b68cf6"
         },
         "rss.php": {
             "path": "rss.php",
-            "sha256": "2d3918a8fc15c982ec246a6a6b1a9f222aac29f348196e77650bbe1844868a6b"
+            "sha256": "a3583edebc59a3597a259b90f2322c546a644d5559f2e8d58683c1eb313fdd1a"
         },
         "s.php": {
             "path": "s.php",
@@ -72,7 +80,7 @@
         },
         "templates/index_template.php": {
             "path": "templates/index_template.php",
-            "sha256": "9bac1483d28b16c3da799c1b0e8194d9a65159c8faf032831d9f9feecc0dc3fc"
+            "sha256": "136565fae2c0fddeba3cce1e169deba7580d7ef8d0af1194b6fc68c39e9f22e0"
         },
         "data/version.json": {
             "path": "data/version.json",
@@ -103,6 +111,11 @@
         "Filter private posts from non-authenticated users (index.php, Storage.php)",
         "Add password-protected indicators in listings (index.php, index_template.php)",
         "Fix image upload CSRF token refresh for multi-image uploads (upload-image.php, create-post.php, edit-post.php)",
+        "Add WordPress-style pretty URLs via .htaccess rewrite rules",
+        "Add category and tag browsing on public pages (index.php)",
+        "Add category/tag display on post pages (post.php)",
+        "Add categories to RSS feed items (rss.php)",
+        "Update short URLs to use pretty URL format (UrlShortener.php, s.php)",
         "Update version to 1.4.0 (version.json, config.php)"
     ]
 }

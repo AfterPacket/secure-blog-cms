@@ -118,7 +118,7 @@ if ($postSlug === null) {
 }
 
 // Success - redirect to the actual post
-$redirectUrl = "post.php?slug=" . urlencode($postSlug);
+$redirectUrl = cms_path("post/" . urlencode($postSlug));
 
 // Log successful redirect (optional - can be disabled if too verbose)
 // $security->logSecurityEvent('Short URL redirect', $code . ' -> ' . $postSlug);

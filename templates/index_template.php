@@ -62,7 +62,7 @@ $site_description = defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : '';
                 <?php if ($post['status'] !== 'published') continue; ?>
                 <article class="post">
                     <h2 class="post-title">
-                        <a href="post.php?slug=<?php echo $security->escapeURL($post['slug']); ?>">
+                        <a href="<?php echo cms_path("post/" . $security->escapeURL($post['slug'])); ?>">
                             <?php echo $security->escapeHTML($post['title']); ?><?php if (!empty($post['password_protected']) && !$security->isAuthenticated()): ?> 🔒<?php endif; ?>
                         </a>
                     </h2>
@@ -78,7 +78,7 @@ $site_description = defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : '';
                             <?php echo $security->escapeHTML($post['excerpt']); ?>
                         <?php endif; ?>
                     </div>
-                    <a href="post.php?slug=<?php echo $security->escapeURL($post['slug']); ?>" class="read-more">Read More →</a>
+                    <a href="<?php echo cms_path("post/" . $security->escapeURL($post['slug'])); ?>" class="read-more">Read More →</a>
                 </article>
             <?php endforeach; ?>
         <?php endif; ?>

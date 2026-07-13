@@ -14,6 +14,7 @@ require_once __DIR__ . "/includes/config.php";
 require_once __DIR__ . "/includes/Security.php";
 require_once __DIR__ . "/includes/Storage.php";
 require_once __DIR__ . "/includes/notifications.php";
+require_once __DIR__ . "/includes/categories.php";
 
 // Check if installed
 if (
@@ -29,6 +30,7 @@ require_once __DIR__ . "/includes/Captcha.php";
 // Initialize security and storage
 $security = Security::getInstance();
 $storage = Storage::getInstance();
+$categoriesManager = Categories::getInstance();
 $commentsManager = Comments::getInstance();
 
 // Get post slug from URL
@@ -815,12 +817,12 @@ if ($post) {
     <header>
         <div class="container" style="position: relative;">
             <h1>
-                <a href="index.php"><?php echo $security->escapeHTML(
-                    SITE_NAME,
-                ); ?></a>
-                <span class="security-badge">🔒 SECURED</span>
-            </h1>
-            <a href="index.php" class="back-link">← Back to Blog</a>
+                <a href="<?php echo cms_path(); ?>"><?php echo $security->escapeHTML(
+                        SITE_NAME,
+                    ); ?></a>
+                    <span class="security-badge">🔒 SECURED</span>
+                </h1>
+                <a href="<?php echo cms_path(); ?>" class="back-link">← Back to Blog</a>
             <?php if ($security->isAuthenticated()): ?>
                 <a href="<?php echo cms_path(
                     "admin/admin.php",
@@ -866,8 +868,30 @@ if ($post) {
                                 ); ?>
                             </span>
                         <?php endif; ?>
+                        <?php if (!empty($post["categories"]) || !empty($post["tags"])): ?>
+                            <div style="margin-top: 8px; font-size: 0.85rem;">
+                                <?php if (!empty($post["categories"])): ?>
+                                    <span>
+                                        <?php foreach ($post["categories"] as $catSlug): ?>
+                                            <a href="<?php echo cms_path("category/" . $security->escapeURL($catSlug)); ?>" style="background: #eaf4fc; color: #2980b9; padding: 2px 8px; border-radius: 3px; text-decoration: none; font-size: 0.8rem; margin-right: 4px;">🏷️ <?php echo $security->escapeHTML($catSlug); ?></a>
+                                        <?php endforeach; ?>
+                                    </span>
+                                <?php endif; ?>
+                                <?php if (!empty($post["tags"])): ?>
+                                    <span>
+                                        <?php
+                                        $postTags = is_array($post["tags"]) ? $post["tags"] : array_map("trim", explode(",", $post["tags"]));
+                                        foreach ($postTags as $tagItem):
+                                            $tagDisplay = is_array($tagItem) ? ($tagItem["name"] ?? $tagItem["slug"] ?? $tagItem) : $tagItem;
+                                            $tagLink = is_array($tagItem) ? ($tagItem["slug"] ?? $tagDisplay) : $tagItem;
+                                        ?>
+                                            <a href="<?php echo cms_path("tag/" . $security->escapeURL($tagLink)); ?>" style="background: #fef9e7; color: #d68910; padding: 2px 8px; border-radius: 3px; text-decoration: none; font-size: 0.8rem; margin-right: 4px;">🔖 <?php echo $security->escapeHTML($tagDisplay); ?></a>
+                                        <?php endforeach; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                </div>
 
                 <?php if ($passwordRequired): ?>
                     <div class="password-gate">
@@ -995,7 +1019,7 @@ if ($post) {
                 <h1>404</h1>
                 <h2>Post Not Found</h2>
                 <p>The post you're looking for doesn't exist or has been removed.</p>
-                <a href="index.php">← Return to Blog Home</a>
+                <a href="<?php echo cms_path(); ?>">← Return to Blog Home</a>
             </div>
         <?php endif; ?>
     </div>

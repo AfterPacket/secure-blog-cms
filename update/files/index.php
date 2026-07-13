@@ -13,6 +13,7 @@ require_once __DIR__ . "/includes/config.php";
 // Load required classes
 require_once __DIR__ . "/includes/Security.php";
 require_once __DIR__ . "/includes/Storage.php";
+require_once __DIR__ . "/includes/categories.php";
 
 // Check if installed — if not, redirect to installer
 // If installed but install directory still exists, do NOT redirect there
@@ -30,6 +31,7 @@ if (!file_exists(__DIR__ . "/data/installed.lock")) {
 // Initialize security and storage
 $security = Security::getInstance();
 $storage = Storage::getInstance();
+$categoriesManager = Categories::getInstance();
 
 // Get current page number
 $page = $security->getGetData("page", "int", 1);
@@ -41,6 +43,30 @@ if (!ALLOW_SEARCH) {
     $searchQuery = "";
 }
 
+// Get category filter if exists
+$categorySlug = $security->getGetData("category", "slug", "");
+$tagSlug = $security->getGetData("tag", "slug", "");
+
+// Get category/tag names for display
+$currentCategory = null;
+$currentTag = null;
+if (!empty($categorySlug)) {
+    foreach ($categoriesManager->getAllCategories() as $cat) {
+        if ($cat["slug"] === $categorySlug) {
+            $currentCategory = $cat;
+            break;
+        }
+    }
+}
+if (!empty($tagSlug)) {
+    foreach ($categoriesManager->getAllTags() as $t) {
+        if ($t["slug"] === $tagSlug) {
+            $currentTag = $t;
+            break;
+        }
+    }
+}
+
 // Get posts
 if (!empty($searchQuery)) {
     $postsData = [
@@ -49,6 +75,37 @@ if (!empty($searchQuery)) {
             "current_page" => 1,
             "total_pages" => 1,
             "total_posts" => 0,
+        ],
+    ];
+} elseif (!empty($categorySlug)) {
+    $categoryPosts = $categoriesManager->getPostsByCategory($categorySlug);
+    // Filter out private posts for non-authenticated users
+    if (!$security->isAuthenticated()) {
+        $categoryPosts = array_filter($categoryPosts, function($p) {
+            return empty($p["visibility"]) || $p["visibility"] !== "private";
+        });
+    }
+    $postsData = [
+        "posts" => $categoryPosts,
+        "pagination" => [
+            "current_page" => 1,
+            "total_pages" => 1,
+            "total_posts" => count($categoryPosts),
+        ],
+    ];
+} elseif (!empty($tagSlug)) {
+    $tagPosts = $categoriesManager->getPostsByTag($tagSlug);
+    if (!$security->isAuthenticated()) {
+        $tagPosts = array_filter($tagPosts, function($p) {
+            return empty($p["visibility"]) || $p["visibility"] !== "private";
+        });
+    }
+    $postsData = [
+        "posts" => $tagPosts,
+        "pagination" => [
+            "current_page" => 1,
+            "total_pages" => 1,
+            "total_posts" => count($tagPosts),
         ],
     ];
 } else {
@@ -384,22 +441,54 @@ $pagination = $postsData["pagination"];
 
 
         <?php if (!empty($searchQuery)): ?>
-            <p style="margin-bottom: 20px; color: #7f8c8d;">
-                Search results for: <strong><?php echo $security->escapeHTML(
-                    $searchQuery,
-                ); ?></strong>
-                (<?php echo count($posts); ?> result<?php echo count($posts) !==
- 1
-     ? "s"
-     : ""; ?>)
-                | <a href="index.php" style="color: #3498db;">Clear search</a>
-            </p>
-        <?php endif; ?>
+                    <p style="margin-bottom: 20px; color: #7f8c8d;">
+                        Search results for: <strong><?php echo $security->escapeHTML(
+                            $searchQuery,
+                        ); ?></strong>
+                        (<?php echo count($posts); ?> result<?php echo count($posts) !==
+         1
+             ? "s"
+             : ""; ?>)
+                        | <a href="<?php echo cms_path(); ?>" style="color: #3498db;">Clear search</a>
+                    </p>
+                <?php endif; ?>
+
+                <?php if (!empty($categorySlug) && $currentCategory): ?>
+                    <div style="margin-bottom: 20px; padding: 15px; background: #eaf4fc; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <strong>🏷️ Category:</strong> <?php echo $security->escapeHTML($currentCategory["name"]); ?>
+                        (<?php echo count($posts); ?> post<?php echo count($posts) !== 1 ? "s" : ""; ?>)
+                        | <a href="<?php echo cms_path(); ?>" style="color: #3498db;">← All Posts</a>
+                                            </div>
+                                        <?php elseif (!empty($categorySlug)): ?>
+                    <div style="margin-bottom: 20px; padding: 15px; background: #eaf4fc; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <strong>🏷️ Category:</strong> <?php echo $security->escapeHTML($categorySlug); ?>
+                        | <a href="<?php echo cms_path(); ?>" style="color: #3498db;">← All Posts</a>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <?php if (!empty($tagSlug) && $currentTag):
+                    <div style="margin-bottom: 20px; padding: 15px; background: #fef9e7; border-radius: 8px; border-left: 4px solid #f39c12;">
+                        <strong>🔖 Tag:</strong> <?php echo $security->escapeHTML($currentTag["name"]); ?>
+                        (<?php echo count($posts); ?> post<?php echo count($posts) !== 1 ? "s" : ""; ?>)
+                        | <a href="<?php echo cms_path(); ?>" style="color: #3498db;">← All Posts</a>
+                                            </div>
+                                        <?php elseif (!empty($tagSlug)): ?>
+                    <div style="margin-bottom: 20px; padding: 15px; background: #fef9e7; border-radius: 8px; border-left: 4px solid #f39c12;">
+                        <strong>🔖 Tag:</strong> <?php echo $security->escapeHTML($tagSlug); ?>
+                        | <a href="<?php echo cms_path(); ?>" style="color: #3498db;">← All Posts</a>
+                    </div>
+                <?php endif; ?>
 
         <?php if (empty($posts)): ?>
             <div class="no-posts">
                 <h2>📝 No Posts Found</h2>
-                <p>There are no published posts yet. Check back soon!</p>
+                <?php if (!empty($categorySlug)): ?>
+                    <p>No posts found in this category.</p>
+                <?php elseif (!empty($tagSlug)): ?>
+                    <p>No posts found with this tag.</p>
+                <?php else: ?>
+                    <p>There are no published posts yet. Check back soon!</p>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <?php foreach ($posts as $post): ?>
@@ -411,9 +500,7 @@ $pagination = $postsData["pagination"];
                 ?>
                 <article class="post">
                     <h2 class="post-title">
-                        <a href="post.php?slug=<?php echo $security->escapeURL(
-                            $post["slug"],
-                        ); ?>">
+                        <a href="<?php echo cms_path("post/" . $security->escapeURL($post["slug"])); ?>">
                             <?php echo $security->escapeHTML($post["title"]); ?><?php if (!empty($post["password_protected"]) && !$security->isAuthenticated()): ?> 🔒<?php endif; ?>
                         </a>
                     </h2>
@@ -431,6 +518,30 @@ $pagination = $postsData["pagination"];
                         ); ?> views</span>
                     </div>
 
+                    <?php if (!empty($post["categories"]) || !empty($post["tags"])): ?>
+                        <div class="post-taxonomy" style="margin: 8px 0; font-size: 0.85rem;">
+                            <?php if (!empty($post["categories"])): ?>
+                                <span class="post-categories">
+                                    <?php foreach ($post["categories"] as $catSlug): ?>
+                                        <a href="<?php echo cms_path("category/" . $security->escapeURL($catSlug)); ?>" style="background: #eaf4fc; color: #2980b9; padding: 2px 8px; border-radius: 3px; text-decoration: none; font-size: 0.8rem; margin-right: 4px;">🏷️ <?php echo $security->escapeHTML($catSlug); ?></a>
+                                    <?php endforeach; ?>
+                                </span>
+                            <?php endif; ?>
+                            <?php if (!empty($post["tags"])): ?>
+                                <span class="post-tags">
+                                    <?php
+                                    $postTags = is_array($post["tags"]) ? $post["tags"] : array_map("trim", explode(",", $post["tags"]));
+                                    foreach ($postTags as $tagItem):
+                                        $tagDisplay = is_array($tagItem) ? ($tagItem["name"] ?? $tagItem["slug"] ?? $tagItem) : $tagItem;
+                                        $tagLink = is_array($tagItem) ? ($tagItem["slug"] ?? $tagDisplay) : $tagItem;
+                                    ?>
+                                        <a href="<?php echo cms_path("tag/" . $security->escapeURL($tagLink)); ?>" style="background: #fef9e7; color: #d68910; padding: 2px 8px; border-radius: 3px; text-decoration: none; font-size: 0.8rem; margin-right: 4px;">🔖 <?php echo $security->escapeHTML($tagDisplay); ?></a>
+                                    <?php endforeach; ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="post-excerpt">
                         <?php if (!empty($post["password_protected"]) && !$security->isAuthenticated()): ?>
                             <em>This post is password protected.</em>
@@ -439,9 +550,7 @@ $pagination = $postsData["pagination"];
                         <?php endif; ?>
                     </div>
 
-                    <a href="post.php?slug=<?php echo $security->escapeURL(
-                        $post["slug"],
-                    ); ?>" class="read-more">
+                    <a href="<?php echo cms_path("post/" . $security->escapeURL($post["slug"])); ?>" class="read-more">
                         Read More →
                     </a>
                 </article>

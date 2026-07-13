@@ -56,7 +56,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
                 }
                 ?></title>
                 <link><?php echo $security->escapeHTML(
-                    SITE_URL . "/post.php?slug=" . $post["slug"],
+                    SITE_URL . cms_path("post/" . $post["slug"]),
                 ); ?></link>
                 <description><![CDATA[<?php
                 if (!empty($post["password_protected"]) && !$security->isAuthenticated()) {
@@ -70,11 +70,16 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
                     $post["created_at"],
                 ); ?></pubDate>
                 <guid isPermaLink="true"><?php echo $security->escapeHTML(
-                    SITE_URL . "/post.php?slug=" . $post["slug"],
+                    SITE_URL . cms_path("post/" . $post["slug"]),
                 ); ?></guid>
                 <author><?php echo $security->escapeHTML(
                     $post["author"],
                 ); ?></author>
+                <?php if (!empty($post["categories"]) && is_array($post["categories"])): ?>
+                    <?php foreach ($post["categories"] as $catSlug): ?>
+                        <category><?php echo $security->escapeHTML($catSlug); ?></category>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </item>
         <?php endforeach; ?>
     <?php endif; ?>

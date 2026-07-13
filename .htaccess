@@ -16,6 +16,25 @@ Require all granted
 
     # Block access to includes directory
     RewriteRule ^includes/ - [F,L]
+
+    # Pretty URLs (WordPress-style)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Short URLs: /s/abc123 → s.php?code=abc123
+    RewriteRule ^s/([a-zA-Z0-9]+)/?$ s.php?code=$1 [L,QSA]
+
+    # Category: /category/tech → index.php?category=tech
+    RewriteRule ^category/([a-zA-Z0-9\-]+)/?$ index.php?category=$1 [L,QSA]
+
+    # Tag: /tag/mytag → index.php?tag=mytag
+    RewriteRule ^tag/([a-zA-Z0-9\-]+)/?$ index.php?tag=$1 [L,QSA]
+
+    # Post: /post/my-slug → post.php?slug=my-slug
+    RewriteRule ^post/([a-zA-Z0-9\-]+)/?$ post.php?slug=$1 [L,QSA]
+
+    # Page: /page/2 → index.php?page=2
+    RewriteRule ^page/([0-9]+)/?$ index.php?page=$1 [L,QSA]
 </IfModule>
 
 # 4. Protect Sensitive Files
