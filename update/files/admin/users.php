@@ -6,6 +6,11 @@
 // Initialize security constant
 define("SECURE_CMS_INIT", true);
 
+// Prevent caching — CSRF tokens must be fresh per request
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 // Load configuration
 require_once __DIR__ . "/../includes/config.php";
 
@@ -32,6 +37,13 @@ if (($_SESSION["role"] ?? "") !== "admin") {
 
 $message = "";
 $messageType = "";
+
+// Role descriptions for display
+$roleDescriptions = [
+    "admin"   => "Full access — manage users, settings, resilience, comments, all posts",
+    "editor"  => "Create, edit, and publish any post. Moderate comments.",
+    "author"  => "Create and edit own posts. Cannot publish or manage others.",
+];
 
 // Handle form submissions
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -66,6 +78,56 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $messageType = $result["success"] ? "success" : "error";
                 }
                 break;
+
+            case "edit_user":
+                $editUsername = $security->getPostData("edit_username", "string", "");
+                $newRole = $security->getPostData("edit_role", "string", "");
+                $newPassword = $_POST["edit_password"] ?? "";
+                $adminPassword = $_POST["admin_password"] ?? "";
+
+                // Verify admin password for confirmation
+                $currentUser = $usersManager->getUser($_SESSION["user"]);
+                if (!$currentUser || !password_verify($adminPassword, $currentUser["password_hash"])) {
+                    $message = "Current admin password is incorrect.";
+                    $messageType = "error";
+                    $security->logSecurityEvent(
+                        "Edit user failed — invalid admin password",
+                        $_SESSION["user"]);
+                    break;
+                }
+
+                // Cannot demote yourself
+                if ($editUsername === $_SESSION["user"] && $newRole !== "admin") {
+                    $message = "You cannot demote yourself from administrator.";
+                    $messageType = "error";
+                    break;
+                }
+
+                $editUser = $usersManager->getUser($editUsername);
+                if (!$editUser) {
+                    $message = "User not found.";
+                    $messageType = "error";
+                    break;
+                }
+
+                $updateData = [];
+                if (!empty($newRole)) {
+                    $updateData["role"] = $newRole;
+                }
+                if (!empty($newPassword)) {
+                    $updateData["password"] = $newPassword;
+                }
+                $updateData["current_username"] = $_SESSION["user"];
+
+                if (empty($updateData["role"]) && empty($updateData["password"])) {
+                    $message = "No changes submitted.";
+                    $messageType = "error";
+                } else {
+                    $result = $usersManager->updateUser($editUsername, $updateData);
+                    $message = $result["message"];
+                    $messageType = $result["success"] ? "success" : "error";
+                }
+                break;
         }
     }
 }
@@ -75,6 +137,15 @@ $csrfToken = $security->generateCSRFToken("users_form");
 
 // Get all users for display
 $allUsers = $usersManager->getAllUsers();
+
+// Prepare edit modal data if requested via GET
+$editUser = null;
+if (isset($_GET["edit"]) && is_string($_GET["edit"])) {
+    $editUsername = $security->sanitizeInput($_GET["edit"], "string");
+    if ($usersManager->userExists($editUsername)) {
+        $editUser = $usersManager->getUser($editUsername);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -104,11 +175,44 @@ $allUsers = $usersManager->getAllUsers();
         .btn:hover { background-color: #2980b9; }
         .btn-danger { background-color: #e74c3c; }
         .btn-danger:hover { background-color: #c0392b; }
+        .btn-secondary { background-color: #7f8c8d; color: #fff; padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
+        .btn-secondary:hover { background-color: #6c7a7a; }
+
+        /* Password policy list */
+        .password-policy { margin: 0.5rem 0; padding: 0; list-style: none; }
+        .password-policy li { font-size: 0.85rem; color: #888; padding: 2px 0; padding-left: 1.2rem; position: relative; }
+        .password-policy li::before { content: "\2713"; position: absolute; left: 0; color: #ccc; }
+        .password-policy li.passed { color: #27ae60; }
+        .password-policy li.passed::before { color: #27ae60; }
+        .password-policy li.failed { color: #e74c3c; }
+
+        /* Password strength meter */
+        .strength-meter { margin: 0.5rem 0; }
+        .strength-meter-bar { height: 6px; border-radius: 3px; background-color: #ecf0f1; overflow: hidden; }
+        .strength-meter-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease, background-color 0.3s ease; width: 0%; }
+        .strength-meter-label { font-size: 0.85rem; margin-top: 4px; font-weight: bold; }
+        .strength-weak .strength-meter-fill { background-color: #e74c3c; width: 25%; }
+        .strength-weak .strength-meter-label { color: #e74c3c; }
+        .strength-fair .strength-meter-fill { background-color: #e67e22; width: 50%; }
+        .strength-fair .strength-meter-label { color: #e67e22; }
+        .strength-good .strength-meter-fill { background-color: #3498db; width: 75%; }
+        .strength-good .strength-meter-label { color: #3498db; }
+        .strength-strong .strength-meter-fill { background-color: #27ae60; width: 100%; }
+        .strength-strong .strength-meter-label { color: #27ae60; }
+
+        /* Role descriptions */
+        .role-option-description { font-size: 0.8rem; color: #7f8c8d; margin-top: 2px; }
+
+        /* Role badges */
+        .role-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .role-badge-admin { background-color: #e74c3c; color: #fff; }
+        .role-badge-editor { background-color: #3498db; color: #fff; }
+        .role-badge-author { background-color: #27ae60; color: #fff; }
 
         .users-table { width: 100%; border-collapse: collapse; }
         .users-table th, .users-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ecf0f1; }
         .users-table thead { background-color: #f9fafb; }
-        .users-table .actions-cell { display: flex; gap: 0.5rem; }
+        .users-table .actions-cell { display: flex; gap: 0.5rem; align-items: center; }
         .users-table .actions-cell form { margin: 0; }
         .users-table .actions-cell .btn { padding: 0.3rem 0.6rem; font-size: 0.9rem; }
         .empty-state { text-align: center; color: #777; padding: 2rem; }
@@ -116,6 +220,14 @@ $allUsers = $usersManager->getAllUsers();
         .alert { padding: 1rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid transparent; }
         .alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
         .alert-error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
+        /* Edit modal overlay */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background-color: #fff; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); padding: 2rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal h2 { margin-top: 0; }
+        .modal .form-group { margin-bottom: 1rem; }
+        .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem; }
 
         @media (max-width: 900px) {
             .main-grid { grid-template-columns: 1fr; }
@@ -135,8 +247,7 @@ $allUsers = $usersManager->getAllUsers();
 
     <div class="container">
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $security->escapeHTML(
-                $messageType); ?>">
+            <div class="alert alert-<?php echo $security->escapeHTML($messageType); ?>">
                 <?php echo $security->escapeHTML($message); ?>
             </div>
         <?php endif; ?>
@@ -145,7 +256,7 @@ $allUsers = $usersManager->getAllUsers();
             <div class="add-user-card">
                 <div class="card">
                     <h2>Add New User</h2>
-                    <form method="post" action="users.php">
+                    <form method="post" action="users.php" id="add-user-form">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                         <input type="hidden" name="action" value="add_user">
                         <div class="form-group">
@@ -154,7 +265,20 @@ $allUsers = $usersManager->getAllUsers();
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password" id="password" name="password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>">
+                            <input type="password" id="password" name="password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>" oninput="updateStrengthMeter(this.value)">
+                            <ul class="password-policy" id="password-policy">
+                                <li id="policy-length" data-regex=".{12,}">Minimum 12 characters</li>
+                                <li id="policy-uppercase" data-regex="[A-Z]">At least one uppercase letter</li>
+                                <li id="policy-lowercase" data-regex="[a-z]">At least one lowercase letter</li>
+                                <li id="policy-digit" data-regex="[0-9]">At least one digit</li>
+                                <li id="policy-special" data-regex="[^a-zA-Z0-9]">At least one special character</li>
+                            </ul>
+                            <div class="strength-meter" id="strength-meter">
+                                <div class="strength-meter-bar">
+                                    <div class="strength-meter-fill"></div>
+                                </div>
+                                <div class="strength-meter-label"></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="role">Role</label>
@@ -163,6 +287,9 @@ $allUsers = $usersManager->getAllUsers();
                                 <option value="editor">Editor</option>
                                 <option value="admin">Administrator</option>
                             </select>
+                            <div class="role-option-description" id="role-description">
+                                <?php echo $security->escapeHTML($roleDescriptions["author"]); ?>
+                            </div>
                         </div>
                         <button type="submit" class="btn">Add User</button>
                     </form>
@@ -180,33 +307,35 @@ $allUsers = $usersManager->getAllUsers();
                                 <tr>
                                     <th>Username</th>
                                     <th>Role</th>
-                                    <th>Created At</th>
+                                    <th>Created</th>
+                                    <th>Last Login</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($allUsers as $user): ?>
                                     <tr>
-                                        <td><?php echo $security->escapeHTML(
-                                            $user["username"]); ?></td>
-                                        <td><?php echo $security->escapeHTML(
-                                            ucfirst($user["role"])); ?></td>
-                                        <td><?php echo date(
-                                            "Y-m-d H:i",
-                                            $user["created_at"]); ?></td>
+                                        <td><?php echo $security->escapeHTML($user["username"]); ?></td>
+                                        <td>
+                                            <?php
+                                            $roleClass = "role-badge-" . $user["role"];
+                                            ?>
+                                            <span class="role-badge <?php echo $roleClass; ?>">
+                                                <?php echo $security->escapeHTML(ucfirst($user["role"])); ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo date("Y-m-d H:i", $user["created_at"]); ?></td>
+                                        <td><?php echo isset($user["last_login"]) && $user["last_login"] ? date("Y-m-d H:i", $user["last_login"]) : "N/A"; ?></td>
                                         <td class="actions-cell">
-                                            <!-- Edit button functionality to be added -->
-                                            <!-- <a href="edit-user.php?username=<?php echo $security->escapeURL(
-                                                $user["username"]); ?>" class="btn">Edit</a> -->
-                                            <?php if (
-                                                $_SESSION["user"] !==
-                                                $user["username"]
-                                            ): ?>
+                                            <button type="button" class="btn btn-secondary" onclick="openEditModal(<?php echo htmlspecialchars(json_encode([
+                                                'username' => $user['username'],
+                                                'role' => $user['role']
+                                            ]), ENT_QUOTES, 'UTF-8'); ?>)">Edit</button>
+                                            <?php if ($_SESSION["user"] !== $user["username"]): ?>
                                                 <form method="post" action="users.php" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
                                                     <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                                     <input type="hidden" name="action" value="delete_user">
-                                                    <input type="hidden" name="username" value="<?php echo $security->escapeHTML(
-                                                        $user["username"]); ?>">
+                                                    <input type="hidden" name="username" value="<?php echo $security->escapeHTML($user["username"]); ?>">
                                                     <button type="submit" class="btn btn-danger">Delete</button>
                                                 </form>
                                             <?php endif; ?>
@@ -220,6 +349,163 @@ $allUsers = $usersManager->getAllUsers();
             </div>
         </div>
     </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal">
+            <h2>Edit User: <span id="edit-username-display"></span></h2>
+            <form method="post" action="users.php" id="edit-user-form">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                <input type="hidden" name="action" value="edit_user">
+                <input type="hidden" name="edit_username" id="edit-username-input" value="">
+
+                <div class="form-group">
+                    <label for="edit-role">Role</label>
+                    <select id="edit-role" name="edit_role">
+                        <option value="author">Author</option>
+                        <option value="editor">Editor</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                    <div class="role-option-description" id="edit-role-description"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-password">New Password</label>
+                    <input type="password" id="edit-password" name="edit_password" placeholder="Leave blank to keep current password">
+                </div>
+
+                <div class="form-group">
+                    <label for="admin-password">Your Admin Password</label>
+                    <input type="password" id="admin-password" name="admin_password" required>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Role descriptions map
+        var roleDescriptions = <?php echo json_encode($roleDescriptions); ?>;
+
+        // Update role description on the add-user form
+        var roleSelect = document.getElementById('role');
+        if (roleSelect) {
+            roleSelect.addEventListener('change', function() {
+                var desc = roleDescriptions[this.value] || '';
+                document.getElementById('role-description').textContent = desc;
+            });
+        }
+
+        // Password strength meter
+        function updateStrengthMeter(password) {
+            var checks = {
+                length: password.length >= 12,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                digit: /[0-9]/.test(password),
+                special: /[^a-zA-Z0-9]/.test(password)
+            };
+
+            // Update policy list items
+            var policyItems = document.querySelectorAll('#password-policy li');
+            policyItems.forEach(function(item) {
+                var regex = new RegExp(item.getAttribute('data-regex'));
+                if (regex.test(password)) {
+                    item.classList.add('passed');
+                    item.classList.remove('failed');
+                } else {
+                    item.classList.remove('passed');
+                    if (password.length > 0) {
+                        item.classList.add('failed');
+                    } else {
+                        item.classList.remove('failed');
+                    }
+                }
+            });
+
+            // Calculate strength
+            var passed = 0;
+            for (var key in checks) {
+                if (checks[key]) passed++;
+            }
+
+            var meter = document.getElementById('strength-meter');
+            meter.className = 'strength-meter';
+            var label = meter.querySelector('.strength-meter-label');
+
+            if (password.length === 0) {
+                label.textContent = '';
+            } else if (passed <= 1) {
+                meter.classList.add('strength-weak');
+                label.textContent = 'Weak';
+            } else if (passed <= 2) {
+                meter.classList.add('strength-fair');
+                label.textContent = 'Fair';
+            } else if (passed <= 3) {
+                meter.classList.add('strength-good');
+                label.textContent = 'Good';
+            } else if (passed >= 4) {
+                meter.classList.add('strength-strong');
+                label.textContent = 'Strong';
+            }
+        }
+
+        // Edit modal functions
+        function openEditModal(userData) {
+            document.getElementById('edit-username-display').textContent = userData.username;
+            document.getElementById('edit-username-input').value = userData.username;
+            document.getElementById('edit-role').value = userData.role;
+            document.getElementById('edit-password').value = '';
+            document.getElementById('admin-password').value = '';
+            updateEditRoleDescription();
+            document.getElementById('edit-modal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('active');
+        }
+
+        // Update role description in edit modal
+        var editRoleSelect = document.getElementById('edit-role');
+        if (editRoleSelect) {
+            editRoleSelect.addEventListener('change', updateEditRoleDescription);
+        }
+
+        function updateEditRoleDescription() {
+            var role = document.getElementById('edit-role').value;
+            var desc = roleDescriptions[role] || '';
+            document.getElementById('edit-role-description').textContent = desc;
+        }
+
+        // Close modal on overlay click
+        document.getElementById('edit-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEditModal();
+            }
+        });
+
+        // Auto-open edit modal if edit parameter present
+        <?php if ($editUser !== null): ?>
+        (function() {
+            var userData = {
+                username: <?php echo json_encode($editUser['username']); ?>,
+                role: <?php echo json_encode($editUser['role']); ?>
+            };
+            openEditModal(userData);
+        })();
+        <?php endif; ?>
+    </script>
 <?php include APP_ROOT . '/templates/footer.php'; ?>
 </body>
 </html>

@@ -80,7 +80,7 @@
         },
         "admin/users.php": {
             "path": "admin/users.php",
-            "sha256": "bf52f9efe8a123f66ce489ee5835ca5bbf031af48787a7ce58a54a0903e16dd0"
+            "sha256": "51d96e950ae38edb429803dfe380364c562ae1faa8757ea715bbd7831e02906e"
         },
         "includes/config.php": {
             "path": "includes/config.php",
@@ -116,7 +116,7 @@
         },
         "includes/users.php": {
             "path": "includes/users.php",
-            "sha256": "e746ac4b9bc6dbae0fee360141d28dc830ac7861e5062f64b798a6baaa05876f"
+            "sha256": "f2a32b6d45ffca993c0bdf1aedb33d0e655d9e683c5e596e5206990af1d5719c"
         },
         "includes/notifications.php": {
             "path": "includes/notifications.php",
