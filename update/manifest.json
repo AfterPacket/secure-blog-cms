@@ -1,50 +1,46 @@
 {
-    "version": "1.5.2",
+    "version": "1.5.3",
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Critical fix: Argon2id password hash corruption in double-quoted strings. Config protection: config.php now uses single quotes for password hash, added DO NOT OVERWRITE warning, added config.php.example template.",
-    "cache_bust": "20260714-0002-CRITICAL",
-    "critical": true,
+    "description": "Fix admin session logout on idle; add manifest generator script",
+    "cache_bust": "20260714-0945",
+    "critical": false,
     "files": {
-        "includes/Security.php": {
-            "path": "includes/Security.php",
-            "sha256": "89548047ed25f97f80cf20705c1809450cba6c7e400f86c2c36d08e5f2bcfe55"
+        "index.php": {
+            "path": "index.php",
+            "sha256": "adcd72a57878c57b0361fc6f6dd27419d362080646a4e6466190f80c97d0249b"
         },
-        "includes/comments.php": {
-            "path": "includes/comments.php",
-            "sha256": "4ad7343cd4e2ee64d647302cdd551eded9caa82b1dd366adc15334a23a9bb221"
+        "post.php": {
+            "path": "post.php",
+            "sha256": "8887bb0cc46632ad293b8134e2f3685fe111dd879181f6c0caedcec6150e79bb"
         },
-        "includes/Upgrader.php": {
-            "path": "includes/Upgrader.php",
-            "sha256": "d8a53b23a11e4ed8023913a0e4b688d2c9824c51f15d18fa6aacd15b376c28d8"
+        "rss.php": {
+            "path": "rss.php",
+            "sha256": "7b96805f34e203f968a2053a1067927fa7b305a791609a97f5cfe5e86879c927"
         },
-        "includes/Storage.php": {
-            "path": "includes/Storage.php",
-            "sha256": "501a8a4519cee5c7728091097a1f0159239c5ffdaf352179b196fab8854b53da"
+        "s.php": {
+            "path": "s.php",
+            "sha256": "adcd19c8c2fee88a5bfe0bb93402a9ae45cbd17bab249e12aec606b5a60bfbe9"
         },
-        "includes/Resilience.php": {
-            "path": "includes/Resilience.php",
-            "sha256": "95b30e5462bc873f48a799201a8a1ad655950a96879fd33266de1d522068e7d1"
+        "admin.php": {
+            "path": "admin.php",
+            "sha256": "4b882d6bda175ac36eea04a5589a1e15cd016bf2e60b960a8ce1283b4b4b0bda"
         },
-        "includes/UrlShortener.php": {
-            "path": "includes/UrlShortener.php",
-            "sha256": "938e2c92409b8c7692e3c4fb2cd423018d9fb4af0a27efc137906dffa1495ffe"
-        },
-        "includes/users.php": {
-            "path": "includes/users.php",
-            "sha256": "e746ac4b9bc6dbae0fee360141d28dc830ac7861e5062f64b798a6baaa05876f"
-        },
-        "admin/settings.php": {
-            "path": "admin/settings.php",
-            "sha256": "195635c62bb1124f0d567d07cb7b5eb5c7569e8c965bc7a64c2ba6ef2553ca48"
-        },
-        "admin/upload-image.php": {
-            "path": "admin/upload-image.php",
-            "sha256": "c6b73ec8e27ea2532d39edc0571d9150b5b07004145f651e3f4c676e9485132a"
+        "edit-post.php": {
+            "path": "edit-post.php",
+            "sha256": "3c746b673b65a0f8ec8e4b59e753a82d7e2171eed7f8954346b8365576fdd0bc"
         },
         "admin/admin.php": {
             "path": "admin/admin.php",
             "sha256": "4df89624d13d61d27c74df22f8bb7bbe1165dd3dfddc256c2098d88160f1814c"
+        },
+        "admin/categories.php": {
+            "path": "admin/categories.php",
+            "sha256": "24320a57fd545d0ba81a56f2b6ed81583092b8e533c5619cf31d9a44c4e7c788"
+        },
+        "admin/comments.php": {
+            "path": "admin/comments.php",
+            "sha256": "492d231d6d7196233038867f81e01b1148922e98d955016ec2c596532dff91f6"
         },
         "admin/create-post.php": {
             "path": "admin/create-post.php",
@@ -58,6 +54,10 @@
             "path": "admin/login.php",
             "sha256": "d6c5c0122521add48a07a084faaddba7e230b650465d1b8156d105f248902e94"
         },
+        "admin/logout.php": {
+            "path": "admin/logout.php",
+            "sha256": "205194de7122381b8451e0966dcf2cbda1a4ea9862e24b4755b10959cfaeef99"
+        },
         "admin/resilience.php": {
             "path": "admin/resilience.php",
             "sha256": "2c22d620af40e7d9e597bfdc9d495d1d23d4b7b12fe6929361c4b92ad48f2a8e"
@@ -66,29 +66,57 @@
             "path": "admin/serve-image.php",
             "sha256": "ee1a424734052ffc319a44d3dbfe0948e384a3d8c0f5acd6b6e78b2e4b1fef20"
         },
+        "admin/settings.php": {
+            "path": "admin/settings.php",
+            "sha256": "195635c62bb1124f0d567d07cb7b5eb5c7569e8c965bc7a64c2ba6ef2553ca48"
+        },
         "admin/upgrade.php": {
             "path": "admin/upgrade.php",
             "sha256": "042b470b3a2223dec25c1ff0a2f9bad18bb23fb336394147c09b723778f5a74a"
         },
-        "post.php": {
-            "path": "post.php",
-            "sha256": "8887bb0cc46632ad293b8134e2f3685fe111dd879181f6c0caedcec6150e79bb"
+        "admin/upload-image.php": {
+            "path": "admin/upload-image.php",
+            "sha256": "c6b73ec8e27ea2532d39edc0571d9150b5b07004145f651e3f4c676e9485132a"
         },
-        "index.php": {
-            "path": "index.php",
-            "sha256": "adcd72a57878c57b0361fc6f6dd27419d362080646a4e6466190f80c97d0249b"
+        "admin/users.php": {
+            "path": "admin/users.php",
+            "sha256": "bf52f9efe8a123f66ce489ee5835ca5bbf031af48787a7ce58a54a0903e16dd0"
         },
-        "rss.php": {
-            "path": "rss.php",
-            "sha256": "7b96805f34e203f968a2053a1067927fa7b305a791609a97f5cfe5e86879c927"
+        "includes/Security.php": {
+            "path": "includes/Security.php",
+            "sha256": "f5e2d67858a5ef329e069d3921ecf557906f0dfe6185e18f871ef98b1b0085bf"
         },
-        "s.php": {
-            "path": "s.php",
-            "sha256": "adcd19c8c2fee88a5bfe0bb93402a9ae45cbd17bab249e12aec606b5a60bfbe9"
+        "includes/Storage.php": {
+            "path": "includes/Storage.php",
+            "sha256": "501a8a4519cee5c7728091097a1f0159239c5ffdaf352179b196fab8854b53da"
         },
-        "data/version.json": {
-            "path": "data/version.json",
-            "sha256": "0f5bddb5c9cc5e41c8855f9d0812d4eb1ff811a4994578591533f460250171f3"
+        "includes/Upgrader.php": {
+            "path": "includes/Upgrader.php",
+            "sha256": "d8a53b23a11e4ed8023913a0e4b688d2c9824c51f15d18fa6aacd15b376c28d8"
+        },
+        "includes/Resilience.php": {
+            "path": "includes/Resilience.php",
+            "sha256": "95b30e5462bc873f48a799201a8a1ad655950a96879fd33266de1d522068e7d1"
+        },
+        "includes/UrlShortener.php": {
+            "path": "includes/UrlShortener.php",
+            "sha256": "938e2c92409b8c7692e3c4fb2cd423018d9fb4af0a27efc137906dffa1495ffe"
+        },
+        "includes/comments.php": {
+            "path": "includes/comments.php",
+            "sha256": "4ad7343cd4e2ee64d647302cdd551eded9caa82b1dd366adc15334a23a9bb221"
+        },
+        "includes/users.php": {
+            "path": "includes/users.php",
+            "sha256": "e746ac4b9bc6dbae0fee360141d28dc830ac7861e5062f64b798a6baaa05876f"
+        },
+        "includes/notifications.php": {
+            "path": "includes/notifications.php",
+            "sha256": "b4aeaa155ac1b0f0f7c9e21191b22c013a66861952e7b454e5bc58b5c03dc071"
+        },
+        "includes/ImageUpload.php": {
+            "path": "includes/ImageUpload.php",
+            "sha256": "906916dd039f470285a6cc586d31804e71bb8f8307316ed2229c36aa03549607"
         },
         "templates/index_template.php": {
             "path": "templates/index_template.php",
@@ -97,18 +125,13 @@
         "templates/post_template.php": {
             "path": "templates/post_template.php",
             "sha256": "9296295f4db1f255f61244657bc46011b8a25919687084eb5ae807562bf9cfe5"
+        },
+        "data/version.json": {
+            "path": "data/version.json",
+            "sha256": "a2bd73ceb906647a0554e881cad0ea17385b1800d96bc51757f44075bc1db2fc"
         }
     },
     "changes": [
-        "CRITICAL: Fix Argon2id password hash corruption — use single quotes for ADMIN_PASSWORD_HASH",
-        "Rate limit post password attempts (5/IP/5min)",
-        "Strengthen session fingerprint with User-Agent hashing",
-        "Add COOP/CORP security headers",
-        "Validate site URL setting (scheme whitelist)",
-        "Sanitize comment author names (strip tags, length limit, email validation)",
-        "Per-user daily upload rate limit (50/day)",
-        "Add DO NOT OVERWRITE warning in config.php header",
-        "Add config.php.example as install template",
-        "Remove config.php from update manifest (never overwrite)"
+        "See RELEASE_NOTES.md for detailed changes"
     ]
 }

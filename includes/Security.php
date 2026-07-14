@@ -80,15 +80,22 @@ class Security
             // Regenerate session ID periodically
             if (!isset($_SESSION["created"])) {
                 $_SESSION["created"] = time();
-            } elseif (time() - $_SESSION["created"] > 1800) {
+            } elseif (time() - $_SESSION["created"] > 14400) {
                 session_regenerate_id(true);
                 $_SESSION["created"] = time();
             }
 
             // Validate session fingerprint
+            // If fingerprint changes (IP/User-Agent shift behind proxies),
+            // log the event and update the fingerprint rather than destroying
+            // the session entirely — which causes frustrating logouts.
             if (!$this->validateSessionFingerprint()) {
-                session_destroy();
-                session_start();
+                // Log the mismatch for security review but keep the session alive
+                $this->logSecurityEvent(
+                    "Session fingerprint changed",
+                    "old=" . substr($_SESSION["fingerprint"] ?? "", 0, 16) . "... new=" . substr($this->generateCurrentFingerprint(), 0, 16) . "..."
+                );
+                // Update fingerprint to the current one so the session continues
                 $this->setSessionFingerprint();
             }
         }
@@ -127,6 +134,16 @@ class Security
             "sha256",
             $ip . '|' . $userAgent,
         );
+    }
+
+    /**
+     * Generate the current fingerprint without storing it
+     */
+    private function generateCurrentFingerprint()
+    {
+        $ip = $this->getClientIP();
+        $userAgent = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
+        return hash('sha256', $ip . '|' . $userAgent);
     }
 
     /**
