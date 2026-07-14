@@ -36,7 +36,7 @@
         },
         "admin/categories.php": {
             "path": "admin/categories.php",
-            "sha256": "24320a57fd545d0ba81a56f2b6ed81583092b8e533c5619cf31d9a44c4e7c788"
+            "sha256": "d6823a8193ffb6720c213f7a57eb70cb2ed03c930d6362fe9fb28cd447be1ecf"
         },
         "admin/comments.php": {
             "path": "admin/comments.php",
@@ -101,6 +101,10 @@
         "includes/UrlShortener.php": {
             "path": "includes/UrlShortener.php",
             "sha256": "938e2c92409b8c7692e3c4fb2cd423018d9fb4af0a27efc137906dffa1495ffe"
+        },
+        "includes/categories.php": {
+            "path": "includes/categories.php",
+            "sha256": "93568a2b936b10dbdc82e9ded67893ad9c1b63768b98dff030f67548d8ff42f4"
         },
         "includes/comments.php": {
             "path": "includes/comments.php",

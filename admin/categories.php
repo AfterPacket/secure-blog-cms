@@ -44,13 +44,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $categoryName = $security->getPostData(
                 "category_name",
                 "string",
-                "");
+                ""
+            );
             $result = $categoriesManager->addCategory($categoryName);
+            $message = $result["message"];
+            $messageType = $result["success"] ? "success" : "error";
+        } elseif ($action === "delete_category") {
+            $categorySlug = $security->getPostData("slug", "string", "");
+            $result = $categoriesManager->deleteCategory($categorySlug);
             $message = $result["message"];
             $messageType = $result["success"] ? "success" : "error";
         } elseif ($action === "add_tag") {
             $tagName = $security->getPostData("tag_name", "string", "");
             $result = $categoriesManager->addTag($tagName);
+            $message = $result["message"];
+            $messageType = $result["success"] ? "success" : "error";
+        } elseif ($action === "delete_tag") {
+            $tagSlug = $security->getPostData("slug", "string", "");
+            $result = $categoriesManager->deleteTag($tagSlug);
             $message = $result["message"];
             $messageType = $result["success"] ? "success" : "error";
         }
@@ -92,6 +103,9 @@ $allTags = $categoriesManager->getAllTags();
         .form-group input[type="text"] { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .btn { background-color: #3498db; color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 1rem; }
         .btn:hover { background-color: #2980b9; }
+        .btn-danger { background-color: #e74c3c; color: #fff; padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .delete-form { display: inline; }
 
         /* Tables */
         .taxonomy-table { width: 100%; border-collapse: collapse; }
@@ -169,6 +183,8 @@ $allTags = $categoriesManager->getAllTags();
                                 <tr>
                                     <th>Name</th>
                                     <th>Slug</th>
+                                    <th>Posts</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -178,6 +194,15 @@ $allTags = $categoriesManager->getAllTags();
                                             $category["name"]); ?></td>
                                         <td><code><?php echo $security->escapeHTML(
                                             $category["slug"]); ?></code></td>
+                                        <td><?php echo count($categoriesManager->getPostsByCategory($category["slug"])); ?></td>
+                                        <td>
+                                            <form method="post" action="categories.php" class="delete-form" onsubmit="return confirm('Delete category \ '<?php echo $security->escapeHTML($category["name"]); ?>'\? This will also remove it from all posts.')">
+                                                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                                                <input type="hidden" name="action" value="delete_category">
+                                                <input type="hidden" name="slug" value="<?php echo $security->escapeHTML($category["slug"]); ?>">
+                                                <button type="submit" class="btn-danger">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -195,6 +220,8 @@ $allTags = $categoriesManager->getAllTags();
                                 <tr>
                                     <th>Name</th>
                                     <th>Slug</th>
+                                    <th>Posts</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -204,6 +231,15 @@ $allTags = $categoriesManager->getAllTags();
                                             $tag["name"]); ?></td>
                                         <td><code><?php echo $security->escapeHTML(
                                             $tag["slug"]); ?></code></td>
+                                        <td><?php echo count($categoriesManager->getPostsByTag($tag["slug"])); ?></td>
+                                        <td>
+                                            <form method="post" action="categories.php" class="delete-form" onsubmit="return confirm('Delete tag \ '<?php echo $security->escapeHTML($tag["name"]); ?>'\? This will also remove it from all posts.')">
+                                                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                                                <input type="hidden" name="action" value="delete_tag">
+                                                <input type="hidden" name="slug" value="<?php echo $security->escapeHTML($tag["slug"]); ?>">
+                                                <button type="submit" class="btn-danger">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
