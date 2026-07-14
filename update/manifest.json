@@ -3,7 +3,7 @@
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
     "description": "User management: password policy, role permissions, edit/delete users, CLI password reset, installer policy enforcement",
-    "cache_bust": "20260714-2100",
+    "cache_bust": "20260714-2200",
     "critical": false,
     "files": {
         "index.php": {
@@ -32,7 +32,7 @@
         },
         "nginx.conf": {
             "path": "nginx.conf",
-            "sha256": "d00f76ec4a8cf075cd018ed6af8c52964d32db6b74cfdcc6c6a8eab124f2aa3e"
+            "sha256": "b97a5eb5c3537a70fad192cbeb38dff98cde36baf8e1f9946d02e7be3682c1d6"
         },
         "admin/admin.php": {
             "path": "admin/admin.php",
@@ -88,11 +88,11 @@
         },
         "cli/.htaccess": {
             "path": "cli/.htaccess",
-            "sha256": "70bb4d85f19a3c9da5b55777b011e72819bd5a4673a9d318db18355b8da114dd"
+            "sha256": "76f4d2beab9ecd1ab5dc5f73199239ba7f88e575e80152b20134bef5a65d54f4"
         },
         "cli/reset_password.php": {
             "path": "cli/reset_password.php",
-            "sha256": "5223c4faa39eb5f8452350542cee5a497b13d1b5ca160b5d9dbedd2bdae1be94"
+            "sha256": "e0fafde8b694b67f9a00860322baf671d40267c50408a8c55f5219ba40c35a04"
         },
         "includes/ImageUpload.php": {
             "path": "includes/ImageUpload.php",
@@ -166,11 +166,10 @@
         "Password strength meter in admin user management UI",
         "Edit user modal with admin password confirmation",
         "Self-demotion protection (admin cannot demote themselves)",
-        "CLI password reset utility (cli/reset_password.php)",
+        "CLI password reset utility with interactive mode (avoids shell expansion)",
         "Installer password policy enforcement with visual checklist",
-        "Installer username validation aligned with Users class (3-20 chars, dashes allowed)",
-        "CLI password reset: interactive mode (hidden input) to avoid shell expansion",
-        "Admin edit user: client-side password policy validation added",
+        "Installer username validation aligned with Users class (3-20 chars, dashes)",
+        "Client-side password validation on edit user modal",
         "Password fields have autocomplete attributes for browser autofill",
         "nginx.conf: added cli/ to blocked directories",
         "Version bump to 1.5.6"
