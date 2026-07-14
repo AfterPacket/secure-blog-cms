@@ -196,7 +196,7 @@ $allTags = $categoriesManager->getAllTags();
                                             $category["slug"]); ?></code></td>
                                         <td><?php echo count($categoriesManager->getPostsByCategory($category["slug"])); ?></td>
                                         <td>
-                                            <form method="post" action="categories.php" class="delete-form" onsubmit="return confirm('Delete category \'' + this.dataset.name + '\'? This will also remove it from all posts.')" data-name="<?php echo $security->escapeHTML($category['name']); ?>">
+                                            <form method="post" action="categories.php" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this category? Posts will keep the category removed.')">
                                                 <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                                 <input type="hidden" name="action" value="delete_category">
                                                 <input type="hidden" name="slug" value="<?php echo $security->escapeHTML($category['slug']); ?>">
@@ -233,7 +233,7 @@ $allTags = $categoriesManager->getAllTags();
                                             $tag["slug"]); ?></code></td>
                                         <td><?php echo count($categoriesManager->getPostsByTag($tag["slug"])); ?></td>
                                         <td>
-                                            <form method="post" action="categories.php" class="delete-form" onsubmit="return confirm('Delete tag \'' + this.dataset.name + '\'? This will also remove it from all posts.')" data-name="<?php echo $security->escapeHTML($tag['name']); ?>">
+                                            <form method="post" action="categories.php" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this tag? Posts will keep the tag removed.')">
                                                 <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                                 <input type="hidden" name="action" value="delete_tag">
                                                 <input type="hidden" name="slug" value="<?php echo $security->escapeHTML($tag['slug']); ?>">

@@ -36,7 +36,7 @@
         },
         "admin/categories.php": {
             "path": "admin/categories.php",
-            "sha256": "6d24d34e6bd12f145258e95bda182dde16e1f5642ec619c923650e8c854755e9"
+            "sha256": "a2ee7e88246718fb32b7eb9ac328854df0111dc56a2ac9e95a09a07f02194c59"
         },
         "admin/comments.php": {
             "path": "admin/comments.php",
