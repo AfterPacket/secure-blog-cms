@@ -548,6 +548,18 @@ $upgradeHistory = $upgrader->getUpgradeHistory();
                     </div>
                 </div>
                 <?php endif; ?>
+
+                <div class="info-card">
+                    <div class="label">Update Channel</div>
+                    <div class="value">
+                        <span class="version-badge" style="background: <?php echo $upgrader->getChannel() === 'beta' ? '#e67e22' : '#27ae60'; ?>">
+                            <?php echo ucfirst($security->escapeHTML($upgrader->getChannel())); ?>
+                        </span>
+                        <?php if ($upgrader->getChannel() === 'beta'): ?>
+                        <div style="font-size: 12px; color: #e67e22; margin-top: 4px;">⚠ Pre-release — may be unstable</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
 
             <div class="checkbox-group">

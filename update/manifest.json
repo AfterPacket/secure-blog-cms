@@ -2,7 +2,7 @@
     "version": "1.5.4",
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Auto-delete install directory after setup; login safety net cleanup",
+    "description": "Auto-delete install directory; update channel support; login cleanup safety net",
     "cache_bust": "20260714-1900",
     "critical": false,
     "files": {
@@ -72,7 +72,7 @@
         },
         "admin/upgrade.php": {
             "path": "admin/upgrade.php",
-            "sha256": "042b470b3a2223dec25c1ff0a2f9bad18bb23fb336394147c09b723778f5a74a"
+            "sha256": "d59bf65a00de018fd8f6e8d81c2d245bb87e6e6336934a8bed289f33aa15a3f2"
         },
         "admin/upload-image.php": {
             "path": "admin/upload-image.php",
@@ -92,7 +92,7 @@
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "279754a07bda92e950faeacadd9323c1a284c6002724160b2e3eaabe77de095b"
+            "sha256": "c21b45fccbe69790725f961b895f102db91fe97cbebd7399a9bd00d82a2bd933"
         },
         "includes/Resilience.php": {
             "path": "includes/Resilience.php",
@@ -135,6 +135,8 @@
         "Auto-delete install/ directory after successful installation (shutdown function)",
         "Login safety net: admin/login.php deletes install/ directory on first login",
         "Legacy install.php cleanup also included",
+        "Update channel support: stable or beta via UPDATE_CHANNEL config",
+        "Admin upgrade page shows current update channel",
         "Version bump to 1.5.4"
     ]
 }

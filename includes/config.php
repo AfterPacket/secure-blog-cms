@@ -140,6 +140,11 @@ ini_set("error_log", LOGS_DIR . "/php_errors.log");
 // WARNING: Enabling this when NOT behind a trusted proxy allows IP spoofing.
 define("TRUST_PROXY_HEADERS", false);
 
+// Update channel: "stable" or "beta"
+// "stable" = releases from the main branch (recommended for production)
+// "beta"   = pre-release builds from the beta branch (for testing only)
+define("UPDATE_CHANNEL", "stable");
+
 // PHP Security Settings
 // HTTPS detection — only trust proxy headers if TRUST_PROXY_HEADERS is enabled
 $__isHttps =

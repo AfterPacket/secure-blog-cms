@@ -11,17 +11,52 @@ if (!defined("SECURE_CMS_INIT")) {
 class Upgrader
 {
     private $update_server_url = "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/manifest.json";
+    private $update_channel = "stable";
     private $last_error = "";
     private $local_manifest_path;
     private $local_update_files_dir;
 
+    // Manifest URLs per channel
+    private static $manifest_urls = [
+        "stable" => "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/manifest.json",
+        "beta" => "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/beta/update/manifest.json",
+    ];
+
     public function __construct()
     {
+        // Determine update channel from config
+        if (defined("UPDATE_CHANNEL") && in_array(UPDATE_CHANNEL, ["stable", "beta"], true)) {
+            $this->update_channel = UPDATE_CHANNEL;
+        }
+
+        // Set manifest URL based on channel
+        if (isset(self::$manifest_urls[$this->update_channel])) {
+            $this->update_server_url = self::$manifest_urls[$this->update_channel];
+        }
+
+        // Allow custom URL override (takes precedence over channel)
         if (defined("UPDATE_SERVER_URL") && UPDATE_SERVER_URL) {
             $this->update_server_url = UPDATE_SERVER_URL;
         }
+
         $this->local_manifest_path = __DIR__ . "/../update/manifest.json";
         $this->local_update_files_dir = __DIR__ . "/../update/files";
+    }
+
+    /**
+     * Get the current update channel
+     */
+    public function getChannel()
+    {
+        return $this->update_channel;
+    }
+
+    /**
+     * Get the manifest URL for the current channel
+     */
+    public function getManifestUrl()
+    {
+        return $this->update_server_url;
     }
 
     /**
