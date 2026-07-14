@@ -146,7 +146,7 @@ cd update/
 # Then commit, tag, and push:
 git add update/ && git commit -m "v1.6.0: update manifest"
 git tag -a v1.6.0 -m "v1.6.0"
-git push origin master --tags
+git push origin main --tags
 ```
 
 ## Project Layout
@@ -189,7 +189,25 @@ When deploying behind CloudPanel with Varnish:
 
 ## Changelog
 
-### v1.5.3 — Session & Updater Fix (2026-07-14)
+### v1.5.5 — Category/Tag Management & Branding (2026-07-14)
+
+**New Features:**
+- **Category & Tag Deletion** — Delete categories and tags with automatic cleanup of post references
+- **Slug Collision Resolution** — Auto-appends `-2`, `-3`, etc. when a slug already exists
+- **Duplicate Prevention** — Case-insensitive name matching rejects exact duplicates; slug collisions auto-resolved
+
+**Improvements:**
+- No-cache headers on admin categories page for CSRF token freshness behind Cloudflare/Varnish
+- Branding updated to Digital Systems LLC / AfterPacket
+- Removed duplicate version display in public footer
+- Admin categories page now shows post count per category/tag
+
+**Bug Fixes:**
+- Fixed PHP syntax error in `addCategory()` return statement
+- Fixed delete confirmation dialog quoting issues
+- Fixed CSRF token invalidation on category/tag management page
+
+### v1.5.4 — Install Cleanup & Update Channels (2026-07-14)
 
 **Critical Bug Fixes:**
 - **[CRITICAL]** Admin session logout on idle — session fingerprint validation was destroying sessions when IP or User-Agent shifted between requests behind Cloudflare/Varnish proxies. Now logs a warning and updates the fingerprint instead of destroying the session.
@@ -279,6 +297,7 @@ When deploying behind CloudPanel with Varnish:
 
 ---
 
-Version: 1.5.3  
+Version: 1.5.5  
 Last Updated: 2026-07-14  
+Created by: Digital Systems LLC / AfterPacket
 Security Level: High

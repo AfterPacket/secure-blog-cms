@@ -1,3 +1,85 @@
+# Secure Blog CMS v1.5.5 — Release Notes
+
+**Release Date:** 2026-07-14  
+**Severity:** Feature & Bug Fix  
+**GitHub:** https://github.com/AfterPacket/secure-blog-cms
+
+---
+
+## Summary
+
+This release adds category and tag management (delete, duplicate prevention, slug collision resolution), fixes CSRF token issues on the admin categories page, and updates branding to Digital Systems LLC / AfterPacket.
+
+---
+
+## New Features
+
+### Category & Tag Deletion
+- **Delete categories and tags** from the admin UI with confirmation prompt
+- Deleted categories/tags are automatically removed from all posts that reference them
+- Post count column shows how many posts use each category/tag
+
+### Slug Collision Resolution
+- When adding a category/tag whose slug already exists, the system auto-appends `-2`, `-3`, etc.
+- Example: If "tech-news" exists, adding "Tech News" again resolves to "tech-news-2"
+
+### Duplicate Prevention
+- Case-insensitive name matching rejects exact duplicate categories/tags
+- Empty names and names over 100 characters are rejected with clear error messages
+
+---
+
+## Improvements
+
+### 🟡 No-Cache Headers for CSRF Freshness
+- Admin categories page now sends `Cache-Control: no-store, no-cache` headers
+- Prevents Cloudflare/Varnish from caching pages with stale CSRF tokens
+
+### 🟡 Branding Update
+- Footer updated to show **Digital Systems LLC / AfterPacket**
+- Digital Systems LLC links to https://digitalsystems.cc
+- AfterPacket links to GitHub
+- Removed duplicate version number from public footer
+
+---
+
+## Bug Fixes
+
+- **PHP syntax error:** Fixed `=>` typo in `addCategory()` return statement
+- **Delete confirmation:** Fixed quoting issues in `onsubmit` JavaScript attributes
+- **CSRF token:** Fixed invalid security token error when deleting categories/tags
+
+---
+
+## Upgrade Instructions
+
+1. Go to **Admin → Upgrade** and click "Check for Updates"
+2. Review the changes and click "Upgrade to 1.5.5"
+3. Your `config.php` and site data are preserved automatically
+
+Or manually:
+1. Backup your `data/` directory and `includes/config.php`
+2. Replace all files with the new release
+3. **Do NOT overwrite `includes/config.php`**
+4. Verify everything works at `/admin.php`
+
+---
+
+## File Changes
+
+| File | Change |
+|------|--------|
+| `includes/categories.php` | Added delete, slug collision, duplicate prevention, post cleanup |
+| `admin/categories.php` | Delete buttons, post count, no-cache headers, CSRF fix |
+| `includes/config.php` | Version bump to 1.5.5 |
+| `includes/config.php.example` | Version bump to 1.5.5 |
+| `data/version.json` | Version 1.5.5, Digital Systems LLC / AfterPacket branding |
+| `templates/footer.php` | Updated branding, removed duplicate version |
+| `templates/index_template.php` | Updated branding link |
+| `templates/post_template.php` | Updated branding link |
+
+---
+
 # Secure Blog CMS v1.5.4 — Release Notes
 
 **Release Date:** 2026-07-14  
