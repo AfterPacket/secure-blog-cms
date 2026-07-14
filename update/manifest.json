@@ -2,8 +2,8 @@
     "version": "1.5.3",
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Fix admin session logout on idle; add manifest generator script",
-    "cache_bust": "20260714-0945",
+    "description": "Fix admin session logout; fix updater version check; add manifest generator",
+    "cache_bust": "20260714-1851",
     "critical": false,
     "files": {
         "index.php": {
@@ -92,7 +92,7 @@
         },
         "includes/Upgrader.php": {
             "path": "includes/Upgrader.php",
-            "sha256": "d8a53b23a11e4ed8023913a0e4b688d2c9824c51f15d18fa6aacd15b376c28d8"
+            "sha256": "279754a07bda92e950faeacadd9323c1a284c6002724160b2e3eaabe77de095b"
         },
         "includes/Resilience.php": {
             "path": "includes/Resilience.php",

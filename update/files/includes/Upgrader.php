@@ -379,6 +379,12 @@ class Upgrader
      */
     public function performUpgradeFromManifest($version)
     {
+        // Clear update cache to ensure fresh manifest data
+        $cacheFile = SETTINGS_DIR . "/update_check.json";
+        if (file_exists($cacheFile)) {
+            @unlink($cacheFile);
+        }
+
         $manifest = $this->fetchRemoteManifest();
         if (!$manifest) {
             $manifest = $this->fetchLocalManifest();
@@ -387,10 +393,23 @@ class Upgrader
             return ["success" => false, "error" => "Could not retrieve update manifest. " . $this->last_error];
         }
 
-        // Verify the requested version exists in the manifest
-        if (!isset($manifest["version"]) || version_compare($manifest["version"], $version, "!=")) {
-            return ["success" => false, "error" => "Requested version not found in manifest."];
+        // Verify the manifest has a version and it's newer than or equal to requested
+        if (!isset($manifest["version"])) {
+            return ["success" => false, "error" => "Manifest does not contain a version."];
         }
+
+        // Use the manifest version (always the latest available)
+        $manifestVersion = $manifest["version"];
+
+        // Only upgrade if the manifest version is newer than current
+        $currentVersion = defined("SECURE_CMS_VERSION") ? SECURE_CMS_VERSION : "1.0.0";
+        if (version_compare($manifestVersion, $currentVersion, "<=")) {
+            return ["success" => false, "error" => "You are already on version $currentVersion. No update available."];
+        }
+
+        // Use the manifest version for the upgrade (not the requested version)
+        // This ensures we always upgrade to what the manifest actually provides
+        $version = $manifestVersion;
 
         // Require checksums - do not allow upgrades without integrity verification
         if (!isset($manifest["files"]) || !is_array($manifest["files"])) {
