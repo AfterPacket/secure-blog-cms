@@ -55,12 +55,22 @@ class Security
                 $cookieDomain = "";
             }
 
+            // Compute HTTPS status respecting TRUST_PROXY_HEADERS
+            $isSecure = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off")
+                || (isset($_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] === "443");
+            if (defined('TRUST_PROXY_HEADERS') && TRUST_PROXY_HEADERS) {
+                $isSecure = $isSecure
+                    || (isset($_SERVER["HTTP_X_FORWARDED_PROTO"])
+                        && strtolower((string) $_SERVER["HTTP_X_FORWARDED_PROTO"]) === "https")
+                    || (isset($_SERVER["HTTP_CF_VISITOR"])
+                        && strpos((string) $_SERVER["HTTP_CF_VISITOR"], "https") !== false);
+            }
+
             session_set_cookie_params([
                 "lifetime" => 0,
                 "path" => "/",
                 "domain" => $cookieDomain,
-                "secure" =>
-                    isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] === "on",
+                "secure" => $isSecure,
                 "httponly" => true,
                 "samesite" => "Strict",
             ]);
@@ -112,11 +122,10 @@ class Security
     private function setSessionFingerprint()
     {
         $ip = $this->getClientIP();
+        $userAgent = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
         $_SESSION["fingerprint"] = hash(
             "sha256",
-            ($_SERVER["HTTP_USER_AGENT"] ?? "") .
-                $ip .
-                ($_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? ""),
+            $ip . '|' . $userAgent,
         );
     }
 
@@ -131,11 +140,10 @@ class Security
         }
 
         $ip = $this->getClientIP();
+        $userAgent = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
         $currentFingerprint = hash(
             "sha256",
-            ($_SERVER["HTTP_USER_AGENT"] ?? "") .
-                $ip .
-                ($_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? ""),
+            $ip . '|' . $userAgent,
         );
 
         return hash_equals($_SESSION["fingerprint"], $currentFingerprint);
@@ -180,8 +188,21 @@ class Security
         // Permissions Policy (formerly Feature Policy)
         header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
 
-        // HSTS (if using HTTPS)
-        if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] === "on") {
+        // Cross-Origin isolation headers
+        header("Cross-Origin-Opener-Policy: same-origin");
+        header("Cross-Origin-Resource-Policy: same-origin");
+
+        // HSTS (if using HTTPS, respecting proxy headers when configured)
+        $__isHttpsForHsts = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off")
+            || (isset($_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] === "443");
+        if (defined('TRUST_PROXY_HEADERS') && TRUST_PROXY_HEADERS) {
+            $__isHttpsForHsts = $__isHttpsForHsts
+                || (isset($_SERVER["HTTP_X_FORWARDED_PROTO"])
+                    && strtolower((string) $_SERVER["HTTP_X_FORWARDED_PROTO"]) === "https")
+                || (isset($_SERVER["HTTP_CF_VISITOR"])
+                    && strpos((string) $_SERVER["HTTP_CF_VISITOR"], "https") !== false);
+        }
+        if ($__isHttpsForHsts) {
             header(
                 "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload",
             );

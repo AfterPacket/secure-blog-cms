@@ -84,14 +84,21 @@ if ($post && !empty($post["password_protected"]) && !$security->isAuthenticated(
                 $passwordMessage = "Invalid security token. Please try again.";
                 $passwordMessageType = "error";
             } else {
-                $submittedPassword = $_POST["post_password_input"] ?? "";
-                if (password_verify($submittedPassword, $post["post_password"])) {
-                    $_SESSION[$unlockKey] = ["time" => time()];
-                    $unlocked = true;
-                } else {
-                    $passwordMessage = "Incorrect password. Please try again.";
+                // Rate limit password attempts (5 per IP per 5 minutes)
+                $clientIP = $security->getClientIPPublic() ?: ($_SERVER["REMOTE_ADDR"] ?? "unknown");
+                if (!$security->checkRateLimit("post_pw_" . $clientIP, 5, 300)) {
+                    $passwordMessage = "Too many password attempts. Please try again in 5 minutes.";
                     $passwordMessageType = "error";
-                    $security->logSecurityEvent("Post password failed", $post["id"]);
+                } else {
+                    $submittedPassword = $_POST["post_password_input"] ?? "";
+                    if (password_verify($submittedPassword, $post["post_password"])) {
+                        $_SESSION[$unlockKey] = ["time" => time()];
+                        $unlocked = true;
+                    } else {
+                        $passwordMessage = "Incorrect password. Please try again.";
+                        $passwordMessageType = "error";
+                        $security->logSecurityEvent("Post password failed", $post["id"]);
+                    }
                 }
             }
         }
@@ -903,7 +910,7 @@ if ($post) {
                                 <?php echo $security->escapeHTML($passwordMessage); ?>
                             </div>
                         <?php endif; ?>
-                        <form method="post" action="post.php?slug=<?php echo $security->escapeURL($post["slug"]); ?>">
+                        <form method="post" action="<?php echo cms_path('post.php?slug=' . $security->escapeURL($post["slug"])); ?>">
                             <input type="hidden" name="csrf_token" value="<?php echo $passwordCsrfToken; ?>">
                             <input type="hidden" name="post_password_submit" value="1">
                             <div>
@@ -935,9 +942,7 @@ if ($post) {
                         </div>
 
                         <?php if ($security->isAuthenticated()): ?>
-                            <a href="admin/edit-post.php?id=<?php echo $security->escapeURL(
-                                $post["id"],
-                            ); ?>" class="edit-link">
+                            <a href="<?php echo cms_path('admin/edit-post.php?id=' . $security->escapeURL($post["id"])); ?>" class="edit-link">
                                 ✏️ Edit This Post
                             </a>
                         <?php endif; ?>
@@ -985,9 +990,7 @@ if ($post) {
                         </div>
                     <?php endif; ?>
 
-                    <form method="post" action="post.php?slug=<?php echo $security->escapeURL(
-                        $post["slug"],
-                    ); ?>#comment-form">
+                    <form method="post" action="<?php echo cms_path('post.php?slug=' . $security->escapeURL($post["slug"])); ?>#comment-form">
                         <input type="hidden" name="csrf_token" value="<?php echo $commentCsrfToken; ?>">
                         <div class="form-group">
                             <label for="author_name">Name *</label>

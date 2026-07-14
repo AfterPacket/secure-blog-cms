@@ -42,7 +42,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
     <language>en-us</language>
     <lastBuildDate><?php echo date(DATE_RSS, time()); ?></lastBuildDate>
     <atom:link href="<?php echo $security->escapeHTML(
-        SITE_URL . "/rss.php",
+        SITE_URL . cms_path("rss.php"),
     ); ?>" rel="self" type="application/rss+xml" />
 
     <?php if (!empty($posts)): ?>

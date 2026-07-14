@@ -1,47 +1,114 @@
 {
-    "version": "1.5.1",
+    "version": "1.5.2",
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Security hardening: rate limit post passwords, session fingerprint with User-Agent, URL validation, COOP/CORP headers, comment sanitization, upload rate limiting.",
-    "cache_bust": "20260714-0001-SECURITY",
+    "description": "Critical fix: Argon2id password hash corruption in double-quoted strings. Config protection: config.php now uses single quotes for password hash, added DO NOT OVERWRITE warning, added config.php.example template.",
+    "cache_bust": "20260714-0002-CRITICAL",
     "critical": true,
     "files": {
         "includes/Security.php": {
             "path": "includes/Security.php",
-            "sha256": "auto"
+            "sha256": "89548047ed25f97f80cf20705c1809450cba6c7e400f86c2c36d08e5f2bcfe55"
         },
         "includes/comments.php": {
             "path": "includes/comments.php",
-            "sha256": "auto"
+            "sha256": "4ad7343cd4e2ee64d647302cdd551eded9caa82b1dd366adc15334a23a9bb221"
+        },
+        "includes/Upgrader.php": {
+            "path": "includes/Upgrader.php",
+            "sha256": "d8a53b23a11e4ed8023913a0e4b688d2c9824c51f15d18fa6aacd15b376c28d8"
+        },
+        "includes/Storage.php": {
+            "path": "includes/Storage.php",
+            "sha256": "501a8a4519cee5c7728091097a1f0159239c5ffdaf352179b196fab8854b53da"
+        },
+        "includes/Resilience.php": {
+            "path": "includes/Resilience.php",
+            "sha256": "95b30e5462bc873f48a799201a8a1ad655950a96879fd33266de1d522068e7d1"
+        },
+        "includes/UrlShortener.php": {
+            "path": "includes/UrlShortener.php",
+            "sha256": "938e2c92409b8c7692e3c4fb2cd423018d9fb4af0a27efc137906dffa1495ffe"
+        },
+        "includes/users.php": {
+            "path": "includes/users.php",
+            "sha256": "e746ac4b9bc6dbae0fee360141d28dc830ac7861e5062f64b798a6baaa05876f"
         },
         "admin/settings.php": {
             "path": "admin/settings.php",
-            "sha256": "auto"
+            "sha256": "195635c62bb1124f0d567d07cb7b5eb5c7569e8c965bc7a64c2ba6ef2553ca48"
         },
         "admin/upload-image.php": {
             "path": "admin/upload-image.php",
-            "sha256": "auto"
+            "sha256": "c6b73ec8e27ea2532d39edc0571d9150b5b07004145f651e3f4c676e9485132a"
+        },
+        "admin/admin.php": {
+            "path": "admin/admin.php",
+            "sha256": "4df89624d13d61d27c74df22f8bb7bbe1165dd3dfddc256c2098d88160f1814c"
+        },
+        "admin/create-post.php": {
+            "path": "admin/create-post.php",
+            "sha256": "8f270808b99ac5792a28914d3dbd841bf6dd637006840a3ee1857dd7b2292575"
+        },
+        "admin/edit-post.php": {
+            "path": "admin/edit-post.php",
+            "sha256": "fd80e384025d65c524d35044e21949050fb40471b47e72699708a3f4be99e570"
+        },
+        "admin/login.php": {
+            "path": "admin/login.php",
+            "sha256": "d6c5c0122521add48a07a084faaddba7e230b650465d1b8156d105f248902e94"
+        },
+        "admin/resilience.php": {
+            "path": "admin/resilience.php",
+            "sha256": "2c22d620af40e7d9e597bfdc9d495d1d23d4b7b12fe6929361c4b92ad48f2a8e"
+        },
+        "admin/serve-image.php": {
+            "path": "admin/serve-image.php",
+            "sha256": "ee1a424734052ffc319a44d3dbfe0948e384a3d8c0f5acd6b6e78b2e4b1fef20"
+        },
+        "admin/upgrade.php": {
+            "path": "admin/upgrade.php",
+            "sha256": "042b470b3a2223dec25c1ff0a2f9bad18bb23fb336394147c09b723778f5a74a"
         },
         "post.php": {
             "path": "post.php",
-            "sha256": "auto"
+            "sha256": "8887bb0cc46632ad293b8134e2f3685fe111dd879181f6c0caedcec6150e79bb"
         },
         "index.php": {
             "path": "index.php",
-            "sha256": "auto"
+            "sha256": "adcd72a57878c57b0361fc6f6dd27419d362080646a4e6466190f80c97d0249b"
+        },
+        "rss.php": {
+            "path": "rss.php",
+            "sha256": "7b96805f34e203f968a2053a1067927fa7b305a791609a97f5cfe5e86879c927"
+        },
+        "s.php": {
+            "path": "s.php",
+            "sha256": "adcd19c8c2fee88a5bfe0bb93402a9ae45cbd17bab249e12aec606b5a60bfbe9"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "auto"
+            "sha256": "0f5bddb5c9cc5e41c8855f9d0812d4eb1ff811a4994578591533f460250171f3"
+        },
+        "templates/index_template.php": {
+            "path": "templates/index_template.php",
+            "sha256": "136565fae2c0fddeba3cce1e169deba7580d7ef8d0af1194b6fc68c39e9f22e0"
+        },
+        "templates/post_template.php": {
+            "path": "templates/post_template.php",
+            "sha256": "9296295f4db1f255f61244657bc46011b8a25919687084eb5ae807562bf9cfe5"
         }
     },
     "changes": [
+        "CRITICAL: Fix Argon2id password hash corruption — use single quotes for ADMIN_PASSWORD_HASH",
         "Rate limit post password attempts (5/IP/5min)",
         "Strengthen session fingerprint with User-Agent hashing",
         "Add COOP/CORP security headers",
         "Validate site URL setting (scheme whitelist)",
         "Sanitize comment author names (strip tags, length limit, email validation)",
         "Per-user daily upload rate limit (50/day)",
-        "Fix corrupted ENABLE_CSP_HEADERS define in config.php"
+        "Add DO NOT OVERWRITE warning in config.php header",
+        "Add config.php.example as install template",
+        "Remove config.php from update manifest (never overwrite)"
     ]
 }

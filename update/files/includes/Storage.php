@@ -172,7 +172,7 @@ class Storage
                 }
                 $post["post_password"] = password_hash(
                     $data["post_password"],
-                    PASSWORD_DEFAULT,
+                    defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_DEFAULT,
                 );
             }
 
@@ -330,7 +330,7 @@ class Storage
                 if (!empty($data["post_password"])) {
                     $post["post_password"] = password_hash(
                         $data["post_password"],
-                        PASSWORD_DEFAULT,
+                        defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_DEFAULT,
                     );
                 }
             } else {
