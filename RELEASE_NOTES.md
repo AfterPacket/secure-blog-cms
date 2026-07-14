@@ -1,33 +1,53 @@
-# Secure Blog CMS v1.5.2 — Release Notes
+# Secure Blog CMS v1.5.4 — Release Notes
 
 **Release Date:** 2026-07-14  
-**Severity:** Critical Bug Fix  
+**Severity:** Security Enhancement  
 **GitHub:** https://github.com/AfterPacket/secure-blog-cms
 
 ---
 
 ## Summary
 
-This release fixes a critical bug where Argon2id password hashes containing `$` characters were corrupted by PHP variable interpolation when stored in double-quoted strings. This caused admin login failures. The password hash define now uses single quotes to prevent this. It also prevents config.php from being overwritten during updates, and adds config.php.example as an install template.
-
-All users should upgrade.
+This release adds automatic self-deletion of the `install/` directory after successful installation, preventing the installer from being left accessible on production servers. The installer now removes itself using a PHP shutdown function, with a safety net in `login.php` that also cleans up the install directory on first admin login.
 
 ---
 
-## Bug Fixes
+## Security Enhancement
 
-### 🔴 Critical: Password Hash Corruption
-Argon2id hashes contain `$` characters (e.g., `$argon2id$v=19$m=...`). When stored in a double-quoted PHP string like `define("ADMIN_PASSWORD_HASH", "$argon2id...")`, PHP interprets the `$` as variable references, corrupting the hash and preventing login. Fixed by using single quotes: `define('ADMIN_PASSWORD_HASH', '...')`.
+### 🟡 Automatic Install Directory Removal
+- **Installer self-deletion:** After successful installation, `install/index.php` registers a PHP shutdown function that recursively deletes the entire `install/` directory. This prevents the installer from remaining accessible on production servers.
+- **Login safety net:** `admin/login.php` now checks for and deletes the `install/` directory on first successful admin login, catching cases where the self-deletion fails (e.g., due to file permissions).
+- **Legacy cleanup:** Also deletes `install.php` if it exists (from older CMS versions).
+- Install success message updated to inform users the directory is being automatically removed.
 
-### 🟡 Config Protection
-- `config.php` now has a prominent header warning not to overwrite it during updates
-- Added `config.php.example` as a template for new installations
-- Installer copies from `config.php.example` to `config.php` if it doesn't exist
-- Upgrader already skips `config.php` — now also removed from update manifest
+---
 
-### 🟡 Update Manifest Updated
-- Manifest updated to v1.5.2
-- `includes/config.php` removed from manifest file list
+## Previous Releases
+
+### v1.5.3 — Session & Updater Fix (2026-07-14)
+
+**Critical Bug Fixes:**
+- Admin session logout on idle — session fingerprint validation was destroying sessions when IP or User-Agent shifted between requests behind Cloudflare/Varnish proxies. Now logs a warning and updates the fingerprint instead of destroying the session.
+- Argon2id password hash corruption — hashes containing `$` characters were corrupted by PHP variable interpolation in double-quoted strings, causing admin login failures. `ADMIN_PASSWORD_HASH` now uses single quotes.
+- Updater "Requested version not found in manifest" error — Upgrader required exact version string match. Now uses the manifest version directly and only checks that it's newer than the current version. Update cache also cleared before upgrading.
+
+**Improvements:**
+- Session regenerate interval increased from 30 minutes to 4 hours
+- `config.php` has prominent DO NOT OVERWRITE warning header
+- Added `config.php.example` as install template
+- `includes/config.php` removed from update manifest
+- Built-in updater now has real SHA-256 hashes
+- Added `generate_manifest.sh` script for release manifests
+
+### v1.5.2 — Config Protection (2026-07-14)
+
+**Critical Bug Fix:**
+- Password hash corruption fix (same root cause as v1.5.3)
+
+**Improvements:**
+- Added `config.php.example` as install template
+- Installer copies from config.php.example; uses single-quote replacement for password hash
+- Removed config.php from update manifest
 
 ---
 

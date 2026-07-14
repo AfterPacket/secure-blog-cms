@@ -222,6 +222,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["install"])) {
                         $logEntry,
                         FILE_APPEND | LOCK_EX);
 
+                    // Self-delete the install directory
+                    // This runs after output is sent, so we register a shutdown function
+                    register_shutdown_function(function () {
+                        $installDir = __DIR__;
+                        // Delete all files in install directory first
+                        $files = new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator($installDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                            RecursiveIteratorIterator::CHILD_FIRST
+                        );
+                        foreach ($files as $file) {
+                            if ($file->isDir()) {
+                                @rmdir($file->getRealPath());
+                            } else {
+                                @unlink($file->getRealPath());
+                            }
+                        }
+                        // Delete the now-empty install directory itself
+                        @rmdir($installDir);
+                    });
+
                     $installComplete = true;
                     $step = 3; // Success page
                 }
@@ -706,7 +726,7 @@ $allChecksPassed = !in_array(false, $systemChecks, true);
                 • Admin account created<br>
                 • Directories configured<br>
                 • Security features enabled<br>
-                • Install file will be deleted on first login
+                • Install directory is being automatically removed
             </div>
 
             <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px;">

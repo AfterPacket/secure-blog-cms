@@ -27,11 +27,26 @@ Secure Blog CMS is a security-first PHP blogging platform that stores content in
 - CSRF protection on all forms (single-use tokens, no replay)
 - XSS sanitization and output escaping (DOM-based HTML purification)
 - CSP headers enabled by default, plus standard HTTP security headers
-- Rate limiting (login, comments, uploads, short URLs) and account lockout
-- Session hardening and regeneration with IP binding
+- Rate limiting (login, comments, uploads, short URLs, post passwords)
+- Account lockout after failed login attempts
+- Session hardening with IP + User-Agent fingerprinting
 - Security event logging to `data/logs/`
 - Mandatory SHA-256 checksums on upgrades; auto-upgrade disabled for safety
 - Proxy header spoofing protection (Cloudflare/X-Forwarded headers gated behind config toggle)
+- COOP/CORP security headers for cross-origin isolation
+- Permissions-Policy header to restrict browser APIs
+- HSTS with preload and includeSubDomains (respects proxy headers)
+- Comment author name sanitization (strip tags, length limit, email validation)
+- Site URL validation (scheme whitelist prevents javascript: and data: URLs)
+- Per-user daily upload rate limiting (50/day per user)
+- Post password brute-force protection (5 attempts per IP per 5 minutes)
+
+### Built-In Updater
+- Check for updates from the admin panel
+- Download and verify files with SHA-256 integrity checks
+- Automatic backup before upgrade
+- Config file never overwritten during updates
+- One-click upgrade process
 
 ## Requirements
 
@@ -39,7 +54,7 @@ Secure Blog CMS is a security-first PHP blogging platform that stores content in
 - Web server (Apache/Nginx) or PHP built-in server
 - Write access to the `data/` directory
 - Extensions (optional but recommended):
-  - `curl` for Pinata IPFS pinning
+  - `curl` for Pinata IPFS pinning and in-app updates
   - `zip` for export ZIP bundles
   - `dom` for DOM-based HTML sanitization (fallback regex available)
 
@@ -55,25 +70,27 @@ Secure Blog CMS is a security-first PHP blogging platform that stores content in
 ### Option B: Manual install
 1. Copy the project into your web root.
 2. Ensure the `data/` directory is writable by the web server.
-3. Set your admin password hash in `includes/config.php`:
+3. Generate an Argon2id password hash (use single quotes to avoid `$` interpretation):
 
-```php
-// Generate a new hash
-// php -r "echo password_hash('YourSecurePassword123!', PASSWORD_ARGON2ID);"
-
-// Then update:
-define('ADMIN_PASSWORD_HASH', 'your_generated_hash_here');
+```bash
+cat > /tmp/hashpass.php << 'EOF'
+<?php
+echo password_hash('YourSecurePassword123!', PASSWORD_ARGON2ID) . PHP_EOL;
+EOF
+php /tmp/hashpass.php
 ```
 
-4. Update basic site settings in `includes/config.php`:
+4. Update `includes/config.php` with your credentials (use **single quotes** for the hash):
 
 ```php
-define('SITE_NAME', 'Your Blog Name');
-define('SITE_DESCRIPTION', 'Your blog description');
-define('SITE_URL', 'https://yourdomain.com');
+define('ADMIN_USERNAME', 'your_username');
+define('ADMIN_PASSWORD_HASH', '$argon2id$v=19$m=65536,...');  // single quotes!
 ```
 
-5. Open `/admin.php` and log in.
+5. Update site settings in `includes/config.php` or the admin UI.
+6. Open `/admin.php` and log in.
+
+> ⚠️ **Important:** Always use single quotes around `ADMIN_PASSWORD_HASH`. Argon2id hashes contain `$` characters which PHP interprets as variable references inside double-quoted strings, corrupting the hash and breaking login.
 
 ### Reverse Proxy / Cloudflare Setup
 
@@ -105,39 +122,34 @@ Or set `hcaptcha_sitekey` in `data/settings/site.json` and keep the secret in en
 ### Pinata (IPFS)
 Configure Pinata credentials in `/admin/settings.php` to enable auto-pinning of exports.
 
-## Usage
-
-### Create and edit posts
-- Log in at `/admin.php` and use the Create/Edit screens.
-- Images are uploaded via the editor and stored in `data/uploads/images/`.
-
-### Comments
-- Public comments are stored in `data/comments/`.
-- Moderate in `/admin/comments.php`.
-
-### Backups
-- Backups are created automatically on key actions (if enabled).
-- Manual backup/restore is available in the admin dashboard.
-
-### Resilience Center (static export)
-- Go to `/admin/resilience.php` and generate a static bundle.
-- Bundles are stored in `data/exports/` and may include a ZIP.
-- Static exports do not include dynamic features like comments, search, or private post access.
-
 ## Updating
 
 ### In-app updater
 - Go to `/admin/upgrade.php` and check for updates.
 - The upgrader downloads `update/manifest.json` from the configured update source.
 - **All file updates require SHA-256 checksum verification** — no file is written without integrity verification.
+- **`includes/config.php` is never overwritten** — your credentials and settings are preserved.
 - Auto-upgrade has been disabled for security. All upgrades must be manually triggered.
 
 ### Manual update
-1. Backup `data/` and `includes/config.php`.
+1. **Backup `data/` and `includes/config.php`.**
 2. Replace application files with the new release.
-3. Re-check your settings and log in to confirm.
+3. **Do NOT overwrite `includes/config.php`** — preserve your existing credentials and settings.
+4. Re-check your settings and log in to confirm.
 
-## Project Layout (high level)
+### Creating a release
+For maintainers, use the `generate_manifest.sh` script to prepare updates:
+
+```bash
+cd update/
+./generate_manifest.sh 1.6.0 "Description of changes"
+# Then commit, tag, and push:
+git add update/ && git commit -m "v1.6.0: update manifest"
+git tag -a v1.6.0 -m "v1.6.0"
+git push origin master --tags
+```
+
+## Project Layout
 
 ```
 secure-blog-cms/
@@ -146,46 +158,127 @@ secure-blog-cms/
   includes/         Core classes (Security, Storage, Comments, Resilience, Uploads)
   install/          Installation wizard (delete after install)
   templates/        Public templates
-  tools/            Build and release helpers
-  update/           Update packages and manifest
+  update/           Update packages, manifest, and release files
   index.php         Public homepage
   post.php          Single post view
   rss.php           RSS feed
   s.php             Short URL redirect handler
 ```
 
+## Deployment Notes
+
+### Nginx (recommended)
+A sample nginx config is included as `nginx.conf` with:
+- Pretty URL rewrites (WordPress-style `/post/slug/`, `/category/tech/`, etc.)
+- Security deny rules for `data/`, `includes/`, and `install/` directories
+- Static file caching headers
+
+### CloudPanel / Varnish
+When deploying behind CloudPanel with Varnish:
+1. Set `TRUST_PROXY_HEADERS` to `true` in `includes/config.php`
+2. Add nginx deny rules for `data/`, `includes/`, and `install/` directories
+3. Ensure parent directory permissions are `755` (CloudPanel may reset to `770`)
+4. Delete the `install/` directory after setup
+
+### Important: Config Protection
+- `includes/config.php` contains your admin credentials and site settings
+- **Never overwrite it during updates** — the updater skips it automatically
+- `includes/config.php.example` is provided as a reference template
+- When deploying manually, always exclude `includes/config.php` from file copies
+- The `ADMIN_PASSWORD_HASH` must use **single quotes** (not double quotes) to prevent PHP from interpreting `$` in Argon2id hashes
+
 ## Changelog
+
+### v1.5.3 — Session & Updater Fix (2026-07-14)
+
+**Critical Bug Fixes:**
+- **[CRITICAL]** Admin session logout on idle — session fingerprint validation was destroying sessions when IP or User-Agent shifted between requests behind Cloudflare/Varnish proxies. Now logs a warning and updates the fingerprint instead of destroying the session.
+- **[CRITICAL]** Argon2id password hash corruption — hashes containing `$` characters were corrupted by PHP variable interpolation in double-quoted strings, causing admin login failures. `ADMIN_PASSWORD_HASH` now uses single quotes.
+- **[CRITICAL]** Updater "Requested version not found in manifest" error — Upgrader required exact version string match. Now uses the manifest version directly and only checks that it's newer than the current version. Update cache also cleared before upgrading.
+
+**Improvements:**
+- Session regenerate interval increased from 30 minutes to 4 hours (less disruption for users)
+- `config.php` has prominent DO NOT OVERWRITE warning header
+- Added `config.php.example` as install template — installer copies from example if config.php doesn't exist
+- `includes/config.php` removed from update manifest — updater will never overwrite it
+- Built-in updater now has real SHA-256 hashes for integrity verification
+- Added `generate_manifest.sh` script for maintainers to generate release manifests
+
+### v1.5.2 — Config Protection (2026-07-14)
+
+**Critical Bug Fix:**
+- **[CRITICAL]** Password hash corruption fix (same root cause as v1.5.3, addressed in config.php template and installer)
+
+**Improvements:**
+- Added `config.php.example` as install template
+- Installer copies from config.php.example; uses single-quote replacement for password hash
+- Removed config.php from update manifest
+
+### v1.5.1 — Pen Test Hardening (2026-07-14)
+
+**Security Fixes:**
+- **[MEDIUM]** Rate limiting added to post password attempts (5 per IP per 5 minutes) — prevents brute-force attacks against password-protected posts.
+- **[MEDIUM]** Session fingerprint now hashes User-Agent with SHA-256 — strengthens session binding beyond IP-only, format: `sha256(ip | sha256(user_agent))`.
+- **[MEDIUM]** Site URL setting validation added — `filter_var(FILTER_VALIDATE_URL)` and scheme whitelist (`http`/`https`) prevent open redirect and XSS via malicious URL values.
+- **[MEDIUM]** Cross-Origin isolation headers added — `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` prevent cross-origin information leakage.
+- **[MEDIUM]** Comment author name sanitization — HTML tags stripped, length capped at 100 characters. Email validated when provided.
+- **[MEDIUM]** Per-user daily upload rate limit added (50 uploads/day per user) alongside existing per-IP hourly limit.
+
+### v1.5.0 — Security + Subfolder Install Fix (2026-07-13)
+
+**Security Fixes:**
+- **[HIGH]** Removed CSRF token from image upload URL query string — tokens were being logged in server access logs and browser history. Now sent only via `X-CSRF-Token` header and POST body.
+- **[HIGH]** Removed `data:` from public CSP `img-src` — prevents SVG-based XSS through `data:image/svg+xml` URIs. Admin CSP still allows `data:` for TinyMCE paste compatibility.
+- **[HIGH]** HSTS header now respects `TRUST_PROXY_HEADERS` — previously only checked `$_SERVER["HTTPS"]`, which is empty behind Cloudflare/Varnish. Sites behind proxies now correctly send HSTS.
+- **[MEDIUM]** Short URL redirect (`s.php`) changed from 301 to 302 — prevents browser cache poisoning if target changes.
+- **[MEDIUM]** Short URL redirect now validates resolved slug corresponds to a published post — prevents open redirect.
+- **[MEDIUM]** Post password hashing upgraded from bcrypt to Argon2id with fallback.
+- **[MEDIUM]** Removed `ini_set()` calls for `allow_url_fopen`/`allow_url_include` — these are `PHP_INI_SYSTEM` directives. Added comments for php.ini configuration.
+- **[LOW]** Removed debug `error_log()` from `ImageUpload.php`.
+- **[LOW]** Fixed `Content-Disposition` filename escaping in `serve-image.php`.
+
+**Bug Fixes:**
+- **[CRITICAL]** All internal links now use `cms_path()` — fixes broken pagination, search, admin links, RSS, and comment forms in subfolder installs.
+- **[CRITICAL]** Fixed `index.php` line 469 — missing `?>` closing tag caused 500 parse error on PHP 8.x.
+
+### v1.4.1 — Patch Release (2026-07-13)
+
+**Security Fixes:**
+- **[HIGH]** Password input fields for post protection were `type="text"` — changed to `type="password"`.
+- **[HIGH]** `ENABLE_UPLOAD_MALWARE_SCAN` was `false` by default — changed to `true`.
+- **[MEDIUM]** Session cookie `secure` flag now respects `TRUST_PROXY_HEADERS`.
+- **[MEDIUM]** Removed debug `console.log` statements from create/edit post pages.
+
+**Bug Fixes:**
+- Image URL insertion: TinyMCE `valid_elements` now allows `class` and `style` on `<img>`.
+- Image paste: Enabled `paste_data_images: true` in TinyMCE.
+- RSS self-link: Now uses `cms_path()` for correct URLs in subfolder installs.
 
 ### v1.4.0 — Security Hardening Release (2026-07-13)
 
 **Critical Fixes:**
-- **[CRITICAL]** Removed Remote Code Execution vector in upgrade system — `download_url` is no longer accepted from POST data. Upgrades now use `performUpgradeFromManifest()` which only fetches from the hardcoded manifest URL. SHA-256 checksums are mandatory for all files (no `"auto"` bypass). Auto-upgrade disabled by default.
-- **[CRITICAL]** Added credential placeholder detection — CMS warns if default `REPLACE_ME_*` credentials are still in place after installation.
+- **[CRITICAL]** Removed Remote Code Execution vector in upgrade system — `download_url` no longer accepted from POST data. Upgrades use `performUpgradeFromManifest()` with hardcoded manifest URL. SHA-256 checksums mandatory. Auto-upgrade disabled.
+- **[CRITICAL]** Added credential placeholder detection — warns if `REPLACE_ME_*` defaults are still in place.
 
 **High Fixes:**
-- **[HIGH]** Replaced regex-based XSS sanitizer with DOM-based HTML purification using `DOMDocument` + XPath. Removes all `on*` event handlers, `formaction`, `javascript:`/`data:` URIs, and dangerous tags (`<svg>`, `<math>`, `<iframe>`, `<object>`, `<embed>`, etc.). Regex fallback preserved for servers without `dom` extension.
-- **[HIGH]** CSP headers now enabled by default (`ENABLE_CSP_HEADERS = true`).
-- **[HIGH]** CSRF tokens are now single-use for all forms — removed `image_upload`/`edit_post_form` reuse exception that allowed replay attacks within the 48-hour token lifetime. Upload handler now returns a fresh token on success for seamless multi-image uploads.
-- **[HIGH]** Session fingerprint no longer blindly trusts `HTTP_CF_CONNECTING_IP` or `HTTP_X_FORWARDED_FOR` headers. New `TRUST_PROXY_HEADERS` config constant (default: `false`) must be explicitly enabled for Cloudflare/reverse proxy deployments. HTTPS detection via `X-Forwarded-Proto`/`CF_Visitor` similarly gated.
-- **[HIGH]** Removed version disclosure header (`X-SecureBlogCMS-Version`) — now only sent if `SHOW_VERSION_HEADER` is explicitly defined and `true`.
-- **[HIGH]** Password protection is now enforced on public pages. Password-protected posts require a password to view content (session-based unlock with 1-hour TTL). Private posts are hidden from non-authenticated users in listings, search, and RSS.
+- **[HIGH]** Replaced regex XSS sanitizer with DOM-based HTML purification (DOMDocument + XPath). Regex fallback for servers without `dom` extension.
+- **[HIGH]** CSP headers enabled by default.
+- **[HIGH]** CSRF tokens now single-use for all forms — removed `image_upload`/`edit_post_form` reuse exception.
+- **[HIGH]** Session fingerprint gated behind `TRUST_PROXY_HEADERS` config (default: `false`).
+- **[HIGH]** Removed version disclosure header (`X-SecureBlogCMS-Version`) — only sent if `SHOW_VERSION_HEADER` is explicitly `true`.
+- **[HIGH]** Password protection enforced on public pages. Private posts hidden from listings, search, and RSS.
 
 **Medium Fixes:**
-- **[MEDIUM]** Role validation added — `addUser()` and `updateUser()` now enforce whitelist (`admin`, `editor`, `author`). Arbitrary roles are rejected.
-- **[MEDIUM]** Password hashing unified to Argon2id across all user management (`Users` class previously used `PASSWORD_DEFAULT`/bcrypt; now uses `PASSWORD_ARGON2ID` with bcrypt fallback).
-- **[MEDIUM]** Rate limiting added to comment submissions (3 comments per IP per hour).
-- **[MEDIUM]** Install directory `.htaccess` hardened — blocks sensitive file types.
-- **[MEDIUM]** CORS `Access-Control-Allow-Credentials` changed from `true` to `false` on image upload/serve endpoints.
-- **[MEDIUM]** Debug logging reduced in upload endpoint — removed verbose `$_POST`/`$_FILES` key dumps.
-- **[MEDIUM]** Error reporting hardened from `E_ALL` to `E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE`.
-
-**Low Fixes:**
-- **[LOW]** Consistent IP source across all rate limiting (login, comments, uploads, short URLs) via new `Security::getClientIPPublic()` method.
-- **[LOW]** Index page redirect logic improved to not redirect to installer when CMS is already installed.
-- **[LOW]** Password-protected posts show 🔒 indicator in listings and RSS feed; content is hidden until password is entered.
+- Role validation whitelist enforced in `addUser()` and `updateUser()`.
+- Password hashing unified to Argon2id across all user management.
+- Rate limiting on comment submissions (3/IP/hour).
+- Install directory `.htaccess` hardened.
+- CORS credentials set to `false` on image endpoints.
+- Debug logging reduced in upload endpoint.
+- Error reporting hardened to `E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE`.
 
 ---
 
-Version: 1.4.0
-Last Updated: 2026-07-13
+Version: 1.5.3  
+Last Updated: 2026-07-14  
 Security Level: High

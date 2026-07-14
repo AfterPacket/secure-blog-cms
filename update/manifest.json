@@ -1,9 +1,9 @@
 {
-    "version": "1.5.3",
+    "version": "1.5.4",
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Fix admin session logout; fix updater version check; add manifest generator",
-    "cache_bust": "20260714-1851",
+    "description": "Auto-delete install directory after setup; login safety net cleanup",
+    "cache_bust": "20260714-1900",
     "critical": false,
     "files": {
         "index.php": {
@@ -52,7 +52,7 @@
         },
         "admin/login.php": {
             "path": "admin/login.php",
-            "sha256": "d6c5c0122521add48a07a084faaddba7e230b650465d1b8156d105f248902e94"
+            "sha256": "56b8c469a3c80ae59777ad116c432ba2736a02312cbdf848f4135a6801e00930"
         },
         "admin/logout.php": {
             "path": "admin/logout.php",
@@ -128,10 +128,13 @@
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "a2bd73ceb906647a0554e881cad0ea17385b1800d96bc51757f44075bc1db2fc"
+            "sha256": "6b6cffb97c9f8dc245254e71ea5393d9d8767255f9d9f70a6f7bdb390c28344a"
         }
     },
     "changes": [
-        "See RELEASE_NOTES.md for detailed changes"
+        "Auto-delete install/ directory after successful installation (shutdown function)",
+        "Login safety net: admin/login.php deletes install/ directory on first login",
+        "Legacy install.php cleanup also included",
+        "Version bump to 1.5.4"
     ]
 }

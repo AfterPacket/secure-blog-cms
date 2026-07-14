@@ -58,14 +58,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $result = $security->authenticate($username, $password);
 
                 if ($result["success"]) {
-                    // Delete install.php on first successful login
+                    // Delete install directory on first successful login (safety net)
+                    $installDir = __DIR__ . "/../install";
+                    if (is_dir($installDir)) {
+                        $files = new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator($installDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                            RecursiveIteratorIterator::CHILD_FIRST
+                        );
+                        foreach ($files as $file) {
+                            if ($file->isDir()) {
+                                @rmdir($file->getRealPath());
+                            } else {
+                                @unlink($file->getRealPath());
+                            }
+                        }
+                        @rmdir($installDir);
+                        $security->logSecurityEvent(
+                            "Install directory deleted on first login",
+                            $username,
+                        );
+                    }
+                    // Also delete legacy install.php if it exists
                     $installFile = __DIR__ . "/../install.php";
                     if (file_exists($installFile)) {
                         @unlink($installFile);
-                        $security->logSecurityEvent(
-                            "Install file deleted on first login",
-                            $username,
-                        );
                     }
 
                     // Successful login - redirect to admin
