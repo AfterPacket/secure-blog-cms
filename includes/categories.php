@@ -152,7 +152,7 @@ class Categories
         $name = trim(strip_tags($name));
         if (empty($name)) {
             return [
-                "success" =>> false,
+                "success" => false,
                 "message" => "Category name cannot be empty.",
             ];
         }
