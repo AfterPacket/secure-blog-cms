@@ -1,9 +1,9 @@
 {
-    "version": "1.5.4",
+    "version": "1.5.5",
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Auto-delete install directory; update channel support; login cleanup safety net",
-    "cache_bust": "20260714-1900",
+    "description": "Category/tag deletion, slug safety, duplicate prevention, branding update",
+    "cache_bust": "20260714-2000",
     "critical": false,
     "files": {
         "index.php": {
@@ -82,6 +82,10 @@
             "path": "admin/users.php",
             "sha256": "bf52f9efe8a123f66ce489ee5835ca5bbf031af48787a7ce58a54a0903e16dd0"
         },
+        "includes/config.php": {
+            "path": "includes/config.php",
+            "sha256": "7f6bd9276ca5801c1bf109231209dd1e71cc97cfee8e328f726b4cc91a9a8ed5"
+        },
         "includes/Security.php": {
             "path": "includes/Security.php",
             "sha256": "f5e2d67858a5ef329e069d3921ecf557906f0dfe6185e18f871ef98b1b0085bf"
@@ -124,23 +128,28 @@
         },
         "templates/index_template.php": {
             "path": "templates/index_template.php",
-            "sha256": "136565fae2c0fddeba3cce1e169deba7580d7ef8d0af1194b6fc68c39e9f22e0"
+            "sha256": "ae88791990982f505b3c9d087eb3c5c198c5fa044a7d39676723e38f8f2fc932"
         },
         "templates/post_template.php": {
             "path": "templates/post_template.php",
-            "sha256": "9296295f4db1f255f61244657bc46011b8a25919687084eb5ae807562bf9cfe5"
+            "sha256": "6a69642d15088d8b2cf2bacf43f37dc65136713ac4f1d1627a316e98dace38fe"
+        },
+        "templates/footer.php": {
+            "path": "templates/footer.php",
+            "sha256": "f83ffc8d72f92a76b994629d91ce3efe5e41ba05cbc8efbf99fd59e11c502e14"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "6b6cffb97c9f8dc245254e71ea5393d9d8767255f9d9f70a6f7bdb390c28344a"
+            "sha256": "2d13d6b92a62ca30da6c2f98061e6d25d1658c265debaa15a137c8e23e345469"
         }
     },
     "changes": [
-        "Auto-delete install/ directory after successful installation (shutdown function)",
-        "Login safety net: admin/login.php deletes install/ directory on first login",
-        "Legacy install.php cleanup also included",
-        "Update channel support: stable or beta via UPDATE_CHANNEL config",
-        "Admin upgrade page shows current update channel",
-        "Version bump to 1.5.4"
+        "Add category and tag deletion with post reference cleanup",
+        "Slug collision resolution (auto-appends -2, -3, etc.)",
+        "Duplicate category/tag prevention (case-insensitive)",
+        "No-cache headers on admin categories page for CSRF freshness",
+        "Branding update: Digital Systems LLC / AfterPacket",
+        "Remove duplicate version display in public footer",
+        "Version bump to 1.5.5"
     ]
 }

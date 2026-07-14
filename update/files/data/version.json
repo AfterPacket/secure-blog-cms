@@ -1,3 +1,8 @@
 {
-    "version":  "1.5.4"
+  "app_name": "Secure Blog CMS",
+  "version": "1.5.5",
+  "license": "GPL-3.0",
+  "created_by": "Digital Systems LLC / AfterPacket",
+  "repo": "https://github.com/AfterPacket",
+  "website": "https://digitalsystems.cc"
 }

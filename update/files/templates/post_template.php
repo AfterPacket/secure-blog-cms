@@ -84,7 +84,7 @@ if (!$post) {
     <footer>
         <div class="container">
             <p>&copy; <?php echo date('Y'); ?> <?php echo $security->escapeHTML($site_name); ?></p>
-            <p>Powered by Secure Blog CMS <?php echo $is_static ? '(Static Edition)' : ''; ?> 🔒</p>
+            <p>Powered by <a href="https://github.com/AfterPacket/secure-blog-cms/" target="_blank" rel="noopener">Secure Blog CMS</a> <?php echo $is_static ? '(Static Edition)' : ''; ?> 🔒 · <a href="https://digitalsystems.cc" target="_blank" rel="noopener">Digital Systems LLC</a> / <a href="https://github.com/AfterPacket/secure-blog-cms/" target="_blank" rel="noopener">AfterPacket</a></p>
         </div>
     </footer>
 </body>
