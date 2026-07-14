@@ -1,9 +1,9 @@
 {
-    "version": "1.5.5",
+    "version": "1.5.6",
     "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Category/tag deletion, slug safety, duplicate prevention, branding update",
-    "cache_bust": "20260714-2000",
+    "description": "User management: password policy, role permissions, edit/delete users, CLI password reset, installer policy enforcement",
+    "cache_bust": "20260714-2100",
     "critical": false,
     "files": {
         "index.php": {
@@ -29,6 +29,10 @@
         "edit-post.php": {
             "path": "edit-post.php",
             "sha256": "3c746b673b65a0f8ec8e4b59e753a82d7e2171eed7f8954346b8365576fdd0bc"
+        },
+        "nginx.conf": {
+            "path": "nginx.conf",
+            "sha256": "d00f76ec4a8cf075cd018ed6af8c52964d32db6b74cfdcc6c6a8eab124f2aa3e"
         },
         "admin/admin.php": {
             "path": "admin/admin.php",
@@ -80,11 +84,23 @@
         },
         "admin/users.php": {
             "path": "admin/users.php",
-            "sha256": "51d96e950ae38edb429803dfe380364c562ae1faa8757ea715bbd7831e02906e"
+            "sha256": "83d3a8fb4d7afeae5e000669f55b4355b29f4a26190e7297ecb569d4b85828da"
         },
-        "includes/config.php": {
-            "path": "includes/config.php",
-            "sha256": "7f6bd9276ca5801c1bf109231209dd1e71cc97cfee8e328f726b4cc91a9a8ed5"
+        "cli/.htaccess": {
+            "path": "cli/.htaccess",
+            "sha256": "70bb4d85f19a3c9da5b55777b011e72819bd5a4673a9d318db18355b8da114dd"
+        },
+        "cli/reset_password.php": {
+            "path": "cli/reset_password.php",
+            "sha256": "5223c4faa39eb5f8452350542cee5a497b13d1b5ca160b5d9dbedd2bdae1be94"
+        },
+        "includes/ImageUpload.php": {
+            "path": "includes/ImageUpload.php",
+            "sha256": "906916dd039f470285a6cc586d31804e71bb8f8307316ed2229c36aa03549607"
+        },
+        "includes/Resilience.php": {
+            "path": "includes/Resilience.php",
+            "sha256": "95b30e5462bc873f48a799201a8a1ad655950a96879fd33266de1d522068e7d1"
         },
         "includes/Security.php": {
             "path": "includes/Security.php",
@@ -98,10 +114,6 @@
             "path": "includes/Upgrader.php",
             "sha256": "c21b45fccbe69790725f961b895f102db91fe97cbebd7399a9bd00d82a2bd933"
         },
-        "includes/Resilience.php": {
-            "path": "includes/Resilience.php",
-            "sha256": "95b30e5462bc873f48a799201a8a1ad655950a96879fd33266de1d522068e7d1"
-        },
         "includes/UrlShortener.php": {
             "path": "includes/UrlShortener.php",
             "sha256": "938e2c92409b8c7692e3c4fb2cd423018d9fb4af0a27efc137906dffa1495ffe"
@@ -114,17 +126,21 @@
             "path": "includes/comments.php",
             "sha256": "4ad7343cd4e2ee64d647302cdd551eded9caa82b1dd366adc15334a23a9bb221"
         },
-        "includes/users.php": {
-            "path": "includes/users.php",
-            "sha256": "f2a32b6d45ffca993c0bdf1aedb33d0e655d9e683c5e596e5206990af1d5719c"
+        "includes/config.php": {
+            "path": "includes/config.php",
+            "sha256": "e3a35e8dbe48e5cb81cc848b468d725a5cbb91f5ea46e6da116ff8b2c2b789f8"
         },
         "includes/notifications.php": {
             "path": "includes/notifications.php",
             "sha256": "b4aeaa155ac1b0f0f7c9e21191b22c013a66861952e7b454e5bc58b5c03dc071"
         },
-        "includes/ImageUpload.php": {
-            "path": "includes/ImageUpload.php",
-            "sha256": "906916dd039f470285a6cc586d31804e71bb8f8307316ed2229c36aa03549607"
+        "includes/users.php": {
+            "path": "includes/users.php",
+            "sha256": "f2a32b6d45ffca993c0bdf1aedb33d0e655d9e683c5e596e5206990af1d5719c"
+        },
+        "install/index.php": {
+            "path": "install/index.php",
+            "sha256": "1d1564af5a43f0ceb14f0d10d782d3c750ae611f5fa1729da5cca2925e868841"
         },
         "templates/index_template.php": {
             "path": "templates/index_template.php",
@@ -140,16 +156,23 @@
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "2d13d6b92a62ca30da6c2f98061e6d25d1658c265debaa15a137c8e23e345469"
+            "sha256": "70af3e1b10fe4995016ae7aa3bad0ac22f88b4c3053dafb8db9b1a209ef976bf"
         }
     },
     "changes": [
-        "Add category and tag deletion with post reference cleanup",
-        "Slug collision resolution (auto-appends -2, -3, etc.)",
-        "Duplicate category/tag prevention (case-insensitive)",
-        "No-cache headers on admin categories page for CSRF freshness",
-        "Branding update: Digital Systems LLC / AfterPacket",
-        "Remove duplicate version display in public footer",
-        "Version bump to 1.5.5"
+        "User management: create, edit, delete users with role assignments",
+        "Password policy enforcement (12+ chars, uppercase, lowercase, digit, special)",
+        "Role-based permissions: Admin, Editor, Author with defined capabilities",
+        "Password strength meter in admin user management UI",
+        "Edit user modal with admin password confirmation",
+        "Self-demotion protection (admin cannot demote themselves)",
+        "CLI password reset utility (cli/reset_password.php)",
+        "Installer password policy enforcement with visual checklist",
+        "Installer username validation aligned with Users class (3-20 chars, dashes allowed)",
+        "CLI password reset: interactive mode (hidden input) to avoid shell expansion",
+        "Admin edit user: client-side password policy validation added",
+        "Password fields have autocomplete attributes for browser autofill",
+        "nginx.conf: added cli/ to blocked directories",
+        "Version bump to 1.5.6"
     ]
 }

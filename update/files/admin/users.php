@@ -265,7 +265,7 @@ if (isset($_GET["edit"]) && is_string($_GET["edit"])) {
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password" id="password" name="password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>" oninput="updateStrengthMeter(this.value)">
+                            <input type="password" id="password" name="password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>" autocomplete="new-password" oninput="updateStrengthMeter(this.value)">
                             <ul class="password-policy" id="password-policy">
                                 <li id="policy-length" data-regex=".{12,}">Minimum 12 characters</li>
                                 <li id="policy-uppercase" data-regex="[A-Z]">At least one uppercase letter</li>
@@ -371,12 +371,12 @@ if (isset($_GET["edit"]) && is_string($_GET["edit"])) {
 
                 <div class="form-group">
                     <label for="edit-password">New Password</label>
-                    <input type="password" id="edit-password" name="edit_password" placeholder="Leave blank to keep current password">
+                    <input type="password" id="edit-password" name="edit_password" placeholder="Leave blank to keep current password" minlength="12" autocomplete="new-password">
                 </div>
 
                 <div class="form-group">
                     <label for="admin-password">Your Admin Password</label>
-                    <input type="password" id="admin-password" name="admin_password" required>
+                    <input type="password" id="admin-password" name="admin_password" required autocomplete="current-password">
                 </div>
 
                 <div class="modal-actions">
@@ -479,6 +479,27 @@ if (isset($_GET["edit"]) && is_string($_GET["edit"])) {
             var role = document.getElementById('edit-role').value;
             var desc = roleDescriptions[role] || '';
             document.getElementById('edit-role-description').textContent = desc;
+        }
+
+        // Validate edit password if provided
+        var editForm = document.getElementById('edit-user-form');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                var editPassword = document.getElementById('edit-password').value;
+                if (editPassword.length > 0) {
+                    var errors = [];
+                    if (editPassword.length < 12) errors.push('at least 12 characters');
+                    if (!/[A-Z]/.test(editPassword)) errors.push('an uppercase letter');
+                    if (!/[a-z]/.test(editPassword)) errors.push('a lowercase letter');
+                    if (!/[0-9]/.test(editPassword)) errors.push('a digit');
+                    if (!/[^a-zA-Z0-9]/.test(editPassword)) errors.push('a special character');
+                    if (errors.length > 0) {
+                        e.preventDefault();
+                        alert('New password must contain: ' + errors.join(', ') + '.');
+                        return false;
+                    }
+                }
+            });
         }
 
         // Close modal on overlay click

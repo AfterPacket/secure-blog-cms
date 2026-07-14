@@ -1,3 +1,78 @@
+# Secure Blog CMS v1.5.6 — Release Notes
+
+**Release Date:** 2026-07-14  
+**Severity:** Feature & Security  
+**GitHub:** https://github.com/AfterPacket/secure-blog-cms
+
+---
+
+## Summary
+
+This release adds full user management to the admin panel with password policy enforcement, role-based permissions, a CLI password reset utility, and installer password policy enforcement.
+
+---
+
+## New Features
+
+### User Management
+- Create, edit, and delete users from the admin panel (`admin/users.php`)
+- Role assignment: Admin, Editor, Author
+- Admin password confirmation required for editing users
+- Self-demotion protection — admins cannot demote themselves
+
+### Password Policy Enforcement
+- Minimum 12 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one digit
+- At least one special character
+- Enforced during: user creation, password changes, installer setup
+- Visual password strength meter on user creation form
+
+### Role-Based Permissions
+- **Admin:** Full access — manage users, settings, resilience, comments, all posts
+- **Editor:** Create, edit, and publish any post. Moderate comments.
+- **Author:** Create and edit own posts only. Cannot publish or manage others.
+
+### CLI Password Reset
+- `cli/reset_password.php` — Emergency password reset utility for when you're locked out
+- **Interactive mode** — Run with just username (no password arg) to enter password with hidden input, avoiding shell expansion of special characters like `$`, `!`, `*`
+- Password policy enforced on reset
+- Confirmation prompt before applying changes
+- Web access blocked via `.htaccess` and nginx config
+
+### Installer Password Policy
+- Visual checklist on the installer password field showing requirements in real-time
+- Server-side validation matches the password policy exactly
+- **Username validation aligned with Users class** — now allows 3-20 chars, letters, numbers, underscores, and dashes (was 3-50 chars, no dashes)
+
+### Special Character Safety
+- Password fields in admin UI have `autocomplete="new-password"` and `autocomplete="current-password"` attributes
+- Client-side password policy validation added to the edit user modal
+- CLI password reset supports interactive mode to avoid shell expansion of `$`, `!`, `*`, backticks, etc.
+- Installer uses `var_export()` with single quotes for password hash storage (prevents `$` interpretation in PHP)
+
+## Security
+
+- `nginx.conf` updated: `cli/` added to blocked directories (both Option A and Option B)
+- `cli/.htaccess` denies all web access
+- No-cache headers on admin users page for CSRF token freshness
+
+## Files Changed
+
+- `includes/users.php` — Password policy, username validation, role permissions, changePassword(), self-demotion protection
+- `admin/users.php` — Complete rewrite with edit modal, strength meter, role descriptions
+- `install/index.php` — Password policy enforcement (server + client)
+- `cli/reset_password.php` — NEW CLI password reset utility
+- `cli/.htaccess` — NEW web access denial
+- `nginx.conf` — Added `cli/` to blocked directories
+- `includes/config.php` — Version bump to 1.5.6
+- `includes/config.php.example` — Version bump to 1.5.6
+- `data/version.json` — Version bump to 1.5.6
+- `update/manifest.json` — Updated for 1.5.6 release
+
+---
+
 # Secure Blog CMS v1.5.5 — Release Notes
 
 **Release Date:** 2026-07-14  

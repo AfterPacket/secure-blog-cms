@@ -154,6 +154,7 @@ git push origin main --tags
 ```
 secure-blog-cms/
   admin/            Admin UI (posts, comments, users, settings, resilience, upgrade)
+  cli/              CLI utilities (password reset)
   data/             JSON data storage (posts, users, comments, logs, backups)
   includes/         Core classes (Security, Storage, Comments, Resilience, Uploads)
   install/          Installation wizard (delete after install)
@@ -170,13 +171,13 @@ secure-blog-cms/
 ### Nginx (recommended)
 A sample nginx config is included as `nginx.conf` with:
 - Pretty URL rewrites (WordPress-style `/post/slug/`, `/category/tech/`, etc.)
-- Security deny rules for `data/`, `includes/`, and `install/` directories
+- Security deny rules for `data/`, `includes/`, `install/`, and `cli/` directories
 - Static file caching headers
 
 ### CloudPanel / Varnish
 When deploying behind CloudPanel with Varnish:
 1. Set `TRUST_PROXY_HEADERS` to `true` in `includes/config.php`
-2. Add nginx deny rules for `data/`, `includes/`, and `install/` directories
+2. Add nginx deny rules for `data/`, `includes/`, `install/`, and `cli/` directories
 3. Ensure parent directory permissions are `755` (CloudPanel may reset to `770`)
 4. Delete the `install/` directory after setup
 
@@ -188,6 +189,27 @@ When deploying behind CloudPanel with Varnish:
 - The `ADMIN_PASSWORD_HASH` must use **single quotes** (not double quotes) to prevent PHP from interpreting `$` in Argon2id hashes
 
 ## Changelog
+
+### v1.5.6 — User Management & Security (2026-07-14)
+
+**New Features:**
+- **User Management** — Create, edit, and delete users from the admin panel
+- **Password Policy** — Enforced minimum 12 characters with uppercase, lowercase, digit, and special character requirements
+- **Role-Based Permissions** — Admin (full access), Editor (publish/edit any post, moderate comments), Author (create/edit own posts only)
+- **Password Strength Meter** — Visual strength indicator on user creation and edit forms
+- **Edit User Modal** — Change role and password with admin password confirmation required
+- **Self-Demotion Protection** — Admins cannot demote themselves to a lower role
+- **CLI Password Reset** — `cli/reset_password.php` utility for emergency password resets when locked out; interactive mode avoids shell expansion of special characters
+- **Installer Password Policy** — Visual checklist enforces password requirements during installation
+- **Special Character Safety** — Passwords with `$`, `!`, `*`, etc. are properly handled throughout the system (CLI, admin UI, installer, JSON storage)
+
+**Security:**
+- `nginx.conf` updated: added `cli/` to blocked directories (both Option A and Option B)
+- `cli/.htaccess` denies all web access to CLI scripts
+
+**Improvements:**
+- `admin/users.php` — No-cache headers for CSRF token freshness behind Cloudflare/Varnish
+- Password hashing uses Argon2id with tuned parameters (bcrypt fallback)
 
 ### v1.5.5 — Category/Tag Management & Branding (2026-07-14)
 
@@ -297,7 +319,7 @@ When deploying behind CloudPanel with Varnish:
 
 ---
 
-Version: 1.5.5  
+Version: 1.5.6  
 Last Updated: 2026-07-14  
 Created by: Digital Systems LLC / AfterPacket
 Security Level: High
