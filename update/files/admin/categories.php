@@ -19,6 +19,11 @@ $security = Security::getInstance();
 $storage = Storage::getInstance();
 $categoriesManager = Categories::getInstance();
 
+// Prevent caching — CSRF tokens must be fresh per request
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 // Check authentication
 if (!$security->isAuthenticated()) {
     header("Location: login.php");
