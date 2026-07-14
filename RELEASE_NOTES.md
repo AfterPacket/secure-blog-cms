@@ -1,3 +1,61 @@
+# Secure Blog CMS v1.5.1 — Release Notes
+
+**Release Date:** 2026-07-14  
+**Severity:** Security Hardening  
+**GitHub:** https://github.com/AfterPacket/secure-blog-cms
+
+---
+
+## Summary
+
+This release addresses findings from a penetration test, adding rate limiting to post password attempts, strengthening session fingerprinting with User-Agent hashing, validating the site URL setting, adding Cross-Origin isolation headers, sanitizing comment author names, and adding per-user daily upload limits.
+
+All users should upgrade.
+
+---
+
+## Security Fixes
+
+### 🟡 Rate Limiting Added to Post Password Attempts
+Post password attempts are now rate-limited to 5 per IP per 5 minutes, preventing brute-force attacks against password-protected posts.
+
+### 🟡 Session Fingerprint Strengthened with User-Agent Hashing
+Session fingerprints now hash the User-Agent string with SHA-256 before including it, instead of using the raw value. The fingerprint format is now `sha256(ip | sha256(user_agent))`, preventing session hijacking when the browser changes.
+
+### 🟡 Site URL Validation Added to Settings
+The `site_url` setting is now validated as a proper URL with `http` or `https` scheme, preventing open redirect or XSS via malicious URL values.
+
+### 🟡 Cross-Origin Isolation Headers Added
+`Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` headers are now sent on all responses, preventing cross-origin information leakage.
+
+### 🟡 Comment Author Name Sanitization
+Comment author names are now stripped of HTML tags and limited to 100 characters. Email addresses are validated when provided.
+
+### 🟡 Per-User Daily Upload Rate Limit Added
+A per-user daily limit of 50 uploads has been added alongside the existing per-IP hourly limit, preventing abuse by authenticated users.
+
+---
+
+## Upgrade Instructions
+
+1. Replace all application files with the new release.
+2. No database or data migration required (file-based storage).
+3. Verify your `includes/config.php` settings are preserved.
+
+---
+
+## File Changes
+
+- `post.php` — Added rate limiting before post password verification
+- `includes/Security.php` — Session fingerprint now hashes User-Agent; added COOP/CORP headers
+- `admin/settings.php` — Added URL validation for `site_url`
+- `includes/comments.php` — Strip HTML tags and limit author name length; validate email
+- `admin/upload-image.php` — Added per-user daily upload rate limit (50/day)
+- `includes/config.php` — Version bump to 1.5.1
+- `data/version.json` — Version bump to 1.5.1
+
+---
+
 # Secure Blog CMS v1.5.0 — Release Notes
 
 **Release Date:** 2026-07-13  

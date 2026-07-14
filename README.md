@@ -156,6 +156,18 @@ secure-blog-cms/
 
 ## Changelog
 
+### v1.5.1 — Pen Test Hardening (2026-07-14)
+
+**Security Fixes:**
+- **[MEDIUM]** Rate limiting added to post password attempts (5 per IP per 5 minutes) — prevents brute-force attacks against password-protected posts.
+- **[MEDIUM]** Session fingerprint now hashes User-Agent with SHA-256 — strengthens session binding beyond IP-only, format: `sha256(ip | sha256(user_agent))`.
+- **[MEDIUM]** Site URL setting validation added — `filter_var(FILTER_VALIDATE_URL)` and scheme whitelist (`http`/`https`) prevent open redirect and XSS via malicious URL values.
+- **[MEDIUM]** Cross-Origin isolation headers added — `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` prevent cross-origin information leakage.
+- **[MEDIUM]** Comment author name sanitization — HTML tags stripped, length capped at 100 characters. Email validated when provided.
+- **[MEDIUM]** Per-user daily upload rate limit added (50 uploads/day per user) alongside existing per-IP hourly limit.
+
+---
+
 ### v1.5.0 — Security + Subfolder Install Fix (2026-07-13)
 
 **Security Fixes:**
@@ -223,6 +235,6 @@ secure-blog-cms/
 
 ---
 
-Version: 1.5.0
-Last Updated: 2026-07-13
+Version: 1.5.1
+Last Updated: 2026-07-14
 Security Level: High

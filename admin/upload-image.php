@@ -72,7 +72,7 @@ if (
     exit();
 }
 
-// Check 3: Rate limiting (20 uploads per hour)
+// Check 3: Rate limiting (200 uploads per hour per IP)
 $clientIdentifier = "upload_" . ($security->getClientIPPublic() ?: ($_SERVER["REMOTE_ADDR"] ?? "unknown"));
 if (!$security->checkRateLimit($clientIdentifier, 200, 3600)) {
     http_response_code(429);
@@ -83,6 +83,22 @@ if (!$security->checkRateLimit($clientIdentifier, 200, 3600)) {
     ]);
     $security->logSecurityEvent(
         "Upload rate limit exceeded",
+        $_SESSION["user"] ?? "unknown",
+    );
+    exit();
+}
+
+// Check 3b: Per-user daily rate limiting (50 per day per user)
+$userIdentifier = "upload_daily_" . ($_SESSION["user"] ?? session_id());
+if (!$security->checkRateLimit($userIdentifier, 50, 86400)) {
+    http_response_code(429);
+    echo json_encode([
+        "success" => false,
+        "error" =>
+            "Daily upload limit reached. Please try again tomorrow.",
+    ]);
+    $security->logSecurityEvent(
+        "Upload daily rate limit exceeded",
         $_SESSION["user"] ?? "unknown",
     );
     exit();

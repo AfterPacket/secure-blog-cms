@@ -84,14 +84,21 @@ if ($post && !empty($post["password_protected"]) && !$security->isAuthenticated(
                 $passwordMessage = "Invalid security token. Please try again.";
                 $passwordMessageType = "error";
             } else {
-                $submittedPassword = $_POST["post_password_input"] ?? "";
-                if (password_verify($submittedPassword, $post["post_password"])) {
-                    $_SESSION[$unlockKey] = ["time" => time()];
-                    $unlocked = true;
-                } else {
-                    $passwordMessage = "Incorrect password. Please try again.";
+                // Rate limit password attempts (5 per IP per 5 minutes)
+                $clientIP = $security->getClientIPPublic() ?: ($_SERVER["REMOTE_ADDR"] ?? "unknown");
+                if (!$security->checkRateLimit("post_pw_" . $clientIP, 5, 300)) {
+                    $passwordMessage = "Too many password attempts. Please try again in 5 minutes.";
                     $passwordMessageType = "error";
-                    $security->logSecurityEvent("Post password failed", $post["id"]);
+                } else {
+                    $submittedPassword = $_POST["post_password_input"] ?? "";
+                    if (password_verify($submittedPassword, $post["post_password"])) {
+                        $_SESSION[$unlockKey] = ["time" => time()];
+                        $unlocked = true;
+                    } else {
+                        $passwordMessage = "Incorrect password. Please try again.";
+                        $passwordMessageType = "error";
+                        $security->logSecurityEvent("Post password failed", $post["id"]);
+                    }
                 }
             }
         }

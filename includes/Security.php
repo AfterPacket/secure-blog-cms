@@ -122,11 +122,10 @@ class Security
     private function setSessionFingerprint()
     {
         $ip = $this->getClientIP();
+        $userAgent = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
         $_SESSION["fingerprint"] = hash(
             "sha256",
-            ($_SERVER["HTTP_USER_AGENT"] ?? "") .
-                $ip .
-                ($_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? ""),
+            $ip . '|' . $userAgent,
         );
     }
 
@@ -141,11 +140,10 @@ class Security
         }
 
         $ip = $this->getClientIP();
+        $userAgent = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
         $currentFingerprint = hash(
             "sha256",
-            ($_SERVER["HTTP_USER_AGENT"] ?? "") .
-                $ip .
-                ($_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? ""),
+            $ip . '|' . $userAgent,
         );
 
         return hash_equals($_SESSION["fingerprint"], $currentFingerprint);
@@ -189,6 +187,10 @@ class Security
 
         // Permissions Policy (formerly Feature Policy)
         header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+
+        // Cross-Origin isolation headers
+        header("Cross-Origin-Opener-Policy: same-origin");
+        header("Cross-Origin-Resource-Policy: same-origin");
 
         // HSTS (if using HTTPS, respecting proxy headers when configured)
         $__isHttpsForHsts = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off")

@@ -136,6 +136,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $errors[] = "Site description is too long (max 500 characters)";
         }
 
+        // Validate site URL if provided
+        $siteUrl = $newSettings["site_url"];
+        if (!empty($siteUrl) && !filter_var($siteUrl, FILTER_VALIDATE_URL)) {
+            $errors[] = "Site URL is not a valid URL.";
+        } elseif (!empty($siteUrl)) {
+            $parsed = parse_url($siteUrl);
+            if (!in_array($parsed["scheme"] ?? '', ["http", "https"])) {
+                $errors[] = "Site URL must use http or https scheme.";
+            }
+        }
+
         if (
             $newSettings["posts_per_page"] < 1 ||
             $newSettings["posts_per_page"] > 100

@@ -153,6 +153,17 @@ class Comments
             ];
         }
 
+        // Sanitize author_name: strip HTML tags and limit length
+        $data["author_name"] = substr(strip_tags($data["author_name"]), 0, 100);
+
+        // Validate email if provided
+        if (!empty($data["author_email"]) && !filter_var($data["author_email"], FILTER_VALIDATE_EMAIL)) {
+            return [
+                "success" => false,
+                "message" => "Please provide a valid email address.",
+            ];
+        }
+
         $comments = $this->loadComments($postId);
 
         $newComment = [
