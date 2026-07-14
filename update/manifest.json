@@ -1,48 +1,47 @@
 {
-    "version": "1.4.1",
-    "released": "2026-07-13",
+    "version": "1.5.1",
+    "released": "2026-07-14",
     "base": "https://raw.githubusercontent.com/AfterPacket/secure-blog-cms/main/update/files",
-    "description": "Patch Release: Fix plaintext password inputs, enable malware scan, fix session secure cookie behind proxies, remove debug logs, fix TinyMCE image URL/paste, fix RSS self-link for subfolders.",
-    "cache_bust": "20260713-0001-PATCH",
+    "description": "Security hardening: rate limit post passwords, session fingerprint with User-Agent, URL validation, COOP/CORP headers, comment sanitization, upload rate limiting.",
+    "cache_bust": "20260714-0001-SECURITY",
     "critical": true,
     "files": {
-        "includes/config.php": {
-            "path": "includes/config.php",
-            "sha256": "6cedd95e0fb58f4e0505a8961246aa853af3da8dc6d496b59fd7c6f08bb7dd2b"
-        },
         "includes/Security.php": {
             "path": "includes/Security.php",
-            "sha256": "82b34edee73f7c995c5d83f8a6ba33464e4edc18364c25ce5edfc93f7d7eadee"
+            "sha256": "auto"
         },
-        "admin/create-post.php": {
-            "path": "admin/create-post.php",
-            "sha256": "5e2d01a7d741205b4f0c3e02da74beed33763b64f42662a48570b3eff07d0650"
+        "includes/comments.php": {
+            "path": "includes/comments.php",
+            "sha256": "auto"
         },
-        "admin/edit-post.php": {
-            "path": "admin/edit-post.php",
-            "sha256": "c73452f776945a09de9cc49ed8e569325ce96d5752cf26b460b7547619db1970"
+        "admin/settings.php": {
+            "path": "admin/settings.php",
+            "sha256": "auto"
         },
-        "rss.php": {
-            "path": "rss.php",
-            "sha256": "7b96805f34e203f968a2053a1067927fa7b305a791609a97f5cfe5e86879c927"
+        "admin/upload-image.php": {
+            "path": "admin/upload-image.php",
+            "sha256": "auto"
+        },
+        "post.php": {
+            "path": "post.php",
+            "sha256": "auto"
+        },
+        "index.php": {
+            "path": "index.php",
+            "sha256": "auto"
         },
         "data/version.json": {
             "path": "data/version.json",
-            "sha256": "1559bf09f1d7ced44572f30f0f7fb32c4cd10085dc3ed82091363c0d34fac55e"
-        },
-        "README.md": {
-            "path": "README.md",
-            "sha256": "16d1e5ddfd8fc221d73a6af6cda977dbaa0bfb0affa7551a3a058d53a759cd9d"
+            "sha256": "auto"
         }
     },
     "changes": [
-        "Fix password input fields from type=text to type=password (create-post.php, edit-post.php)",
-        "Enable upload malware scan by default (config.php)",
-        "Fix session cookie secure flag to respect TRUST_PROXY_HEADERS (Security.php)",
-        "Remove debug console.log statements from production (create-post.php, edit-post.php)",
-        "Fix TinyMCE image URL insertion stripping class/style attributes (create-post.php, edit-post.php)",
-        "Enable paste_data_images in TinyMCE for image paste support (create-post.php, edit-post.php)",
-        "Fix RSS self-link for subfolder installs using cms_path() (rss.php)",
-        "Update version to 1.4.1 (version.json, config.php)"
+        "Rate limit post password attempts (5/IP/5min)",
+        "Strengthen session fingerprint with User-Agent hashing",
+        "Add COOP/CORP security headers",
+        "Validate site URL setting (scheme whitelist)",
+        "Sanitize comment author names (strip tags, length limit, email validation)",
+        "Per-user daily upload rate limit (50/day)",
+        "Fix corrupted ENABLE_CSP_HEADERS define in config.php"
     ]
 }

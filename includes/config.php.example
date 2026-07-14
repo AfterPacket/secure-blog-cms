@@ -1,12 +1,15 @@
 <?php
 /**
- * Secure Blog CMS - Configuration File
+ * Secure Blog CMS - Configuration File (Template)
  * SQL-Free, XSS Protected, CSRF Protected
  *
  * ⚠️  DO NOT OVERWRITE THIS FILE DURING UPDATES  ⚠️
  * This file contains site-specific settings (credentials, URLs, etc.).
  * When updating, always preserve your existing config.php.
  * The updater and deployment scripts should NEVER replace this file.
+ *
+ * For new installations, the installer will copy this to config.php
+ * and replace the placeholder values with your settings.
  */
 
 // Prevent direct access

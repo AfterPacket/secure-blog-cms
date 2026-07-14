@@ -143,8 +143,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["install"])) {
                         ["cost" => 12]);
                 }
 
-                // Update config.php
+                // Copy config.php.example to config.php if config.php doesn't exist yet
                 $configPath = __DIR__ . "/../includes/config.php";
+                $configExamplePath = __DIR__ . "/../includes/config.php.example";
+                if (!file_exists($configPath) && file_exists($configExamplePath)) {
+                    copy($configExamplePath, $configPath);
+                }
                 $configContent = file_get_contents($configPath);
 
                 // Replace default values
@@ -155,7 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["install"])) {
                     $configContent);
 
                 $configContent = str_replace(
-                    '"REPLACE_ME_PASSWORD_HASH"',
+                    "'REPLACE_ME_PASSWORD_HASH'",
                     var_export($passwordHash, true),
                     $configContent);
 

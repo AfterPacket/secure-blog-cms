@@ -156,6 +156,17 @@ secure-blog-cms/
 
 ## Changelog
 
+### v1.5.2 — Critical Login Fix (2026-07-14)
+
+**Critical Bug Fix:**
+- **[CRITICAL]** Argon2id password hashes containing `$` characters were corrupted by PHP variable interpolation in double-quoted strings, causing admin login failures. Password hash define now uses single quotes.
+
+**Improvements:**
+- Added prominent DO NOT OVERWRITE warning in config.php header
+- Added config.php.example as install template (never overwritten by updates)
+- Installer now copies from config.php.example to config.php
+- Removed config.php from update manifest (upgrader already skips it)
+
 ### v1.5.1 — Pen Test Hardening (2026-07-14)
 
 **Security Fixes:**
@@ -235,6 +246,6 @@ secure-blog-cms/
 
 ---
 
-Version: 1.5.1
+Version: 1.5.2
 Last Updated: 2026-07-14
 Security Level: High

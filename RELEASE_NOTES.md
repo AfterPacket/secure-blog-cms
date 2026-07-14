@@ -1,3 +1,55 @@
+# Secure Blog CMS v1.5.2 — Release Notes
+
+**Release Date:** 2026-07-14  
+**Severity:** Critical Bug Fix  
+**GitHub:** https://github.com/AfterPacket/secure-blog-cms
+
+---
+
+## Summary
+
+This release fixes a critical bug where Argon2id password hashes containing `$` characters were corrupted by PHP variable interpolation when stored in double-quoted strings. This caused admin login failures. The password hash define now uses single quotes to prevent this. It also prevents config.php from being overwritten during updates, and adds config.php.example as an install template.
+
+All users should upgrade.
+
+---
+
+## Bug Fixes
+
+### 🔴 Critical: Password Hash Corruption
+Argon2id hashes contain `$` characters (e.g., `$argon2id$v=19$m=...`). When stored in a double-quoted PHP string like `define("ADMIN_PASSWORD_HASH", "$argon2id...")`, PHP interprets the `$` as variable references, corrupting the hash and preventing login. Fixed by using single quotes: `define('ADMIN_PASSWORD_HASH', '...')`.
+
+### 🟡 Config Protection
+- `config.php` now has a prominent header warning not to overwrite it during updates
+- Added `config.php.example` as a template for new installations
+- Installer copies from `config.php.example` to `config.php` if it doesn't exist
+- Upgrader already skips `config.php` — now also removed from update manifest
+
+### 🟡 Update Manifest Updated
+- Manifest updated to v1.5.2
+- `includes/config.php` removed from manifest file list
+
+---
+
+## Upgrade Instructions
+
+1. Replace all application files with the new release.
+2. **DO NOT overwrite `includes/config.php`** — preserve your existing credentials and settings.
+3. If upgrading from a fresh install, the installer will use `config.php.example` as a template.
+4. No data migration required (file-based storage).
+
+---
+
+## File Changes
+
+- `includes/config.php` — Password hash define now uses single quotes; added DO NOT OVERWRITE warning header
+- `includes/config.php.example` — New template file for installations
+- `install/index.php` — Installer now copies from config.php.example; uses single-quote replacement for password hash
+- `update/manifest.json` — Updated to v1.5.2; removed config.php from file list
+- `data/version.json` — Version bump to 1.5.2
+
+---
+
 # Secure Blog CMS v1.5.1 — Release Notes
 
 **Release Date:** 2026-07-14  
